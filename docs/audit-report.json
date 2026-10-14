@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T04:44:52.561Z",
+  "generatedAt": "2026-10-14T14:07:27.117Z",
   "pages": [
     {
       "page": "หน้า 2",
@@ -780,6 +780,11 @@
       "page": "ภาคผนวก B",
       "atoms": 130,
       "missing": 0
+    },
+    {
+      "page": "AI + Excel spec",
+      "atoms": 289,
+      "missing": 0
     }
   ],
   "totals": {
@@ -1462,6 +1467,21 @@
     "atoms": 8029,
     "missing": [],
     "dropped": 36
+  },
+  "excel": {
+    "pages": 47,
+    "totals": {
+      "atoms": 289,
+      "exact": 289,
+      "ordered": 0,
+      "uiReplaced": 0,
+      "missing": 0,
+      "code": 26,
+      "codeOk": 26,
+      "urls": 0,
+      "urlsOk": 0
+    },
+    "missing": []
   },
   "home": [
     {

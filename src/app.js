@@ -16,17 +16,23 @@ const store = {
 
 // ---------- data ----------
 const DEEP0 = 1000;
-const TOTAL = D.meta.totalPages + D.meta.deepTotal;
+const EX0 = 20000; // AI + Excel pages: 20101…
+const TOTAL = D.meta.totalPages + D.meta.deepTotal + D.meta.excelTotal;
 const HOME = { n: 1, title: 'หน้าแรก: Copilot AI Agents for Work 2026', type: 'home', chapter: 1, icon: 'home', typeLabel: 'หน้าแรก' };
 const DEEPCH = D.deepGroups.map((g, i) => ({ n: 101 + i, key: g.key, title: g.th, en: g.name, desc: g.desc, group: g.key, goals: [], deep: true, pages: D.deepIndex.filter(l => l.group === g.key).map(l => DEEP0 + l.n), agents: 0 }));
 const DEEPP = D.deepIndex.map(l => ({ n: DEEP0 + l.n, k: l.n, title: l.title, type: 'deep', typeLabel: 'Deep Learning', icon: 'hat_graduation', chapter: DEEPCH.find(c => c.key === l.group).n, header: { short: l.outcome ? 'ผลลัพธ์หลังเรียน: ' + l.outcome : '' }, outcome: l.outcome, text: l.text, html: null }));
-const PAGES = [HOME, ...D.pages, ...DEEPP].sort((a, b) => a.n - b.n);
+const X_KIND_ICON = { overview: 'compass_northwest', lesson: 'book_open', workshop: 'hat_graduation', techniques: 'lightbulb', quiz: 'question_circle', automation: 'flowchart', tool: 'toolbox' };
+const XCH = D.excel.chapters.map(c => ({ ...c, group: c.key, goals: [], excel: true, agents: 0 }));
+const XP = D.excel.index.map(x => ({ n: x.n, slug: x.slug, k: x.code, title: x.title, type: 'excel', kind: x.kind, typeLabel: 'AI + Excel', icon: X_KIND_ICON[x.kind] || 'table', chapter: x.chapter, header: { short: x.short }, text: x.text, html: null }));
+const XSLUG = new Map(XP.map(p => [p.slug, p.n]));
+const PAGES = [HOME, ...D.pages, ...DEEPP, ...XP].sort((a, b) => a.n - b.n);
 const PI = new Map(PAGES.map(p => [p.n, p]));
-const CH = new Map([...D.chapters, ...DEEPCH].map(c => [c.n, c]));
-const ALLCH = [...D.chapters, ...DEEPCH];
-const isDeep = n => n > DEEP0;
-const hrefOf = n => isDeep(n) ? `#/d/${n - DEEP0}` : `#/p/${n}`;
-const refN = r => { const [k, v] = r.split(':'); return k === 'd' ? DEEP0 + +v : +v; };
+const CH = new Map([...D.chapters, ...DEEPCH, ...XCH].map(c => [c.n, c]));
+const ALLCH = [...D.chapters, ...DEEPCH, ...XCH];
+const isEx = n => n > EX0;
+const isDeep = n => n > DEEP0 && n < EX0;
+const hrefOf = n => isEx(n) ? `#/x/${PI.get(n).slug}` : isDeep(n) ? `#/d/${n - DEEP0}` : `#/p/${n}`;
+const refN = r => { const [k, v] = r.split(':'); return k === 'd' ? DEEP0 + +v : k === 'x' ? XSLUG.get(v) : +v; };
 const AG = D.agents;
 const AGL = Object.values(AG).sort((a, b) => a.id - b.id);
 CH.get(1).pages = [1, ...CH.get(1).pages];
@@ -95,8 +101,8 @@ function renderTOC() {
     if (!pages.length) return '';
     const exp = q || g || openCh.has(ch.n) || (cur && cur.chapter === ch.n);
     const d = chapterDone(ch);
-    return `${ch.n === 101 ? '<p class="sb-sec">' + ic('hat_graduation') + ' <span>Deep Learning · 36 บทเชิงลึก</span></p>' : ''}<div class="ch" style="${gvar(ch.group)}"><button type="button" class="ch-h" data-ch="${ch.n}" aria-expanded="${!!exp}" aria-controls="pl-${ch.n}">${ic('chevron_right', 'chev')}<span class="ch-n">${ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span class="ch-t">${esc(ch.title)}</span>${ring(d, ch.pages.length)}<span class="sr-only">เรียนแล้ว ${d} จาก ${ch.pages.length} หน้า</span></button>
-    <ul class="pl" id="pl-${ch.n}" ${exp ? '' : 'hidden'}>${pages.map(p => `<li style="${gvar(pageGroup(p))}"><a href="${hrefOf(p.n)}" ${cur && cur.n === p.n ? 'aria-current="page"' : ''}><span class="pn">${isDeep(p.n) ? p.k : p.n}</span><span class="pt">${esc(p.title)}</span><span class="dot ${done.has(p.n) ? 'd' : visited.has(p.n) ? 'v' : ''}" title="${done.has(p.n) ? 'เรียนแล้ว' : visited.has(p.n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`).join('')}</ul></div>`;
+    return `${ch.n === 101 ? '<p class="sb-sec">' + ic('hat_graduation') + ' <span>Deep Learning · 36 บทเชิงลึก</span></p>' : ch.n === 201 ? '<p class="sb-sec">' + ic('table') + ' <span>AI + Excel Formula Mastery</span></p>' : ''}<div class="ch" style="${gvar(ch.group)}"><button type="button" class="ch-h" data-ch="${ch.n}" aria-expanded="${!!exp}" aria-controls="pl-${ch.n}">${ic('chevron_right', 'chev')}<span class="ch-n">${ch.excel ? 'X' + (ch.n - 200) : ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span class="ch-t">${esc(ch.title)}</span>${ring(d, ch.pages.length)}<span class="sr-only">เรียนแล้ว ${d} จาก ${ch.pages.length} หน้า</span></button>
+    <ul class="pl" id="pl-${ch.n}" ${exp ? '' : 'hidden'}>${pages.map(p => `<li style="${gvar(pageGroup(p))}"><a href="${hrefOf(p.n)}" ${cur && cur.n === p.n ? 'aria-current="page"' : ''}><span class="pn">${isDeep(p.n) || isEx(p.n) ? p.k : p.n}</span><span class="pt">${esc(p.title)}</span><span class="dot ${done.has(p.n) ? 'd' : visited.has(p.n) ? 'v' : ''}" title="${done.has(p.n) ? 'เรียนแล้ว' : visited.has(p.n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`).join('')}</ul></div>`;
   }).join('');
   $('#tocList').innerHTML = html || '<p class="empty">ไม่พบหน้าที่ตรงกับตัวกรอง</p>';
 }
@@ -111,7 +117,8 @@ const SCENES = {
   lp: ['vehicle_truck', 'timer', 'compass_northwest'], erp: ['receipt', 'apps', 'cart'], feed: ['food_grains', 'building_factory', 'scales'],
   lab: ['beaker', 'eye', 'shield_checkmark'], qms: ['shield_checkmark', 'document_bullet_list', 'ribbon'], cis: ['leaf_two', 'arrow_sync', 'cloud'],
   d1: ['lightbulb', 'book_open', 'sparkle'], d2: ['window', 'table', 'slide_text'], d3: ['bot', 'flowchart', 'plug_connected'], d4: ['shield_checkmark', 'lock_closed', 'eye'],
-  d5: ['data_bar_vertical', 'clipboard_task', 'leaf_two'], d6: ['hat_graduation', 'trophy', 'rocket']
+  d5: ['data_bar_vertical', 'clipboard_task', 'leaf_two'], d6: ['hat_graduation', 'trophy', 'rocket'],
+  x0: ['table', 'sparkle', 'calculator'], xb: ['calculator', 'table', 'lightbulb'], xi: ['table', 'data_bar_vertical', 'filter'], xa: ['flowchart', 'code', 'data_bar_vertical'], xt: ['toolbox', 'beaker', 'data_bar_vertical']
 };
 const CH_ICON = { intro: 'lightbulb', pmode: 'sparkle', acct: 'people_team', build: 'toolbox', personal: 'person', handoff: 'mail', wf: 'flowchart', office: 'window', arch: 'organization' };
 let illN = 0;
@@ -162,7 +169,9 @@ const art = icon => illus('gen', icon);
 function headerHTML(p) {
   const ch = CH.get(p.chapter);
   const a = p.agent ? AG[p.agent] : null;
-  const crumb = isDeep(p.n)
+  const crumb = isEx(p.n)
+    ? `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/excel">AI + Excel</a><span aria-hidden="true">›</span><span>${esc(ch.title)}</span><span class="pill">${ic(p.icon)}<span>${esc(p.k)}</span></span></nav>`
+    : isDeep(p.n)
     ? `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/deep">Deep Learning</a><span aria-hidden="true">›</span><span>${esc(ch.title)}</span><span class="pill">${ic('hat_graduation')}<span>บทเชิงลึก ${p.k} / ${D.meta.deepTotal}</span></span></nav>`
     : `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/p/${moduleOf(ch)}">บทที่ ${ch.n} · ${esc(ch.title)}</a><span class="pill">${ic(p.icon)}<span>${esc(p.typeLabel)}</span></span><span class="pill">หน้า ${p.n} / ${D.meta.totalPages}</span></nav>`;
   let meta = '';
@@ -172,7 +181,8 @@ function headerHTML(p) {
   }
   const big = p.type === 'module';
   if (isDeep(p.n)) meta = `<div class="ph-meta"><span class="pill g">${ic(D.deepGroups.find(g => g.key === ch.key).icon)}<span>${esc(ch.en)}</span></span>${p.outcome ? `<span class="pill">${ic('target_arrow')}<span>ผลลัพธ์หลังเรียน</span></span>` : ''}</div>`;
-  return `<header class="ph${big ? ' ph-module' : ''}">${illus(pageGroup(p), p.type === 'agent' || p.type === 'agentflow' ? 'bot' : big ? (CH_ICON[ch.key] || null) : isDeep(p.n) ? null : p.icon, 'ph-art')}${crumb}<h1>${esc(p.title)}</h1>${p.header.short ? `<p class="short">${esc(p.header.short)}</p>` : ''}${meta}</header>`;
+  if (isEx(p.n)) meta = `<div class="ph-meta"><span class="pill g">${ic(ch.icon)}<span>${esc(ch.en)}</span></span><span class="pill">${ic('table')}<span>AI + Excel Formula Mastery</span></span></div>`;
+  return `<header class="ph${big ? ' ph-module' : ''}">${illus(pageGroup(p), p.type === 'agent' || p.type === 'agentflow' ? 'bot' : big ? (CH_ICON[ch.key] || null) : isDeep(p.n) ? null : isEx(p.n) ? ch.icon : p.icon, 'ph-art')}${crumb}<h1>${esc(p.title)}</h1>${p.header.short ? `<p class="short">${esc(p.header.short)}</p>` : ''}${meta}</header>`;
 }
 const READYK = { 'Copilot-assisted': 'assist', 'Connected Automation': 'connected', 'Concept Design': 'concept' };
 function readyBadge(name) { const k = READYK[name] || 'assist'; return `<span class="ready ready-${k}" title="${esc(D.readiness[k].th)}">${ic(k === 'connected' ? 'plug_connected' : k === 'concept' ? 'lightbulb' : 'sparkle')}<span>${esc(name)}</span></span>`; }
@@ -191,6 +201,8 @@ function route() {
   const m = h.match(/^p\/(\d+)$/);
   if (m && PI.has(+m[1])) return +m[1] === 1 ? renderHome() : renderPage(+m[1]);
   const dm = h.match(/^d\/(\d+)$/); if (dm && PI.has(DEEP0 + +dm[1])) return renderPage(DEEP0 + +dm[1]);
+  const xm = h.match(/^x\/([a-z0-9-]+)$/); if (xm && XSLUG.has(xm[1])) return renderPage(XSLUG.get(xm[1]));
+  if (h === 'excel') return renderExcelHome();
   if (h === 'deep') return renderDeepHome();
   const tm = h.match(/^track\/([a-z]+)$/); if (tm && D.tracks.some(t => t.key === tm[1])) return renderTrack(tm[1]);
   if (h === 'tracks') return renderTracks();
@@ -214,13 +226,17 @@ function setMain(html, title, n) {
 
 function renderPage(n) {
   const p = PI.get(n);
+  if (isEx(n) && p.html == null) {
+    $('#main').innerHTML = '<div class="wrap"><p class="empty">' + ic('arrow_sync') + ' กำลังโหลดหลักสูตร AI + Excel…</p></div>';
+    return loadExcel().then(() => { if (location.hash === hrefOf(n)) renderPage(n); }, () => { $('#main').innerHTML = '<div class="wrap"><p class="empty">โหลดหลักสูตร AI + Excel ไม่ได้ (ไฟล์ excel-data.js)</p></div>'; });
+  }
   if (isDeep(n) && p.html == null) {
     $('#main').innerHTML = '<div class="wrap"><p class="empty">' + ic('arrow_sync') + ' กำลังโหลดบทเรียนเชิงลึก…</p></div>';
     return loadDeep().then(() => { if (location.hash === hrefOf(n)) renderPage(n); }, () => { $('#main').innerHTML = '<div class="wrap"><p class="empty">โหลดบทเรียนเชิงลึกไม่ได้ (ไฟล์ deep-data.js)</p></div>'; });
   }
   cur = p;
   visited.add(n); saveProgress(); store.set('cpa26-last', n);
-  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}<div class="content${isDeep(n) ? ' deep-body' : ''}">${p.html}</div>${isDeep(n) ? '' : relatedHTML(n)}${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
+  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}<div class="content${isDeep(n) ? ' deep-body' : isEx(n) ? ' x-body' : ''}">${p.html}</div>${isDeep(n) || isEx(n) ? '' : relatedHTML(n)}${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
   setDoneBtn($('#doneBtn'), done.has(n));
   mount($('#main'), p);
   renderTOC(); scrollTocToCurrent(); updateProgress();
@@ -237,6 +253,7 @@ function mount(root, p) {
   $$('[data-quiz]', root).forEach(initQuiz);
   $$('[data-deep-pb]', root).forEach(initDeepPB);
   $$('[data-decision]', root).forEach(initDecision);
+  mountExcel(root);
 }
 
 // ---------- tabs ----------
@@ -453,6 +470,7 @@ const TOOLS = [
   ['#/track/agent', 'bot', 'เส้นทาง Copilot Agent', 'เส้นทางหลัก: แนวคิด สร้าง ทดสอบ และนำ Agent ไปใช้จริง'],
   ['#/updates', 'arrow_sync', 'อัปเดตล่าสุด Copilot', 'ข่าวฟีเจอร์ใหม่จาก Microsoft 365 Roadmap อัปเดตอัตโนมัติ'],
   ['#/deep', 'hat_graduation', 'Deep Learning 36 บท', 'บทเรียนเชิงลึก Workshop และแบบทดสอบประจำบท'],
+  ['#/excel', 'table', 'AI + Excel Formula Mastery', 'หลักสูตร 3 ระดับ · Prompt Library · Formula Lab · Dashboard'],
   ['#/tracks', 'compass_northwest', 'เส้นทางการเรียนทั้งหมด', 'Agent · Office · เบราว์เซอร์ · Tips · งานจริง · Governance'],
   ['#/agents', 'people_team', 'Agent Directory', 'ค้นหาและกรอง Agent ทั้ง 67 ตัวตามกลุ่มงานและระดับความพร้อม'],
   ['#/builder', 'toolbox', 'Agent Builder Studio', 'เขียนการตั้งค่า Agent เอง พร้อมตัวนับและตรวจกติกา URL'],
@@ -475,6 +493,7 @@ function heroAnim() {
 }
 function chapterCardHTML(c) {
   const d = chapterDone(c);
+  if (c.excel) return `<a class="ccard" href="${hrefOf(c.pages[0])}" style="${gvar(c.group)}"><span class="cc-art">${illus(c.group, c.icon, 'cc-svg')}</span><span class="cn">${ic(c.icon)} AI + Excel · ${esc(c.en)}</span><b>${esc(c.title)}</b><small>${c.pages.length} หน้า${d ? ` · เรียนแล้ว ${d}` : ''}</small><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / c.pages.length * 100)}%"></i></span></a>`;
   const deepG = c.deep ? D.deepGroups.find(g => g.key === c.key) : null;
   return `<a class="ccard ${c.key === 'pmode' ? 'feature' : ''}" href="${hrefOf(c.deep ? c.pages[0] : moduleOf(c))}" style="${gvar(c.group)}"><span class="cc-art">${illus(c.group, c.deep ? deepG.icon : CH_ICON[c.key] || null, 'cc-svg')}</span><span class="cn">${ic(c.deep ? deepG.icon : D.groups[c.group].icon)} ${c.deep ? 'Deep Learning · ' + esc(deepG.name) : 'บทที่ ' + c.n}</span><b>${esc(c.title)}</b><small>${c.deep ? `บท ${deepG.a}–${deepG.b} · ${c.pages.length} บท` : `${c.pages.length} หน้า${c.agents ? ` · ${c.agents} Agent` : ''}`}${d ? ` · เรียนแล้ว ${d}` : ''}</small><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / c.pages.length * 100)}%"></i></span></a>`;
 }
@@ -502,9 +521,10 @@ function renderHome() {
     <div class="stat-tile"><span class="st-ic">${ic('hat_graduation')}</span><div><b>${D.meta.deepTotal}</b><span>บทเชิงลึก (Deep Learning)</span></div></div>
     <div class="stat-tile"><span class="st-ic">${ic('trophy')}</span><div><b>${done.size}</b><span>หน้าที่เรียนแล้ว จาก ${TOTAL}</span></div></div>
   </div>
-  ${lastP && last !== 1 ? `<a class="callout resume" href="${hrefOf(last)}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>${isDeep(last) ? 'Deep Learning บท ' + lastP.k : 'หน้า ' + last} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
+  ${lastP && last !== 1 ? `<a class="callout resume" href="${hrefOf(last)}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>${isEx(last) ? 'AI + Excel · ' + esc(lastP.k) : isDeep(last) ? 'Deep Learning บท ' + lastP.k : 'หน้า ' + last} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
   <section class="cgroup"><h2 class="sec">${ic('toolbox')}<span>เครื่องมือ</span></h2><div class="tools">${TOOLS.map(([h, i, t, s]) => `<a class="tool" href="${h}"><span class="ti">${ic(i)}</span><span><b>${esc(t)}</b><small>${esc(s)}</small></span></a>`).join('')}</div></section>
   ${GROUPS3.map(([t, s, keys]) => `<section class="cgroup"><h2 class="sec">${ic('book_open')}<span>${esc(t)}</span></h2><p>${esc(s)}</p><div class="ccards">${keys.map(k => chByKey[k] ? chapterCardHTML(chByKey[k]) : '').join('')}</div></section>`).join('')}
+  <section class="cgroup x-home"><h2 class="sec">${ic('table')}<span>AI + Excel Formula Mastery · 3 ระดับ</span></h2><p>เปลี่ยนภาษาคนเป็นสูตร Excel ด้วย AI · Prompt Library, Formula Lab, Interactive Dashboard และไฟล์ Excel ตัวอย่าง · <a href="#/excel">เปิดหน้าหลักสูตร</a></p><div class="ccards">${XCH.map(chapterCardHTML).join('')}</div></section>
   <section class="cgroup"><h2 class="sec">${ic('hat_graduation')}<span>Deep Learning · 36 บทเชิงลึก</span></h2><p>บทเรียนเชิงลึกพร้อม Workshop, Prompt Builder และแบบทดสอบประจำบท · <a href="#/deep">ดูภาพรวมและหลักคิดร่วม</a></p><div class="ccards">${DEEPCH.map(chapterCardHTML).join('')}</div></section>
   ${copyLine()}`, '', 1);
   wireUpdates($('#main')); refreshUpdates();
@@ -514,15 +534,15 @@ function renderHome() {
 // ---------- Learning paths ----------
 const trackItems = t => t.steps.flatMap(s => s.items).map(refN);
 const trackDone = t => { const it = [...new Set(trackItems(t))]; return [it.filter(n => done.has(n)).length, it.length]; };
-const TRACK_ART = { agent: 'eng', office: 'data', browser: 'lp', tips: 'ci', apply: 'farm', foundation: 'qms', implement: 'rep' };
+const TRACK_ART = { agent: 'eng', excel: 'xb', office: 'data', browser: 'lp', tips: 'ci', apply: 'farm', foundation: 'qms', implement: 'rep' };
 function tracksGridHTML() {
-  return `<div class="tracks">${D.tracks.map(t => { const [d, n] = trackDone(t); const nd = new Set(trackItems(t).filter(isDeep)).size; return `<a class="track ${t.star ? 'star' : ''}" href="#/track/${t.key}" style="${gvar(TRACK_ART[t.key] || 'gen')}"><span class="tr-art">${illus(TRACK_ART[t.key] || 'gen', t.icon, 'tr-svg')}</span><span class="tr-b">${t.star ? `<span class="tr-star">${ic('star_f')} เริ่มที่นี่ · ไฮไลต์หลัก</span>` : ''}<b>${esc(t.title)}</b><small>${esc(t.sub)}</small>${t.star ? `<ol class="tr-steps">${t.steps.map(x => `<li>${esc(x.t)}</li>`).join('')}</ol>` : ''}<span class="tr-meta">${t.steps.length} ขั้น · ${n - nd} หน้าคอร์สหลัก · ${nd} บทเชิงลึก${d ? ` · เรียนแล้ว ${d}` : ''}</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / n * 100)}%"></i></span></span></a>`; }).join('')}</div>`;
+  return `<div class="tracks">${D.tracks.map(t => { const [d, n] = trackDone(t); const nd = new Set(trackItems(t).filter(isDeep)).size, nx = new Set(trackItems(t).filter(isEx)).size; return `<a class="track ${t.star ? 'star' : ''}" href="#/track/${t.key}" style="${gvar(TRACK_ART[t.key] || 'gen')}"><span class="tr-art">${illus(TRACK_ART[t.key] || 'gen', t.icon, 'tr-svg')}</span><span class="tr-b">${t.star ? `<span class="tr-star">${ic('star_f')} เริ่มที่นี่ · ไฮไลต์หลัก</span>` : ''}<b>${esc(t.title)}</b><small>${esc(t.sub)}</small>${t.star ? `<ol class="tr-steps">${t.steps.map(x => `<li>${esc(x.t)}</li>`).join('')}</ol>` : ''}<span class="tr-meta">${t.steps.length} ขั้น · ${nx ? `${nx} หน้า AI + Excel` : `${n - nd} หน้าคอร์สหลัก · ${nd} บทเชิงลึก`}${d ? ` · เรียนแล้ว ${d}` : ''}</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / n * 100)}%"></i></span></span></a>`; }).join('')}</div>`;
 }
 function itemCardHTML(n) {
   const p = PI.get(n); if (!p) return '';
-  const deep = isDeep(n);
+  const deep = isDeep(n), ex = isEx(n);
   const a = p.agent ? AG[p.agent] : null;
-  return `<li><a class="toc-card" href="${hrefOf(n)}" style="${gvar(pageGroup(p))}"><span class="tc-ic">${ic(deep ? 'hat_graduation' : p.icon)}</span><span class="tc-b"><small>${deep ? 'บทเชิงลึก ' + p.k + ' · ' + esc(CH.get(p.chapter).title) : 'คอร์สหลัก · หน้า ' + n + ' · ' + esc(p.typeLabel)}</small><b>${esc(p.title)}</b>${deep && p.outcome ? `<span class="tc-s">${esc(p.outcome)}</span>` : a && p.type === 'agent' ? `<span class="tc-s">${esc(a.short)}</span>` : ''}</span><span class="dot ${done.has(n) ? 'd' : visited.has(n) ? 'v' : ''}" title="${done.has(n) ? 'เรียนแล้ว' : visited.has(n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`;
+  return `<li><a class="toc-card" href="${hrefOf(n)}" style="${gvar(pageGroup(p))}"><span class="tc-ic">${ic(deep ? 'hat_graduation' : p.icon)}</span><span class="tc-b"><small>${ex ? 'AI + Excel · ' + esc(p.k) + ' · ' + esc(CH.get(p.chapter).title) : deep ? 'บทเชิงลึก ' + p.k + ' · ' + esc(CH.get(p.chapter).title) : 'คอร์สหลัก · หน้า ' + n + ' · ' + esc(p.typeLabel)}</small><b>${esc(p.title)}</b>${ex && p.header.short ? `<span class="tc-s">${esc(p.header.short)}</span>` : deep && p.outcome ? `<span class="tc-s">${esc(p.outcome)}</span>` : a && p.type === 'agent' ? `<span class="tc-s">${esc(a.short)}</span>` : ''}</span><span class="dot ${done.has(n) ? 'd' : visited.has(n) ? 'v' : ''}" title="${done.has(n) ? 'เรียนแล้ว' : visited.has(n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`;
 }
 function renderTracks() {
   cur = null;
@@ -733,9 +753,9 @@ function buildIndex() {
   SIDX = PAGES.filter(p => p.n !== 1 && (p.html || p.text)).map(p => {
     const a = p.agent ? AG[p.agent] : null;
     const ch = CH.get(p.chapter);
-    return { kind: 'page', n: p.n, title: p.title, t: p.title.toLowerCase(), meta: isDeep(p.n) ? `Deep Learning บท ${p.k} · ${ch.title}` : `หน้า ${p.n} · บทที่ ${ch.n} ${ch.title}`, icon: p.icon, g: pageGroup(p),
+    return { kind: 'page', n: p.n, title: p.title, t: p.title.toLowerCase(), meta: isEx(p.n) ? `AI + Excel · ${p.k} · ${ch.title}` : isDeep(p.n) ? `Deep Learning บท ${p.k} · ${ch.title}` : `หน้า ${p.n} · บทที่ ${ch.n} ${ch.title}`, icon: p.icon, g: pageGroup(p),
       a: a && (p.type === 'agent' || p.type === 'agentflow') ? [a.name, a.short, a.builder.name, ...a.inputs, ...a.outputs].join(' ').toLowerCase() : '',
-      body: isDeep(p.n) ? p.text : strip(p.html), bl: '' };
+      body: isDeep(p.n) || isEx(p.n) ? p.text : strip(p.html), bl: '' };
   });
   SIDX.forEach(x => { x.bl = x.body.toLowerCase(); });
   TOOLS.forEach(([h, i, t, s]) => SIDX.push({ kind: 'tool', href: h, title: t, t: t.toLowerCase(), meta: 'เครื่องมือ · ' + s, icon: i, g: 'gen', a: s.toLowerCase(), body: '', bl: '' }));
@@ -855,7 +875,7 @@ function renderProgress() {
   setMain(`<header class="ph" style="--dc:var(--green)">${art('trophy')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>เครื่องมือ</span></nav><h1>Learning Progress</h1><p class="short">ความคืบหน้าบันทึกในเบราว์เซอร์นี้เท่านั้น (localStorage) ไม่ส่งข้อมูลออกไปที่ใด</p></header>
   <div class="card prog-hero"><svg class="big-ring" viewBox="0 0 150 150" role="img" aria-label="เรียนแล้ว ${pct}%"><defs><linearGradient id="pgrad"><stop offset="0" stop-color="#1F5BE3"/><stop offset=".5" stop-color="#22BE97"/><stop offset="1" stop-color="#8A55EA"/></linearGradient></defs><circle class="bgc" cx="75" cy="75" r="${r}"/><circle class="fgc" cx="75" cy="75" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - done.size / TOTAL)}"/><text x="75" y="80" text-anchor="middle">${pct}%</text><text class="s" x="75" y="100" text-anchor="middle">${done.size}/${TOTAL} หน้า</text></svg>
   <div><p><b>เรียนแล้ว ${done.size} หน้า</b> · เปิดดูแล้ว ${visited.size} หน้า · จบแล้ว ${D.chapters.filter(ch => chapterDone(ch) === ch.pages.length).length}/${D.chapters.length} บท</p>${last ? `<a class="btn btn-primary" href="#/p/${last}">${ic('history')}<span>ไปหน้าล่าสุด (หน้า ${last})</span></a> ` : ''}<button type="button" class="btn btn-outline" id="progReset">${ic('arrow_clockwise')}<span>ล้างความคืบหน้า</span></button></div></div>
-  <h2 class="sec">${ic('book_open')}<span>รายบท</span></h2><div class="pchap">${ALLCH.map(ch => { const d = chapterDone(ch); const nx = ch.pages.find(n => !done.has(n)) || moduleOf(ch); return `<a href="${hrefOf(nx)}" style="${gvar(ch.group)}"><span class="n">${ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span><b>${esc(ch.title)}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / ch.pages.length * 100)}%"></i></span></span><small>${d}/${ch.pages.length} หน้า</small></a>`; }).join('')}</div>${copyLine()}`, 'Learning Progress');
+  <h2 class="sec">${ic('book_open')}<span>รายบท</span></h2><div class="pchap">${ALLCH.map(ch => { const d = chapterDone(ch); const nx = ch.pages.find(n => !done.has(n)) || moduleOf(ch); return `<a href="${hrefOf(nx)}" style="${gvar(ch.group)}"><span class="n">${ch.excel ? 'X' + (ch.n - 200) : ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span><b>${esc(ch.title)}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / ch.pages.length * 100)}%"></i></span></span><small>${d}/${ch.pages.length} หน้า</small></a>`; }).join('')}</div>${copyLine()}`, 'Learning Progress');
   $('#progReset').addEventListener('click', () => { if (confirm('ล้างความคืบหน้าทั้งหมดในเบราว์เซอร์นี้?')) { done.clear(); visited.clear(); saveProgress(); store.set('cpa26-last', null); store.set('cpa26-chk', {}); updateProgress(); renderProgress(); toast('ล้างความคืบหน้าแล้ว'); } });
   renderTOC(); updateProgress();
 }
@@ -929,6 +949,8 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('hashchange', route);
 mq.addEventListener && mq.addEventListener('change', () => { if (!mq.matches) closeDrawer(); });
+
+/*__EXCEL_JS__*/
 
 // ---------- Email gate (once per device) ----------
 const GATE = (() => { try { return JSON.parse(document.getElementById('gate-cfg').textContent); } catch (e) { return { on: false, h: [] }; } })();

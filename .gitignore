@@ -8,3 +8,4 @@ playwright-report/
 *-dist.zip
 private/*
 !private/README.md
+scripts/excel/.workbook-expected.json

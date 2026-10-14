@@ -67,9 +67,11 @@ async function grab(hash) {
   });
 }
 
-const report = { generatedAt: new Date().toISOString(), pages: [], totals: { atoms: 0, exact: 0, ordered: 0, uiReplaced: 0, missing: 0, code: 0, codeOk: 0, urls: 0, urlsOk: 0 }, missing: [], uiReplaced: [], consoleErrors };
+const REPORT = { generatedAt: new Date().toISOString(), pages: [], totals: { atoms: 0, exact: 0, ordered: 0, uiReplaced: 0, missing: 0, code: 0, codeOk: 0, urls: 0, urlsOk: 0 }, missing: [], uiReplaced: [], consoleErrors };
 
-function check(label, md, dom) {
+const report = REPORT;
+function check(label, md, dom, tot = report.totals, miss = report.missing) {
+  const report = { totals: tot, missing: miss, uiReplaced: [], pages: [] };
   const T = squash(dom.text);
   const res = { page: label, atoms: 0, missing: [] };
   for (const a of atomsOf(md)) {
@@ -98,6 +100,8 @@ function check(label, md, dom) {
   }
   report.pages.push({ page: label, atoms: res.atoms, missing: res.missing.length });
   if (res.missing.length) report.missing.push(res);
+  for (const u of report.uiReplaced) REPORT.uiReplaced.push(u);
+  for (const pg of report.pages) REPORT.pages.push(pg);
 }
 
 for (const p of pages) check(`หน้า ${p.n}`, p.md, await grab('#/p/' + p.n));
@@ -121,6 +125,21 @@ for (const n of Object.keys(DA.lesson)) { report.deep.lessons++; checkDeep('Deep
 checkDeep('Deep overview', DA.shared, await grabDeep('#/deep', '#deepShared .deep-sec'));
 report.deep.dropped = DA.dropped.length;
 
+// ---- AI + Excel Formula Mastery: every atom of the (sanitised) spec must appear on the Excel pages (outside .supp) ----
+const { loadSpec } = await import('./lib/excel.mjs');
+const XS = loadSpec(ROOT);
+const xSlugs = await page.evaluate(() => window.__app.D.excel.index.map(i => i.slug));
+const xDom = { text: '', pres: [], hrefs: [] };
+for (const slug of xSlugs) {
+  await page.evaluate(h => { location.hash = h; }, '#/x/' + slug);
+  await page.waitForFunction(s => location.hash === '#/x/' + s && document.querySelector('#main .x-body'), slug, { timeout: 15000 });
+  const d = await page.evaluate(() => { const m = document.querySelector('#main').cloneNode(true); m.querySelectorAll('.supp').forEach(s => s.remove()); m.querySelectorAll('select,[data-xpb],[data-xlab],[data-xdash]').forEach(s => s.remove()); return { text: m.textContent, pres: [...m.querySelectorAll('pre')].map(p => p.textContent), hrefs: [...m.querySelectorAll('a[href]')].map(a => a.getAttribute('href')) }; });
+  xDom.text += '\n' + d.text; xDom.pres.push(...d.pres); xDom.hrefs.push(...d.hrefs);
+}
+report.excel = { pages: xSlugs.length, totals: { atoms: 0, exact: 0, ordered: 0, uiReplaced: 0, missing: 0, code: 0, codeOk: 0, urls: 0, urlsOk: 0 }, missing: [] };
+// atomsOf() strips '_' (the main MD uses _italics_); the Excel spec uses it in names like Raw_Data → compare without '_'
+check('AI + Excel spec', XS.md, { ...xDom, text: xDom.text.replace(/_/g, '') }, report.excel.totals, report.excel.missing);
+
 // home page requirements from Part 1
 const home = await grab('#/');
 const homeNeed = ['Copilot', 'AI Agents for Work 2026', 'การใช้งาน AI แบบพาลงมือทำ · 23 ตุลาคม 2569', 'เริ่มที่ Prompt Mode →', 'ค้นหา Agent ตามกลุ่มงาน', '67', 'Agent พร้อมการตั้งค่าคัดลอกได้', '17', 'กลุ่มงาน', '27', 'บทเรียน', 'หน้าที่เรียนแล้ว', '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret'];
@@ -135,7 +154,7 @@ const docNo = html.replace(/<svg[\s\S]*?<\/svg>/g, '').match(/\b(?:SOP|WI|QP|FM|
 const { loadAllowed } = await import('./lib/gate.mjs');
 const allowedEmails = loadAllowed(ROOT).emails;
 const distAll = fs.readdirSync(path.join(ROOT, 'dist'), { recursive: true }).filter(f => /\.(html|js|json|webmanifest|txt)$/.test(f)).map(f => fs.readFileSync(path.join(ROOT, 'dist', f), 'utf8')).join('\n');
-report.forbidden = { allowedEmailsChecked: allowedEmails.length, plainEmailsInDist: allowedEmails.filter(e => distAll.toLowerCase().includes(e)).length, termsChecked: terms.length, hits: terms.filter(t => html.toLowerCase().includes(t.toLowerCase())), jobTitles: [...new Set(html.match(/\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])], documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
+report.forbidden = { allowedEmailsChecked: allowedEmails.length, plainEmailsInDist: allowedEmails.filter(e => distAll.toLowerCase().includes(e)).length, termsChecked: terms.length, hits: terms.filter(t => html.toLowerCase().includes(t.toLowerCase())), jobTitles: [...new Set(html.match(/(?<!Name )\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])] /* "Name Manager" is an Excel menu, not a job title */, documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
 
 await browser.close(); srv.close();
 fs.writeFileSync(path.join(ROOT, 'docs', 'audit-report.json'), JSON.stringify(report, null, 2));
@@ -143,7 +162,9 @@ const t = report.totals;
 console.log(`atoms ${t.atoms} · exact ${t.exact} · ordered ${t.ordered} · ui-replaced ${t.uiReplaced} · MISSING ${t.missing}`);
 console.log(`code blocks ${t.codeOk}/${t.code} · urls ${t.urlsOk}/${t.urls} · home ${report.home.filter(x => x.ok).length}/${report.home.length} · console errors ${consoleErrors.length}`);
 console.log(`deep lessons ${report.deep.lessons} · atoms ${report.deep.atoms} · MISSING ${report.deep.missing.length}`);
+console.log(`excel spec · pages ${report.excel.pages} · atoms ${report.excel.totals.atoms} · code ${report.excel.totals.codeOk}/${report.excel.totals.code} · MISSING ${report.excel.totals.missing}`);
+for (const m of report.excel.missing.slice(0, 3)) console.log('  ✗ excel', JSON.stringify(m.missing.slice(0, 12)));
 console.log('forbidden:', JSON.stringify(report.forbidden));
 for (const m of report.deep.missing.slice(0, 25)) console.log('  ✗', m.page, JSON.stringify(m.text));
 for (const m of report.missing.slice(0, 40)) console.log('  ✗', m.page, JSON.stringify(m.missing.slice(0, 4)));
-process.exitCode = t.missing || report.deep.missing.length || consoleErrors.length || report.home.some(x => !x.ok) || report.forbidden.hits.length || report.forbidden.jobTitles.length || report.forbidden.plainEmailsInDist ? 1 : 0;
+process.exitCode = t.missing || report.excel.totals.missing || report.deep.missing.length || consoleErrors.length || report.home.some(x => !x.ok) || report.forbidden.hits.length || report.forbidden.jobTitles.length || report.forbidden.plainEmailsInDist ? 1 : 0;

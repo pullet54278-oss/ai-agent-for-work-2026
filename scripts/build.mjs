@@ -10,6 +10,7 @@ import { buildDeep, DEEP_GROUPS } from './lib/deep.mjs';
 import { renderDeepLesson, quizHTML, checklistHTML } from './lib/deep-render.mjs';
 import { TRACKS } from '../content/tracks.mjs';
 import { loadAllowed, hashEmail, GATE_SALT } from './lib/gate.mjs';
+import { buildExcel } from './lib/excel.mjs';
 
 const t0 = Date.now();
 const DIST = path.join(ROOT, 'dist');
@@ -130,7 +131,8 @@ const deepShared = {
   checklist: checklistHTML('Checklist ก่อนนำไปใช้ (ใช้ได้กับทุกบท)', deep.shared.checklist, 'shared')
 };
 // ---- learning paths + cross references (dedupe overlapping topics by linking, not repeating) ----
-const refTitle = r => { const [k, n] = r.split(':'); return k === 'p' ? pageByN.get(+n).title : deepTitle(+n); };
+const excel = await buildExcel(ROOT);
+const refTitle = r => { const [k, n] = r.split(':'); return k === 'p' ? pageByN.get(+n).title : k === 'x' ? (excel.index.find(i => i.slug === n) || {}).title : deepTitle(+n); };
 const tracks = TRACKS.map(t => ({ ...t, steps: t.steps.map(s => ({ t: s.t, items: s.items.map(r => { if (!refTitle(r)) throw new Error('bad track ref ' + r); return r; }) })) }));
 const related = { p: {}, d: {} };
 for (const t of TRACKS) for (const s of t.steps) {
@@ -156,7 +158,7 @@ const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/
 const data = {
   meta: {
     title: 'Copilot AI Agents for Work 2026', subtitle: 'AI Agents for Work 2026', event: 'การใช้งาน AI แบบพาลงมือทำ · 23 ตุลาคม 2569',
-    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, buildId, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
+    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, buildId, excelTotal: excel.index.length, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
   },
   groups: Object.fromEntries(Object.entries(groups).map(([k, v]) => [k, { name: v.name, c: GROUP_COLORS[k], icon: GROUP_ICON[k] }])),
   readiness,
@@ -171,6 +173,7 @@ const data = {
   deepGroups: DEEP_GROUPS,
   deepIndex: deep.lessons.map(l => ({ n: l.n, title: l.title, outcome: l.outcome, group: l.group, icon: l.icon, text: Object.values(deepRendered[l.n]).join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 2500) })),
   tracks, related, updates, updatesTh,
+  excel: { chapters: excel.chapters, index: excel.index }, excelReportDate: excel.sample.reportDate,
   deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
 
@@ -182,7 +185,8 @@ data.meta.copilotLogo = copilotLogo ? 'brand/' + copilotLogo : null;
 // ---- assemble ----
 const tpl = fs.readFileSync(path.join(ROOT, 'src', 'template.html'), 'utf8');
 const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8');
-const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8');
+const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'));
+if (js.includes('/*__EXCEL_JS__*/')) throw new Error('excel.js not injected');
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">${Object.entries(icons).map(([k, v]) => `<symbol id="i-${k}" viewBox="0 0 24 24" fill="currentColor">${v}</symbol>`).join('')}</svg>`;
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 const html = tpl
@@ -198,6 +202,10 @@ fs.mkdirSync(path.join(DIST, 'vendor'), { recursive: true });
 fs.writeFileSync(path.join(DIST, 'index.html'), html);
 // deep lessons load on demand (CSP 'self', works from file:// too)
 fs.writeFileSync(path.join(DIST, 'deep-data.js'), 'window.__DEEP=' + JSON.stringify({ lessons: deepRendered, shared: deepShared }).replace(/</g, '\\u003c') + ';');
+// AI + Excel: lesson html + dashboard sample data load on demand; sample workbook is downloadable
+fs.writeFileSync(path.join(DIST, 'excel-data.js'), 'window.__EXCEL=' + JSON.stringify({ html: excel.html, sample: excel.sample }).replace(/</g, '\\u003c') + ';');
+fs.mkdirSync(path.join(DIST, 'excel'), { recursive: true });
+fs.copyFileSync(path.join(ROOT, 'ai-excel-formula-mastery', 'data', 'sample-workbook.xlsx'), path.join(DIST, 'excel', 'sample-workbook.xlsx'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'logo.png'), path.join(DIST, 'logo.png'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.full.min.js'), path.join(DIST, 'vendor', 'xlsx.full.min.js'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.LICENSE'), path.join(DIST, 'vendor', 'xlsx.LICENSE.txt'));
@@ -213,7 +221,7 @@ fs.writeFileSync(path.join(DIST, 'manifest.webmanifest'), JSON.stringify({
   icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }],
   shortcuts: [{ name: 'เรียน Copilot Agent', url: './#/track/agent' }, { name: 'อัปเดตล่าสุด', url: './#/updates' }, { name: 'Agent Directory', url: './#/agents' }]
 }, null, 1));
-const precache = ['./', `deep-data.js?v=${encodeURIComponent(buildId)}`, 'logo.png', 'favicon.svg', 'manifest.webmanifest', ...iconFiles.map(f => 'icons/' + f), ...(copilotLogo ? ['brand/' + copilotLogo] : [])];
+const precache = ['./', `deep-data.js?v=${encodeURIComponent(buildId)}`, `excel-data.js?v=${encodeURIComponent(buildId)}`, 'excel/sample-workbook.xlsx', 'logo.png', 'favicon.svg', 'manifest.webmanifest', ...iconFiles.map(f => 'icons/' + f), ...(copilotLogo ? ['brand/' + copilotLogo] : [])];
 const swSrc = fs.readFileSync(path.join(ROOT, 'src', 'sw.js'), 'utf8').replaceAll('__BUILD_ID__', buildId).replaceAll('__PRECACHE__', JSON.stringify(precache));
 if (/__[A-Z_]+__/.test(swSrc)) throw new Error('sw.js: unfilled placeholder');
 fs.writeFileSync(path.join(DIST, 'sw.js'), swSrc);
@@ -241,6 +249,12 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
 /deep-data.js
   Cache-Control: public, max-age=0, must-revalidate
 
+/excel-data.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/excel/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /sw.js
   Cache-Control: no-cache
   Service-Worker-Allowed: /
@@ -255,6 +269,6 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
 /icons/*
   Cache-Control: public, max-age=604800
 `);
-fs.writeFileSync(path.join(DIST, 'build-report.json'), JSON.stringify({ built: new Date().toISOString(), pages: rendered.length + 1, deepLessons: deep.lessons.length, deepReport: deep.report, updates: { fetchedAt: updates.fetchedAt, items: updates.items.length }, version: pkg.version, buildId, gate: { on: gate.on, count: gate.h.length, sources: allowed.sources }, updatesTh: { translated: updates.items.length - thMissing, total: updates.items.length }, agents: Object.keys(agents).length, bytes: Buffer.byteLength(html), warnings }, null, 2));
+fs.writeFileSync(path.join(DIST, 'build-report.json'), JSON.stringify({ built: new Date().toISOString(), pages: rendered.length + 1, deepLessons: deep.lessons.length, deepReport: deep.report, updates: { fetchedAt: updates.fetchedAt, items: updates.items.length }, version: pkg.version, buildId, excel: excel.report, gate: { on: gate.on, count: gate.h.length, sources: allowed.sources }, updatesTh: { translated: updates.items.length - thMissing, total: updates.items.length }, agents: Object.keys(agents).length, bytes: Buffer.byteLength(html), warnings }, null, 2));
 console.log(`built dist/index.html  ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB  pages=${rendered.length + 1} agents=${Object.keys(agents).length}  ${Date.now() - t0}ms`);
 for (const w of warnings) console.log('  ⚠', w);

@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.2.0 — 14 ต.ค. 2569
+
+- **หลักสูตรใหม่ AI + Excel Formula Mastery (3 ระดับ)** จาก `AI_Excel_3_Levels_Claude_Build_Spec.md` (Source of Truth แสดงครบทุกตัวอักษร · audit 289/289 ชิ้น, Prompt/โค้ด 26/26 บล็อก)
+  - Beginner 7 บท · Intermediate 7 บท · Advanced 8 บท แต่ละบทครบ 12 ส่วน (Objectives … Troubleshooting) + คู่มือ Power Query / Office Scripts / Power Automate / Dashboard / AI Agent
+  - สูตร 175 สูตร พร้อมเวอร์ชัน Excel ข้อสมมติ และกรณีทดสอบ 614 กรณี — สูตรคลาสสิกผ่านการคำนวณจริงด้วย LibreOffice 528/528 · สูตร Microsoft 365 26 สูตรติดป้าย "ยังไม่ได้ทดสอบใน Excel จริง"
+  - Workshop 5/6/7 กิจกรรม พร้อมเฉลยและเกณฑ์ตรวจ · แบบทดสอบก่อน/หลังเรียน 10+10 ข้อต่อระดับ พร้อมเทียบคะแนน
+  - คลังเทคนิคใช้งานจริง 44 เทคนิค + Prompt ให้ AI ช่วย (แนวหัวข้ออ้างอิงจากชุดหนังสือ Deep Into Function — เขียนใหม่ทั้งหมด)
+  - เครื่องมือ: Prompt Library (ค้นหา/กรอง/Framework Builder), Formula Lab (ตัวลองสูตร 8 แบบ), Interactive Dashboard (KPI, Filter, กราฟ, ตาราง, Export CSV/Excel, อัปโหลดไฟล์, Data Quality Warnings, Prototype label), ไฟล์ `sample-workbook.xlsx` (สูตร 354/354 เซลล์ตรวจผ่าน)
+  - เส้นทางการเรียน "AI + Excel Formula Mastery" และหมวดใหม่ในสารบัญ ค้นหา ความคืบหน้า และโหมดออฟไลน์
+- ชุดส่งมอบตามข้อ 17 ของสเปกในโฟลเดอร์ `ai-excel-formula-mastery/` (สร้างจากข้อมูลชุดเดียวกับเว็บ)
+- ความปลอดภัย: เนื้อหา Excel แสดงแท็ก HTML เป็นข้อความเสมอ (ตัวอย่างอย่าง `<img onerror>` ในบทความปลอดภัย)
+
 ## 3.1.0 — 14 ต.ค. 2569
 
 - **ข่าว Copilot ภาษาไทย**: ทุกการ์ดมีหัวข้อและสรุปภาษาไทยแบบเข้าใจง่าย (80/80 รายการใน `data/updates-th.json`), บอกว่า "เหมาะกับ" ใคร, วันที่ Preview/GA เป็นเดือนไทย พ.ศ., ต้นฉบับภาษาอังกฤษพับเก็บไว้ในการ์ด · ข่าวใหม่ที่ยังไม่มีคำแปลได้สรุปภาษาไทยอัตโนมัติจากสถานะ/วันที่

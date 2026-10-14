@@ -3,7 +3,7 @@
 คู่มือเรียนรู้แบบโต้ตอบ (ภาษาไทย) สำหรับคอร์ส "การใช้งาน AI แบบพาลงมือทำ" · 23 ตุลาคม 2569
 สร้างจาก `content/copilot-ai-agents-for-work.md` (ส่วนที่ 1 = สเปก UI, ส่วนที่ 2 = เนื้อหาทั้งหมด) และ `assets/logo.png`
 
-Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์ชัน 3.1.0** (ดู `CHANGELOG.md`)
+Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์ชัน 3.2.0** (ดู `CHANGELOG.md`)
 
 ## มีอะไรบ้าง
 
@@ -23,6 +23,7 @@ Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์�
 | **เส้นทางการเรียน 7 เส้นทาง** — Copilot Agent (เริ่มที่นี่) · Excel/Word/PowerPoint · เบราว์เซอร์ · Tips & Tricks · ประยุกต์ใช้งานจริง · พื้นฐาน · ขยายผลในองค์กร | หน้าแรก / `#/tracks`, `#/track/{key}` |
 | **Deep Learning 36 บทเชิงลึก** (บูรณาการจาก v10) จัด 6 กลุ่ม · แบบทดสอบเฉพาะบท 3 ข้อทุกบท · Prompt Builder/เครื่องมือตัดสินใจ/Checklist · เนื้อหาที่ซ้ำทุกบทรวมไว้ที่หน้าภาพรวม | `#/deep`, `#/d/{1–36}` |
 | **อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot** (อัตโนมัติจาก Microsoft 365 Roadmap) สรุปภาษาไทยทุกการ์ด · หน้าแรกแสดง 3 ข่าวเด่น · ข่าวทั้งหมดกดเปิดดูได้ | หน้าแรก / `#/updates` |
+| **AI + Excel Formula Mastery** 3 ระดับ · Prompt Library · Formula Lab · Interactive Dashboard · ไฟล์ Excel ตัวอย่าง · แบบทดสอบก่อน/หลังเรียน | `#/excel`, `#/x/{slug}` |
 | **PWA** ติดตั้งเป็นแอปบนมือถือ/แท็บเล็ต ใช้ออฟไลน์ได้ · ปุ่ม **รีเฟรช · อัปเดตแอป** | แถบบน / เมนูเครื่องมือ |
 | **Email gate** กรอก Email ที่มีสิทธิ์ครั้งเดียวต่อเครื่อง | หน้าแรกก่อนเข้าใช้งาน |
 | หมายเลขเวอร์ชัน + เครดิตผู้สร้าง Nattapon Yokkret | หน้าแรก (ป้าย v3.0.0) และท้ายทุกหน้า |
@@ -89,6 +90,19 @@ AXE=path/to/axe.min.js node tests/e2e.mjs   # เพิ่มการตรว�
 
 ตั้งค่าครั้งเดียว: Netlify → Site configuration → Build & deploy → **Build hooks** → Add build hook → คัดลอก URL → Environment variables → เพิ่ม `BUILD_HOOK_URL` = URL นั้น
 หมายเหตุ: Functions ทำงานเฉพาะการ deploy แบบเชื่อม Git หรือ Netlify CLI (`netlify deploy --prod`) — **Netlify Drop (ลากวาง) ไม่รองรับ Functions** หน้าเว็บจะยังแสดง snapshot ได้ตามปกติ
+
+## AI + Excel Formula Mastery
+
+| ส่วน | ไฟล์ |
+|---|---|
+| ต้นฉบับ (Source of Truth) | `content/excel/AI_Excel_3_Levels_Claude_Build_Spec.md` (แสดงทุกตัวอักษรในกรอบ "ต้นฉบับ") |
+| ส่วนขยาย (บทเรียน สูตร เทคนิค Workshop แบบทดสอบ) | `content/excel/level-b.mjs`, `level-i.mjs`, `level-a.mjs` ตามสคีมา `content/excel/SCHEMA.md` · คู่มือ Automation `content/excel/automation.mjs` |
+| ไฟล์ Excel ตัวอย่าง | `python3 scripts/excel/make_workbook.py` → `ai-excel-formula-mastery/data/sample-workbook.xlsx` + `content/excel/sample-data.json` |
+| ตรวจสูตร | `node scripts/excel/verify-formulas.mjs` (สคีมา + คำนวณทุกกรณีทดสอบด้วย LibreOffice) · `python3 scripts/excel/verify_workbook.py` (ทุกเซลล์สูตรในไฟล์ตัวอย่าง) |
+| ชุดส่งมอบ | `node scripts/excel/export.mjs` → `ai-excel-formula-mastery/` (curriculum, prompts, workshops, automation, dashboard, tests) |
+| หน้าเว็บ | `scripts/lib/excel.mjs` (render) · `src/excel.js` (Prompt Library, Formula Lab, Dashboard) → `dist/excel-data.js` โหลดเมื่อเปิดหน้า |
+
+ลำดับเมื่อแก้เนื้อหา: แก้ `content/excel/*.mjs` → `node scripts/excel/verify-formulas.mjs` (ต้อง 0 ปัญหา) → `npm run build` → `node scripts/excel/export.mjs` → `npm run audit` → `node tests/e2e.mjs`
 
 ## Email gate (สิทธิ์เข้าใช้งาน)
 

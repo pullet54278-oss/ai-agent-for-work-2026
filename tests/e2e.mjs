@@ -43,6 +43,7 @@ await page.goto(url);
 await page.waitForSelector('.hero');
 const D = await page.evaluate(() => window.__app.D);
 const ORDER = [1, ...D.pages.map(p => p.n)].sort((a, b) => a - b);
+const TOTALP = D.meta.totalPages + D.meta.deepTotal + D.meta.excelTotal;
 
 await suite('T4 Navigation: every page renders with correct title', async () => {
   let bad = 0;
@@ -63,7 +64,8 @@ await suite('T4 Navigation: every page renders with correct title', async () => 
   await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(60);
   eq(await page.evaluate(() => location.hash), '#/p/33', 'ArrowLeft → previous page');
   await go('#/p/155'); eq(await page.$eval('.pager a[rel="next"]', a => a.getAttribute('href')).catch(() => null), '#/d/1', 'last course page → Deep Learning lesson 1');
-  await go('#/d/36'); await page.waitForSelector('#main .deep-body'); ok(!(await page.$('.pager a[rel="next"]')), 'last deep lesson has no next');
+  await go('#/d/36'); await page.waitForSelector('#main .deep-body'); eq(await page.$eval('.pager a[rel="next"]', a => a.getAttribute('href')).catch(() => null), '#/x/start', 'last deep lesson → AI + Excel course start');
+  { const lastX = D.excel.index[D.excel.index.length - 1]; await go('#/x/' + lastX.slug); await page.waitForSelector('#main .x-body'); ok(!(await page.$('.pager a[rel="next"]')), 'last AI + Excel page has no next'); }
   for (const r of ['#/agents', '#/builder', '#/progress', '#/appendix-a', '#/appendix-b', '#/deep', '#/tracks', '#/track/agent', '#/updates', '#/d/13', '#/nonexistent']) { await go(r); ok(await page.$('#main h1'), 'route renders ' + r); }
   await go('#/p/2');
   ok((await text('.copy-line')) === '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', 'copyright line on page');
@@ -79,7 +81,7 @@ await suite('Brand + illustrations', async () => {
   ok(h1[1] === 'none', 'Copilot wordmark uses plain text colour (no logo-imitating gradient)');
   ok(h1[2] >= 56, 'Copilot is the largest text on home (' + h1[2] + 'px)');
   ok(await page.$('.hero-scene'), 'hero illustration');
-  eq(await page.$$eval('.ccard .cc-svg', l => l.length), 33, 'illustration on every chapter card (27 chapters + 6 deep groups)');
+  eq(await page.$$eval('.ccard .cc-svg', l => l.length), 27 + 6 + D.excel.chapters.length, 'illustration on every chapter card (27 chapters + 6 deep groups + AI + Excel)');
   await go('#/p/95'); ok(await page.$('.ph-module .ph-art'), 'module header illustration');
   await go('#/p/33'); ok(await page.$('.ph .ph-art'), 'agent header illustration');
 });
@@ -93,7 +95,7 @@ await suite('Copilot Agent first + learning paths', async () => {
   ok(order[0].includes('hero') && order[1].includes('updates') && order[2].includes('tracks-sec'), 'home order: hero → live updates → learning paths (' + order.slice(0, 3).join(' | ') + ')');
   const tracks = await page.$$eval('.tracks .track b', l => l.map(e => e.textContent));
   eq(tracks[0], 'Copilot Agent', 'first learning path is Copilot Agent');
-  ok(tracks.length === 7 && tracks.some(t => /Excel, Word และ PowerPoint/.test(t)) && tracks.some(t => /เบราว์เซอร์/.test(t)) && tracks.some(t => /Tips & Tricks/.test(t)) && tracks.some(t => /งานจริง/.test(t)), '7 paths: Agent, Office, browser, tips, real work, …');
+  ok(tracks.length === 8 && tracks.some(t => /AI \+ Excel/.test(t)) && tracks.some(t => /Excel, Word และ PowerPoint/.test(t)) && tracks.some(t => /เบราว์เซอร์/.test(t)) && tracks.some(t => /Tips & Tricks/.test(t)) && tracks.some(t => /งานจริง/.test(t)), '8 paths: Agent, AI + Excel, Office, browser, tips, real work, …');
   ok(await page.$('.tracks .track.star'), 'Agent path featured');
   await go('#/track/agent');
   const items = await page.$$eval('.track-steps .toc-card', l => l.map(a => a.getAttribute('href')));
@@ -183,6 +185,101 @@ await suite('Auto-updates (Microsoft 365 Roadmap) · Thai summaries · 3 feature
   ok(SNAP.items.length >= 20 && SNAP.items.every(i => /^https:\/\/www\.microsoft\.com\//.test(i.url) && i.title), 'snapshot holds real Copilot roadmap items (' + SNAP.items.length + ', fetched ' + SNAP.fetchedAt + ')');
   eq(SNAP.items.filter(i => !TH[i.id]).length, 0, 'every snapshot item has a Thai translation');
 });
+await suite('AI + Excel Formula Mastery', async () => {
+  const errs = []; const onErr = e => errs.push(e.message); page.on('pageerror', onErr);
+  const SPEC = fs.readFileSync(path.join(ROOT, 'content', 'excel', 'AI_Excel_3_Levels_Claude_Build_Spec.md'), 'utf8');
+  const SAMPLE = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'excel', 'sample-data.json'), 'utf8'));
+  const X = D.excel;
+  await go('#/excel'); await page.waitForSelector('.x-levels');
+  eq(await page.$$eval('.x-level', l => l.length), 3, 'course hub: 3 level cards');
+  eq(await page.$$eval('.x-tools .tool', l => l.length), 4, 'course hub: 4 tools');
+  ok((await text('#tocList')).includes('AI + Excel Formula Mastery'), 'TOC has AI + Excel section');
+  let bad = 0;
+  for (const it of X.index) { await go('#/x/' + it.slug); await page.waitForFunction(s => location.hash === '#/x/' + s && document.querySelector('#main .x-body h1, #main h1'), it.slug); if ((await text('#main h1')) !== it.title) bad++; }
+  eq(bad, 0, `all ${X.index.length} AI + Excel pages render with correct h1`);
+  // Prompt Library: every spec prompt verbatim + copy
+  await go('#/x/prompts'); await page.waitForSelector('[data-xlib]');
+  const ids = [...SPEC.matchAll(/^### ([BIA]0\d) /gm)].map(m => m[1]);
+  eq(ids.length, 22, 'spec defines 22 prompts (B01–B07, I01–I07, A01–A08)');
+  const heads = await page.$$eval('.x-src .prompt-head span', l => l.map(e => e.textContent));
+  ok(ids.every(id => heads.some(h => h.startsWith(id))), 'Prompt Library shows all 22 spec prompts');
+  const want = SPEC.match(/### B03[\s\S]*?```text\n([\s\S]*?)\n```/)[1];
+  await page.evaluate(() => [...document.querySelectorAll('.x-src .prompt')].find(p => p.querySelector('.prompt-head span').textContent.startsWith('B03')).querySelector('[data-copy]').click());
+  await page.waitForTimeout(200); eq(await clip(), want, 'copy B03 = spec text verbatim');
+  await page.click('[data-xf="i"]'); await page.waitForTimeout(80);
+  ok(await page.$$eval('[data-xlv="b"]', l => l.every(e => e.hidden)) && await page.$$eval('[data-xlv="i"]', l => l.every(e => !e.hidden)), 'level filter: Intermediate only');
+  await page.click('[data-xf=""]'); await page.fill('#xpQ', 'Power Query'); await page.waitForTimeout(80);
+  ok(/แสดง \d+ Prompt/.test(await text('[data-xp-count]')) && (await page.$$eval('.content .prompt:not([hidden])', l => l.length)) < (await page.$$eval('.content .prompt', l => l.length)), 'prompt search narrows the list');
+  await page.fill('#xpb-goal', 'สรุป Feed รายฟาร์ม'); await page.selectOption('#xpb-sep', ';'); await page.waitForTimeout(50);
+  const pb = await text('[data-xpb-out]'); ok(pb.includes('เป้าหมาย: สรุป Feed รายฟาร์ม') && pb.includes('คั่นอาร์กิวเมนต์ด้วย ;') && pb.includes('8) ระบุสิ่งที่ต้องตรวจด้วยมนุษย์ก่อนใช้งานจริง'), 'Framework prompt builder composes 8-part prompt');
+  // Formula Lab
+  await go('#/x/formulas'); await page.waitForSelector('[data-xlab] [data-xl]');
+  const nF = await page.$$eval('.xf-wrap', l => l.length); ok(nF >= 100, `Formula Lab lists ${nF} formulas`);
+  ok(await page.$$eval('.xf-wrap', l => l.every(w => w.querySelector('.xver') && w.querySelectorAll('.xf-t tbody tr').length >= 3)), 'every formula has a version badge and ≥3 test cases');
+  await page.selectOption('#xfV', 'm365'); await page.waitForTimeout(60);
+  ok(await page.$$eval('.xf-wrap:not([hidden])', l => l.length > 0 && l.every(w => w.dataset.ver === 'm365')), 'version filter');
+  ok(await page.$$eval('.xf-wrap:not([hidden]) .xstat', l => l.every(e => e.classList.contains('m365'))), 'M365 formulas labelled "ยังไม่ได้ทดสอบใน Excel จริง"');
+  await page.selectOption('#xfV', '');
+  const lab = async (k, vals) => { await page.click(`#xlt-${k}`); for (const [i, v] of Object.entries(vals)) await page.fill(`#xl-${k}-${i}`, v); await page.waitForTimeout(40); return page.textContent(`#xlp-${k} [data-xl-r]`); };
+  eq(await lab('ifand', { 0: '50', 1: 'ผ่าน' }), '0', 'lab IF+AND: A2=50 → 0'); eq(await lab('ifand', { 0: '51' }), '100', 'lab IF+AND: A2=51 → 100'); eq(await lab('ifand', { 0: '51', 1: '' }), '0', 'lab IF+AND: B2 blank → 0');
+  ok((await lab('cv', { 0: '10 12 14' })).includes('CV%=16.67'), 'lab CV%: 10,12,14 → 16.67');
+  ok((await lab('cv', { 0: '0 0' })).includes('#N/A'), 'lab CV%: mean 0 → #N/A');
+  eq(await lab('lookup', { 1: 'F003' }), 'รหัสซ้ำ', 'lab lookup: duplicate key warns'); eq(await lab('lookup', { 1: 'f001' }), '1.62', 'lab lookup: case-insensitive hit'); eq(await lab('lookup', { 1: 'F009' }), 'ไม่พบฟาร์ม', 'lab lookup: not found');
+  ok((await lab('sumifs', {})).startsWith('1,130 kg (2 แถว)'), 'lab SUMIFS date range with times → 1,130 kg');
+  eq(await lab('fcr', { 0: '3600', 1: '2250' }), '1.600', 'lab CALC_FCR 3600/2250'); eq(await lab('fcr', { 1: '0' }), '#N/A', 'lab CALC_FCR gain 0 → #N/A');
+  eq(await lab('dq', { 2: '-5' }), 'ERROR', 'lab Data Quality: negative → ERROR'); eq(await lab('dq', { 2: '940', 3: '' }), 'WARNING', 'lab Data Quality: blank feed → WARNING');
+  eq(await lab('split', { 0: 'BR-2026-001' }), '[BR] [2026] [001]', 'lab split keeps leading zeros');
+  // lesson page: spec prompt + verified formula cards + answer key
+  await go('#/x/b2'); await page.waitForSelector('#main .x-body');
+  ok(await page.$('#main .x-src .prompt') && await page.$('#main .xf .xstat.ok'), 'lesson shows spec prompt and LibreOffice-verified formulas');
+  ok((await page.$$eval('#main .x-ex details', l => l.length)) >= 3, 'lesson exercises with answer keys');
+  for (const sec of ['Learning Objectives', 'Prerequisites', 'Concepts', 'Function Reference', 'Formula Examples', 'Sample Data', 'Expected Output', 'Validation', 'Exercises + Answer Key', 'Troubleshooting']) if (!(await text('#main')).includes(sec)) ok(false, 'lesson section ' + sec);
+  ok(true, 'lesson has all 12 parts (Objectives … Troubleshooting)');
+  // quiz + pre/post compare
+  await go('#/x/b-quiz'); await page.waitForSelector('[data-quiz="xq-b-pre"]');
+  await page.$$eval('[data-quiz="xq-b-pre"] fieldset', fs => fs.forEach(f => { f.querySelectorAll('input')[+f.dataset.a].checked = true; }));
+  await page.click('[data-quiz="xq-b-pre"] [data-quiz-check]'); await page.waitForTimeout(80);
+  eq(await text('[data-quiz="xq-b-pre"] .qres'), 'คะแนน 10/10 · ยอดเยี่ยม!', 'pre-test scoring with answer key');
+  ok((await text('[data-xq-compare]')).includes('10/10'), 'pre/post comparison updates');
+  eq(await page.$$eval('[data-quiz="xq-b-post"] fieldset', l => l.length), 10, 'post-test 10 questions');
+  // progress counts AI + Excel pages
+  await page.click('#doneBtn'); await page.waitForTimeout(60);
+  ok((await text('#progTxt')).endsWith('/' + TOTALP), 'progress total includes AI + Excel pages (' + TOTALP + ')');
+  await page.click('#doneBtn');
+  // workbook download
+  await go('#/x/workbook'); await page.waitForSelector('a[download]');
+  const wb = await page.evaluate(async () => { const r = await fetch(document.querySelector('a[download]').href); return [r.status, (await r.arrayBuffer()).byteLength]; });
+  ok(wb[0] === 200 && wb[1] > 10000, `sample-workbook.xlsx downloadable (${wb[1]} bytes)`);
+  // dashboard
+  await go('#/x/dashboard'); await page.waitForSelector('[data-xd-kpis] .xd-k');
+  eq(await page.$$eval('[data-xd-kpis] .xd-k', l => l.length), 4, 'dashboard: 4 KPI cards');
+  ok((await text('[data-xd-status]')).includes('PROTOTYPE') && (await text('[data-xd-status]')).includes('Last Updated') && (await text('[data-xd-status]')).includes('Refresh Status'), 'dashboard shows source / last updated / refresh status / prototype label');
+  const lastOf = f => SAMPLE.rows.filter(r => r.Farm_ID === f).sort((a, b) => b.Age_Days - a.Age_Days)[0];
+  const r2 = lastOf('F002'); const live = r2.Birds_Placed - r2.Mortality_Cum; const fcr2 = r2.Feed_Cum_kg / ((r2.Body_Weight_g - SAMPLE.chickWeightG) / 1000 * live);
+  await page.selectOption('#xdFarm', 'F002'); await page.waitForTimeout(60);
+  eq(await page.$$eval('[data-xd-rows] tr', l => l.length), SAMPLE.rows.filter(r => r.Farm_ID === 'F002').length, 'filter Farm F002 → its rows');
+  ok((await text('[data-xd-kpis]')).includes(fcr2.toFixed(3)), `FCR KPI = ${fcr2.toFixed(3)} (same definition as workbook)`);
+  await page.selectOption('#xdAge', '42'); await page.waitForTimeout(40); eq(await page.$$eval('[data-xd-rows] tr', l => l.length), 1, 'filter age 42');
+  await page.fill('#xdFrom', '2027-01-01'); await page.dispatchEvent('#xdFrom', 'change'); await page.waitForTimeout(40);
+  ok((await text('[data-xd-kpis]')).includes('ไม่มีข้อมูลตามตัวกรองนี้'), 'empty state when filters match nothing');
+  await page.click('[data-xd-reset]'); await page.waitForTimeout(40);
+  eq(await page.$$eval('[data-xd-rows] tr', l => l.length), SAMPLE.rows.length, 'reset filters → all rows');
+  await page.fill('#xdQ', 'F004'); await page.waitForTimeout(40); eq(await page.$$eval('[data-xd-rows] tr', l => l.length), 6, 'table search'); await page.fill('#xdQ', '');
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-xd-csv]')]);
+  const csv = fs.readFileSync(await dl.path(), 'utf8'); ok(csv.split('\n').length === SAMPLE.rows.length + 1 && csv.includes('FCR'), 'Export CSV (header + all rows)');
+  const [dl2] = await Promise.all([page.waitForEvent('download'), page.click('[data-xd-xlsx]')]);
+  ok(fs.statSync(await dl2.path()).size > 1000 && dl2.suggestedFilename() === 'farm-dashboard.xlsx', 'Export Excel');
+  await page.setInputFiles('#xdFile', path.join(ROOT, 'ai-excel-formula-mastery', 'data', 'sample-workbook.xlsx')); await page.waitForFunction(() => /อัปโหลด/.test(document.querySelector('[data-xd-status]').textContent), null, { timeout: 8000 });
+  ok((await text('[data-xd-status]')).includes(`อ่าน ${SAMPLE.rows.length} แถวสำเร็จ`), 'upload the real sample workbook (Raw_Data sheet) → reads all rows');
+  fs.writeFileSync(path.join(FIX, 'bad-schema.csv'), 'Farm,When,Weight\nF001,2026-10-01,500\n');
+  await page.setInputFiles('#xdFile', path.join(FIX, 'bad-schema.csv')); await page.waitForTimeout(400);
+  ok((await text('[data-xd-status]')).includes('Schema ไม่ตรง') && (await page.$$eval('[data-xd-rows] tr', l => l.length)) === SAMPLE.rows.length, 'wrong schema → error state, previous data kept');
+  fs.writeFileSync(path.join(FIX, 'dirty.csv'), 'Farm_ID,Date,Age_Days,Body_Weight_g,Feed_Cum_kg,Mortality_Cum,Birds_Placed\nF001,2026-10-01,14,500,4000,40,10000\nF001,2026-10-01,14,500,4000,40,10000\nF002,2026-10-08,21,-940,9000,90,9800\nF003,2026-12-30,21,940,9000,90,9800\n');
+  await page.setInputFiles('#xdFile', path.join(FIX, 'dirty.csv')); await page.waitForTimeout(400);
+  const qw = await text('[data-xd-status]'); ok(/Data Quality Warnings: \d+/.test(qw) && qw.includes('ข้อมูลซ้ำ') && qw.includes('ค่าติดลบ') && qw.includes('เกินวันรายงาน'), 'data quality warnings: duplicate, negative, future date');
+  await page.click('[data-xd-sample]'); await page.waitForTimeout(60); ok((await text('[data-xd-status]')).includes('PROTOTYPE'), 'back to sample data');
+  page.off('pageerror', onErr); eq(errs.length, 0, 'no page errors on AI + Excel pages');
+});
 await suite('Email gate (once per device)', async () => {
   const gctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
   const g = await gctx.newPage(); const errs = []; g.on('pageerror', e => errs.push(e.message));
@@ -240,6 +337,8 @@ await suite('PWA + refresh / update app', async () => {
   ok(true, 'opens offline (from service-worker cache)');
   await p.goto(url + '#/d/2'); await p.waitForSelector('#main .deep-body', { timeout: 10000 });
   ok(true, 'deep lesson opens offline');
+  await p.goto(url + '#/x/dashboard'); await p.waitForSelector('[data-xd-kpis] .xd-k', { timeout: 10000 });
+  ok(true, 'AI + Excel dashboard opens offline');
   await p.click('#updateBtn'); await p.waitForTimeout(400);
   ok((await p.textContent('#toast')).includes('ออฟไลน์'), 'refresh while offline explains it uses the saved version');
   await pctx.setOffline(false);
@@ -473,12 +572,12 @@ await suite('T10 Learning progress', async () => {
   await go('#/p/8');
   await page.click('#doneBtn');
   eq(await page.getAttribute('#doneBtn', 'aria-pressed'), 'true', 'mark learned');
-  eq(await text('#progTxt'), 'เรียนแล้ว 1/191', 'progress counter');
+  eq(await text('#progTxt'), `เรียนแล้ว 1/${TOTALP}`, 'progress counter');
   await go('#/p/9'); await page.click('#doneBtn');
   await go('#/p/10'); await page.click('#doneBtn');
   ok((await text('#toast')).includes('จบบทที่ 2 แล้ว'), 'chapter complete toast');
   await page.reload(); await page.waitForSelector('#main h1');
-  eq(await text('#progTxt'), 'เรียนแล้ว 3/191', 'progress persists after reload');
+  eq(await text('#progTxt'), `เรียนแล้ว 3/${TOTALP}`, 'progress persists after reload');
   ok(await page.$('#tocList a[href="#/p/8"] .dot.d'), 'TOC filled dot for learned page');
   await go('#/p/11');
   ok(await page.$('#tocList a[href="#/p/11"] .dot.v'), 'TOC outlined dot for visited page');
@@ -487,7 +586,7 @@ await suite('T10 Learning progress', async () => {
   await go('#/');
   ok((await text('.hero ~ .callout.resume, .callout.resume')).includes('หน้า 11'), 'resume card shows last page');
   await go('#/p/10'); await page.click('#doneBtn');
-  eq(await text('#progTxt'), 'เรียนแล้ว 2/191', 'unmark learned');
+  eq(await text('#progTxt'), `เรียนแล้ว 2/${TOTALP}`, 'unmark learned');
 });
 
 await suite('TOC filter + theme', async () => {
@@ -526,7 +625,7 @@ await suite('Storage unavailable', async () => {
 });
 
 await suite('T11 Responsive (no horizontal scroll, drawer, bottom bar)', async () => {
-  const sample = ['#/', '#/track/agent', '#/tracks', '#/updates', '#/deep', '#/d/1', '#/d/13', '#/d/34', '#/p/14', '#/p/21', '#/p/24', '#/p/31', '#/p/33', '#/p/34', '#/p/9', '#/p/70', '#/p/153', '#/p/30', '#/agents', '#/builder/1', '#/appendix-b', '#/progress', '#/p/95', '#/p/147'];
+  const sample = ['#/', '#/track/agent', '#/tracks', '#/updates', '#/deep', '#/d/1', '#/d/13', '#/d/34', '#/p/14', '#/p/21', '#/p/24', '#/p/31', '#/p/33', '#/p/34', '#/p/9', '#/p/70', '#/p/153', '#/p/30', '#/agents', '#/builder/1', '#/appendix-b', '#/progress', '#/p/95', '#/p/147', '#/excel', '#/x/start', '#/x/b1', '#/x/i4', '#/x/a5', '#/x/prompts', '#/x/formulas', '#/x/dashboard', '#/x/a-power-query'];
   for (const [w, h] of [[1440, 900], [1024, 768], [820, 1180], [400, 800], [390, 844], [360, 740]]) {
     const p = await ctx.newPage(); await p.setViewportSize({ width: w, height: h });
     await p.goto(url); await p.waitForSelector('.hero');
@@ -589,7 +688,7 @@ await suite('T12 Accessibility', async () => {
     const viol = {};
     const actx = await seededContext(browser, { serviceWorkers: 'block', viewport: { width: 1440, height: 900 }, bypassCSP: true, reducedMotion: 'reduce' }); // CSP would block the injected axe script
     const p = await actx.newPage();
-    for (const r of ['#/', '#/p/2', '#/p/14', '#/p/33', '#/p/34', '#/p/9', '#/p/23', '#/p/70', '#/agents', '#/builder/1', '#/progress']) {
+    for (const r of ['#/', '#/p/2', '#/p/14', '#/p/33', '#/p/34', '#/p/9', '#/p/23', '#/p/70', '#/agents', '#/builder/1', '#/progress', '#/excel', '#/x/b1', '#/x/prompts', '#/x/formulas', '#/x/dashboard', '#/x/b-quiz']) {
       for (const theme of ['light', 'dark']) {
         await p.goto(url + r); await p.waitForSelector('#main h1');
         await p.evaluate(t => document.documentElement.setAttribute('data-theme', t), theme);

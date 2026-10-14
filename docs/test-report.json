@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-14T04:39:17.119Z",
-  "pass": 281,
+  "generatedAt": "2026-10-14T14:19:44.440Z",
+  "pass": 334,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
-      "pass": 21,
+      "pass": 22,
       "fail": 0
     },
     "Brand + illustrations": {
@@ -23,12 +23,16 @@
       "pass": 23,
       "fail": 0
     },
+    "AI + Excel Formula Mastery": {
+      "pass": 51,
+      "fail": 0
+    },
     "Email gate (once per device)": {
       "pass": 17,
       "fail": 0
     },
     "PWA + refresh / update app": {
-      "pass": 15,
+      "pass": 16,
       "fail": 0
     },
     "Version + credit": {

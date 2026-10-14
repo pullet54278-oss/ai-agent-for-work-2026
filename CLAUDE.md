@@ -12,6 +12,7 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - `data/updates-th.json` หัวข้อ/สรุปข่าวภาษาไทย (key = Roadmap ID) — เมื่อ snapshot มีข่าวใหม่ build จะเตือนจำนวนที่ยังไม่แปล ให้เติมคำแปลแล้ว build ใหม่ (ข่าวที่ไม่มีคำแปลแสดงสรุปอัตโนมัติ)
 - PWA: `src/sw.js` (build เติม build id + precache) · `assets/icons/` สร้างด้วย `node scripts/make-icons.mjs` จาก `assets/app-icon.png` (ถ้ามี) · build เขียน `manifest.webmanifest`, `sw.js`, `version.json`
 - Email gate: `scripts/lib/gate.mjs` อ่านรายชื่อจาก `private/` (gitignored) หรือ env `ALLOWED_EMAILS` ฝังเฉพาะ hash — **ห้าม commit รายชื่อ Email และห้ามใส่ Email ตัวจริงใน dist/**
+- หลักสูตร AI + Excel: ต้นฉบับ `content/excel/AI_Excel_3_Levels_Claude_Build_Spec.md` (ใช้ตามเดิมทุกตัวอักษร ยกเว้น "หัวหน้างาน"→"ผู้รับผิดชอบงาน") · ส่วนขยาย `content/excel/level-{b,i,a}.mjs` + `automation.mjs` ตาม `content/excel/SCHEMA.md` · ไฟล์ตัวอย่างจาก `scripts/excel/make_workbook.py` · ทุกสูตรต้องมีเวอร์ชันและกรณีทดสอบ ≥3 และผ่าน `node scripts/excel/verify-formulas.mjs` (LibreOffice) — สูตร M365 ติดป้ายยังไม่ได้ทดสอบใน Excel จริง · ชุดส่งมอบ `ai-excel-formula-mastery/` สร้างด้วย `node scripts/excel/export.mjs` ห้ามแก้มือ
 - เวอร์ชันแอปอ่านจาก `package.json` (แสดงบนหน้าแรกและท้ายหน้า) ขึ้นเวอร์ชันพร้อมบันทึกใน `CHANGELOG.md`
 - `data/` ข้อมูลเสริมที่ MD สูญหายตอนแปลงจากหน้าเว็บ (Prompt Lab 11 หมวด, ชื่อปุ่ม Agent, Office chips, Agent #28) build จะตรวจว่าตรงกับ MD เมื่อมีทั้งสองที่
 - `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)

@@ -1,5 +1,5 @@
 // เส้นทางการเรียน (Learning Paths) — เรียงตามลำดับความสำคัญ: Copilot Agent เป็นอันดับแรก
-// item: 'p:N' = หน้าในคอร์สหลัก (content/copilot-ai-agents-for-work.md) · 'd:N' = บทเรียนเชิงลึก (Deep Learning 36 บท)
+// item: 'p:N' = หน้าในคอร์สหลัก (content/copilot-ai-agents-for-work.md) · 'd:N' = บทเรียนเชิงลึก (Deep Learning 36 บท) · 'x:slug' = หลักสูตร AI + Excel
 // แต่ละส่วน (step) ร้อยเนื้อหาทั้งสองแหล่งที่พูดเรื่องเดียวกันไว้ด้วยกัน แทนการทำซ้ำเนื้อหา
 export const TRACKS = [
   {
@@ -22,6 +22,16 @@ export const TRACKS = [
       { t: 'Word', items: ['p:146', 'd:6', 'p:27'] },
       { t: 'PowerPoint', items: ['p:147', 'd:8', 'p:29'] },
       { t: 'Outlook และ Teams', items: ['d:9', 'd:10'] }
+    ]
+  },
+  {
+    key: 'excel', title: 'AI + Excel Formula Mastery', sub: 'ให้ AI ช่วยเขียนสูตร Excel 3 ระดับ ตั้งแต่สูตรพื้นฐานถึง LET, LAMBDA, Power Query, Automation และ Dashboard', icon: 'table', color: 'xb',
+    steps: [
+      { t: 'เริ่มต้น: Course Map และ Prompt Framework', items: ['x:start', 'x:master-prompt'] },
+      { t: 'Beginner: เปลี่ยนภาษาคนเป็นสูตร', items: ['x:b-overview', 'x:b1', 'x:b2', 'x:b3', 'x:b4', 'x:b5', 'x:b6', 'x:b7', 'x:b-workshop', 'x:b-quiz'] },
+      { t: 'Intermediate: สูตรซ้อน + หลายตาราง', items: ['x:i-overview', 'x:i1', 'x:i2', 'x:i3', 'x:i4', 'x:i5', 'x:i6', 'x:i7', 'x:i-workshop', 'x:i-quiz'] },
+      { t: 'Advanced: LET, LAMBDA, Power Query, Automation', items: ['x:a-overview', 'x:a1', 'x:a2', 'x:a3', 'x:a4', 'x:a5', 'x:a6', 'x:a7', 'x:a8', 'x:a-workshop', 'x:a-quiz'] },
+      { t: 'เครื่องมือ: Prompt Library, Formula Lab, Dashboard', items: ['x:prompts', 'x:formulas', 'x:dashboard', 'x:workbook'] }
     ]
   },
   {
