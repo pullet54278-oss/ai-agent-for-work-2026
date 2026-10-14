@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T04:39:18.756Z",
+  "generatedAt": "2026-10-14T04:44:52.561Z",
   "pages": [
     {
       "page": "หน้า 2",
@@ -1518,7 +1518,7 @@
     }
   ],
   "forbidden": {
-    "allowedEmailsChecked": 18,
+    "allowedEmailsChecked": 19,
     "plainEmailsInDist": 0,
     "termsChecked": 1,
     "hits": [],
