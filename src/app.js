@@ -95,13 +95,59 @@ function renderTOC() {
 }
 function scrollTocToCurrent() { const a = $('#tocList a[aria-current="page"]'); if (a) a.scrollIntoView({ block: 'nearest' }); }
 
-// ---------- illustrations ----------
-function art(icon) {
-  return `<svg class="ph-art" viewBox="0 0 220 220" aria-hidden="true"><defs><linearGradient id="ag" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1FA3E6" stop-opacity=".35"/><stop offset=".5" stop-color="#22BE97" stop-opacity=".25"/><stop offset="1" stop-color="#8A55EA" stop-opacity=".35"/></linearGradient></defs>
-  <g class="art-blob"><path d="M110 22c40 0 82 26 86 70s-24 92-76 98-94-30-96-76 46-92 86-92z" fill="url(#ag)"/></g>
-  <g class="art-orbit" fill="none" stroke="currentColor" stroke-opacity=".18"><circle cx="110" cy="110" r="84" stroke-dasharray="3 7"/><circle cx="194" cy="110" r="5" fill="currentColor" fill-opacity=".35"/></g>
-  <g transform="translate(74 74) scale(3)" style="color:var(--dc)" fill="currentColor" opacity=".85"><use href="#i-${icon}" width="24" height="24"/></g></svg>`;
+// ---------- illustrations (inline SVG scenes per work group, themed by --dc) ----------
+const SCENES = {
+  gen: ['book_open', 'sparkle', 'lightbulb'], data: ['data_bar_vertical', 'table', 'data_trending'], farm: ['leaf_two', 'clipboard_task', 'document_text'],
+  inv: ['box', 'cart', 'receipt'], fin: ['money', 'calculator', 'receipt'], sales: ['megaphone', 'people_team', 'arrow_trending_lines'],
+  eng: ['wrench', 'settings', 'flash'], ci: ['arrow_trending_lines', 'target_arrow', 'lightbulb'], rep: ['board', 'slide_text', 'document_text'],
+  pb: ['people_community', 'scales', 'heart_pulse'], hat: ['heart_pulse', 'timer', 'clipboard_task'], brl: ['shield_task', 'heart_pulse', 'data_bar_vertical'],
+  lp: ['vehicle_truck', 'timer', 'compass_northwest'], erp: ['receipt', 'apps', 'cart'], feed: ['food_grains', 'building_factory', 'scales'],
+  lab: ['beaker', 'eye', 'shield_checkmark'], qms: ['shield_checkmark', 'document_bullet_list', 'ribbon'], cis: ['leaf_two', 'arrow_sync', 'cloud']
+};
+const CH_ICON = { intro: 'lightbulb', pmode: 'sparkle', acct: 'people_team', build: 'toolbox', personal: 'person', handoff: 'mail', wf: 'flowchart', office: 'window', arch: 'organization' };
+let illN = 0;
+const spark = (x, y, r) => `<path class="il-spark" d="M${x} ${y - r}C${x + r * .18} ${y - r * .18} ${x + r * .18} ${y - r * .18} ${x + r} ${y}C${x + r * .18} ${y + r * .18} ${x + r * .18} ${y + r * .18} ${x} ${y + r}C${x - r * .18} ${y + r * .18} ${x - r * .18} ${y + r * .18} ${x - r} ${y}C${x - r * .18} ${y - r * .18} ${x - r * .18} ${y - r * .18} ${x} ${y - r}z"/>`;
+function illus(g, main, cls = 'ph-art') {
+  const [m, a1, a2] = SCENES[g] || SCENES.gen; const id = 'il' + (++illN);
+  const u = (n, x, y, sc, f) => `<g transform="translate(${x} ${y}) scale(${sc})" style="fill:${f}"><use href="#i-${n}" width="24" height="24"/></g>`;
+  return `<svg class="${cls}" viewBox="0 0 320 220" aria-hidden="true" focusable="false"${g === 'gen' ? ' style="--dc:var(--accent)"' : ''}><defs>
+  <linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--dc);stop-opacity:.26"/><stop offset="1" style="stop-color:var(--dc);stop-opacity:.03"/></linearGradient>
+  <linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb,var(--dc) 80%,#fff)"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--dc) 70%,#3b1d7a)"/></linearGradient>
+  <pattern id="${id}p" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" style="fill:var(--dc);fill-opacity:.28"/></pattern></defs>
+  <rect x="168" y="8" width="146" height="110" rx="18" fill="url(#${id}p)"/>
+  <path class="art-blob" d="M150 34c50-18 128 2 146 56s-14 112-74 124-132-16-142-74 20-88 70-106z" fill="url(#${id}a)"/>
+  <circle cx="214" cy="116" r="78" class="art-ring" fill="none" style="stroke:var(--dc);stroke-opacity:.35" stroke-dasharray="2 8"/>
+  <circle cx="214" cy="116" r="56" fill="url(#${id}b)" class="il-core"/>
+  ${u(main || m, 178, 80, 3, '#fff')}
+  <g class="float1"><rect x="92" y="36" width="66" height="56" rx="14" class="il-card"/>${u(a1, 113, 52, 1, 'var(--dc)')}<rect x="104" y="80" width="42" height="4" rx="2" style="fill:var(--dc);fill-opacity:.25"/></g>
+  <g class="float2"><rect x="248" y="152" width="62" height="52" rx="14" class="il-card"/>${u(a2, 267, 166, 1, 'var(--dc)')}<rect x="258" y="192" width="40" height="4" rx="2" style="fill:var(--dc);fill-opacity:.25"/></g>
+  <g style="fill:var(--dc)">${spark(296, 46, 9)}${spark(134, 176, 6)}${spark(166, 22, 5)}</g></svg>`;
 }
+
+// Hero scene: file → prompt → Agent (Copilot) → result
+function heroScene() {
+  const logo = D.meta.copilotLogo;
+  const core = logo ? `<image href="${esc(logo)}" x="208" y="138" width="84" height="84"/>` : `<g transform="translate(218 148) scale(2.6)" style="fill:#fff"><use href="#i-bot" width="24" height="24"/></g>`;
+  const file = (x, y, c, t, d) => `<g transform="translate(${x} ${y})"><g class="hs-file" style="animation-delay:${d}s"><rect width="92" height="40" rx="10" class="il-card"/><rect x="10" y="9" width="22" height="22" rx="5" fill="${c}"/><text x="21" y="24" text-anchor="middle" class="hs-ext">${t}</text><rect x="40" y="13" width="40" height="5" rx="2.5" class="hs-line"/><rect x="40" y="23" width="28" height="5" rx="2.5" class="hs-line"/></g></g>`;
+  return `<svg class="hero-scene" viewBox="0 0 500 360" role="img" aria-label="ภาพประกอบ: ไฟล์ → Prompt → Agent → ผลลัพธ์">
+  <defs><linearGradient id="hsg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5BE3"/><stop offset=".35" stop-color="#22BE97"/><stop offset=".65" stop-color="#F2B225"/><stop offset="1" stop-color="#8A55EA"/></linearGradient>
+  <radialGradient id="hsr"><stop offset="0" stop-color="#8A55EA" stop-opacity=".35"/><stop offset=".6" stop-color="#1FA3E6" stop-opacity=".12"/><stop offset="1" stop-color="#1FA3E6" stop-opacity="0"/></radialGradient></defs>
+  <rect x="10" y="14" width="480" height="300" rx="20" class="hs-win"/>
+  <rect x="10" y="14" width="480" height="38" rx="20" class="hs-bar"/><rect x="10" y="40" width="480" height="12" class="hs-bar"/>
+  <circle cx="34" cy="33" r="5" fill="#EE5A7C"/><circle cx="52" cy="33" r="5" fill="#F2B225"/><circle cx="70" cy="33" r="5" fill="#22BE97"/>
+  <rect x="160" y="24" width="180" height="18" rx="9" class="hs-url"/>
+  <circle cx="250" cy="180" r="110" fill="url(#hsr)" class="hs-glow"/>
+  <path class="hs-path" d="M128 108 C170 108 180 150 206 168"/><path class="hs-path" d="M128 158 C160 158 180 172 206 178"/><path class="hs-path" d="M128 208 C170 208 180 196 206 190"/><path class="hs-path" d="M296 180 C330 180 340 150 370 150"/>
+  <path class="hs-flow" d="M128 108 C170 108 180 150 206 168"/><path class="hs-flow" style="animation-delay:-.8s" d="M128 208 C170 208 180 196 206 190"/><path class="hs-flow" style="animation-delay:-1.6s" d="M296 180 C330 180 340 150 370 150"/>
+  ${file(34, 88, '#1D7A45', 'X', 0)}${file(34, 138, '#C23B5A', 'P', .4)}${file(34, 188, '#2557E0', 'W', .8)}
+  <circle cx="250" cy="180" r="56" class="hs-core"/><circle cx="250" cy="180" r="66" fill="none" stroke="url(#hsg)" stroke-width="2.5" class="hs-pulse"/>
+  ${core}
+  <g transform="translate(150 62)"><g class="hs-bub"><rect width="176" height="40" rx="14" class="il-card"/><g transform="translate(12 9) scale(.92)" style="fill:#2557E0"><use href="#i-chat" width="24" height="24"/></g><rect x="42" y="12" width="108" height="5" rx="2.5" class="hs-line"/><rect x="42" y="23" width="70" height="5" rx="2.5" class="hs-line"/></g></g>
+  <g transform="translate(370 104)"><g class="hs-res"><rect width="104" height="112" rx="14" class="il-card"/><rect x="16" y="64" width="12" height="30" rx="3" fill="#22BE97"/><rect x="34" y="50" width="12" height="44" rx="3" fill="#1FA3E6"/><rect x="52" y="36" width="12" height="58" rx="3" fill="#2557E0"/><rect x="70" y="56" width="12" height="38" rx="3" fill="#8A55EA"/><rect x="16" y="18" width="56" height="6" rx="3" class="hs-line"/><circle cx="88" cy="22" r="10" fill="#178F6B"/><path d="M83 22l3.5 3.5L93 18" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+  ${['ไฟล์', 'Prompt', 'Agent', 'ผลลัพธ์'].map((t, i) => `<g transform="translate(${44 + i * 112} 334)"><circle r="12" fill="url(#hsg)"/><text y="4.5" text-anchor="middle" class="hs-n">${i + 1}</text><text x="20" y="5" class="hs-step">${t}</text>${i < 3 ? `<path d="M${76} 0h18" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="2 4"/>` : ''}</g>`).join('')}
+  </svg>`;
+}
+const art = icon => illus('gen', icon);
 
 // ---------- page header / footer ----------
 function headerHTML(p) {
@@ -113,7 +159,8 @@ function headerHTML(p) {
     const ready = p.header.ready || a.readinessName;
     meta = `<div class="ph-meta"><span class="pill g">${ic(D.groups[a.group].icon)}<span>${esc(p.header.group || a.groupName)}</span></span>${readyBadge(ready)}<span class="pill">${ic('bot')}<span>Agent #${a.id}</span></span></div>`;
   }
-  return `<header class="ph">${art(p.type === 'agent' || p.type === 'agentflow' ? 'bot' : p.icon)}${crumb}<h1>${esc(p.title)}</h1>${p.header.short ? `<p class="short">${esc(p.header.short)}</p>` : ''}${meta}</header>`;
+  const big = p.type === 'module';
+  return `<header class="ph${big ? ' ph-module' : ''}">${illus(pageGroup(p), p.type === 'agent' || p.type === 'agentflow' ? 'bot' : big ? (CH_ICON[ch.key] || null) : p.icon, 'ph-art')}${crumb}<h1>${esc(p.title)}</h1>${p.header.short ? `<p class="short">${esc(p.header.short)}</p>` : ''}${meta}</header>`;
 }
 const READYK = { 'Copilot-assisted': 'assist', 'Connected Automation': 'connected', 'Concept Design': 'concept' };
 function readyBadge(name) { const k = READYK[name] || 'assist'; return `<span class="ready ready-${k}" title="${esc(D.readiness[k].th)}">${ic(k === 'connected' ? 'plug_connected' : k === 'concept' ? 'lightbulb' : 'sparkle')}<span>${esc(name)}</span></span>`; }
@@ -401,23 +448,23 @@ function renderHome() {
   const card = k => {
     const c = chByKey[k]; if (!c) return '';
     const d = chapterDone(c);
-    return `<a class="ccard ${k === 'pmode' ? 'feature' : ''}" href="#/p/${moduleOf(c)}" style="${gvar(c.group)}"><span class="cn">${ic(D.groups[c.group].icon)} บทที่ ${c.n}</span><b>${esc(c.title)}</b><small>${c.pages.length} หน้า${c.agents ? ` · ${c.agents} Agent` : ''}${d ? ` · เรียนแล้ว ${d}` : ''}</small><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / c.pages.length * 100)}%"></i></span><svg class="ill" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><use href="#i-${D.groups[c.group].icon}" width="24" height="24"/></svg></a>`;
+    return `<a class="ccard ${k === 'pmode' ? 'feature' : ''}" href="#/p/${moduleOf(c)}" style="${gvar(c.group)}"><span class="cc-art">${illus(c.group, CH_ICON[c.key] || null, 'cc-svg')}</span><span class="cn">${ic(D.groups[c.group].icon)} บทที่ ${c.n}</span><b>${esc(c.title)}</b><small>${c.pages.length} หน้า${c.agents ? ` · ${c.agents} Agent` : ''}${d ? ` · เรียนแล้ว ${d}` : ''}</small><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / c.pages.length * 100)}%"></i></span></a>`;
   };
   const groupsN = Object.keys(D.groups).filter(g => g !== 'gen').length;
-  const mark = D.meta.copilotLogo ? `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot">` : '';
-  setMain(`<section class="hero" aria-labelledby="heroT"><div class="hero-grid"><div>
+  const mark = D.meta.copilotLogo ? `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="96" height="96">` : '';
+  setMain(`<section class="hero" aria-labelledby="heroT"><div class="hero-grid"><div class="hero-txt">
     <span class="logo-chip"><img src="logo.png" alt="AI Agent for Work" width="167" height="46"></span>
     <div class="hero-word">${mark}<h1 id="heroT">Copilot</h1></div>
     <p class="hero-sub">AI Agents for Work 2026</p>
-    <p class="hero-ev">${esc(D.meta.event)}</p>
+    <p class="hero-ev"><span class="pill">${ic('hat_graduation')}<span>${esc(D.meta.event)}</span></span></p>
     <p class="hero-desc">คู่มือเรียนรู้การใช้ Copilot ตั้งแต่แนบไฟล์และเขียน Prompt ไปจนถึงสร้าง Agent ที่ทำงานซ้ำได้ ครอบคลุมงานฟาร์ม การวางแผน การเงิน ห้องปฏิบัติการ และระบบคุณภาพ</p>
     <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#/p/${moduleOf(chByKey.pmode)}">เริ่มที่ Prompt Mode →</a><button type="button" class="btn btn-outline btn-lg" data-open-finder>${ic('people_team')}<span>ค้นหา Agent ตามกลุ่มงาน</span></button></div>
-  </div>${heroAnim()}</div></section>
+  </div><div class="hero-art">${heroScene()}</div></div></section>
   <div class="stats">
-    <div class="stat-tile">${ic('bot')}<div><b>${AGL.length}</b><span>Agent พร้อมการตั้งค่าคัดลอกได้</span></div></div>
-    <div class="stat-tile">${ic('people_team')}<div><b>${groupsN}</b><span>กลุ่มงาน</span></div></div>
-    <div class="stat-tile">${ic('book_open')}<div><b>${D.chapters.length}</b><span>บทเรียน</span></div></div>
-    <div class="stat-tile">${ic('trophy')}<div><b>${done.size}</b><span>หน้าที่เรียนแล้ว จาก ${TOTAL}</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('bot')}</span><div><b>${AGL.length}</b><span>Agent พร้อมการตั้งค่าคัดลอกได้</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('people_team')}</span><div><b>${groupsN}</b><span>กลุ่มงาน</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('book_open')}</span><div><b>${D.chapters.length}</b><span>บทเรียน</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('trophy')}</span><div><b>${done.size}</b><span>หน้าที่เรียนแล้ว จาก ${TOTAL}</span></div></div>
   </div>
   ${lastP && last !== 1 ? `<a class="callout resume" href="#/p/${last}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>หน้า ${last} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
   <section class="cgroup"><h2 class="sec">${ic('toolbox')}<span>เครื่องมือ</span></h2><div class="tools">${TOOLS.map(([h, i, t, s]) => `<a class="tool" href="${h}"><span class="ti">${ic(i)}</span><span><b>${esc(t)}</b><small>${esc(s)}</small></span></a>`).join('')}</div></section>
@@ -667,7 +714,7 @@ mq.addEventListener && mq.addEventListener('change', () => { if (!mq.matches) cl
 
 // ---------- boot ----------
 if (!location.hash) { const last = store.get('cpa26-last', null); if (last && PI.has(last) && last !== 1) { /* stay on home; resume card offered */ } }
-if (D.meta.copilotLogo) $('.brand-t').insertAdjacentHTML('beforebegin', `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot">`);
+if (D.meta.copilotLogo) $('.brand-t').insertAdjacentHTML('beforebegin', `<span class="brand-sep" aria-hidden="true"></span><img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="30" height="30">`);
 updateProgress();
 route();
 // reset the sequential-focus starting point so the first Tab reaches the skip link

@@ -11,13 +11,14 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)
 - `scripts/build.mjs` สร้าง `dist/` (index.html ไฟล์เดียว + logo.png + vendor/ + _headers) · `scripts/inventory.mjs` · `scripts/audit.mjs`
 - `tests/e2e.mjs` ทดสอบทุกฟังก์ชันด้วย Playwright · `docs/` แผน รายงาน
-- `assets/logo.png` โลโก้ AI Agent for Work · `assets/brand/` ช่องสำหรับโลโก้ Copilot ทางการ (ใส่เมื่อได้รับอนุญาตเท่านั้น)
+- `assets/logo.png` โลโก้ AI Agent for Work · `assets/brand/copilot-logo.svg` โลโก้ Copilot ทางการ (แสดงที่แถบบนและหน้าแรก)
 - `legacy/index-v1.html` เวอร์ชันเดิม (อ้างอิง)
 - `source-docs/` เอกสาร Workflow ต้นทาง (ห้ามเผยแพร่ ห้าม copy เข้า dist/)
 
 ## ข้อห้าม (สำคัญ)
 - ห้ามใส่ชื่อบริษัท ชื่อฟาร์มหรือโรงงาน ชื่อเอกสาร เลขที่เอกสาร หรือตำแหน่งงานบนเว็บ ใช้คำว่า "ผู้รับผิดชอบ" หรือ "ผู้มีอำนาจอนุมัติ" แทน
-- ห้ามใช้โลโก้ Microsoft/Copilot และห้ามทำตัวอักษร COPILOT เลียนแบบสีหรือรูปแบบโลโก้ คำว่า Copilot ใช้สีตัวอักษรปกติ
+- โลโก้ Copilot ทางการ: เจ้าของงานสั่งให้ใช้ (14 ต.ค. 2569) ไฟล์อยู่ที่ `assets/brand/copilot-logo.svg` (ดู NOTICE.txt) ใช้ตามต้นฉบับ ห้ามดัดแปลงสีหรือรูปทรงโลโก้ ห้ามใช้โลโก้ Microsoft อื่น
+- ห้ามทำตัวอักษร COPILOT เลียนแบบสีหรือรูปแบบโลโก้ คำว่า Copilot ใช้สีตัวอักษรปกติ (สี --ink)
 - ก่อนส่งมอบทุกครั้ง ค้นหาคำต้องห้ามใน dist/index.html ให้ได้ผล 0 (`npm run audit` อ่านรายการจาก content/forbidden-terms.txt)
 
 ## ข้อจำกัดระบบที่ต้องออกแบบตาม
@@ -29,7 +30,8 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - ข้อมูลเรื่องสิทธิ์บัญชีและชื่อเมนู Copilot ให้ติดป้าย "ตรวจกับบัญชีจริงก่อนสอน" เว้นแต่ผู้ใช้ยืนยันด้วยภาพหน้าจอ
 
 ## UI
-- คำว่า Copilot ต้องเด่นและใหญ่ที่สุดบนหน้าแรก ใช้โลโก้ logo.png ที่แถบบนและหน้าแรก
+- คำว่า Copilot ต้องเด่นและใหญ่ที่สุดบนหน้าแรก ใช้โลโก้ logo.png และโลโก้ Copilot ที่แถบบนและหน้าแรก
+- ภาพประกอบเป็น inline SVG สร้างใน app.js (`illus()` ตามกลุ่มงาน, `heroScene()`) ใช้สีกลุ่มผ่าน --dc รองรับทั้ง 2 ธีม
 - โหมด Light/Dark (ในโหมดมืดให้โลโก้วางบนพื้นสีอ่อน)
 - ลิขสิทธิ์ท้ายทุกหน้า: © 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret
 - หน้า Agent: 2 คอลัมน์ แผง "สร้าง Agent" ติดด้านขวา มีเว็บไซต์ 4 แหล่ง กล่องแนบไฟล์ และการตั้งค่าที่คัดลอกได้

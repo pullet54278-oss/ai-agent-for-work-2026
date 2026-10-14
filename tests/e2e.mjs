@@ -64,6 +64,20 @@ await suite('T4 Navigation: every page renders with correct title', async () => 
   ok(await page.$('#doneBtn'), 'mark-as-learned button present');
 });
 
+await suite('Brand + illustrations', async () => {
+  await go('#/');
+  const logos = await page.$$eval('img.copilot-mark', l => l.map(i => ({ ok: i.complete && i.naturalWidth > 0, alt: i.alt })));
+  eq(logos.length, 2, 'official Copilot logo in top bar and hero');
+  ok(logos.every(l => l.ok && l.alt === 'Microsoft Copilot'), 'logo images load with alt text');
+  const h1 = await page.$eval('#heroT', e => { const c = getComputedStyle(e); return [c.color, c.backgroundImage, parseFloat(c.fontSize)]; });
+  ok(h1[1] === 'none', 'Copilot wordmark uses plain text colour (no logo-imitating gradient)');
+  ok(h1[2] >= 56, 'Copilot is the largest text on home (' + h1[2] + 'px)');
+  ok(await page.$('.hero-scene'), 'hero illustration');
+  eq(await page.$$eval('.ccard .cc-svg', l => l.length), 27, 'illustration on every chapter card');
+  await go('#/p/95'); ok(await page.$('.ph-module .ph-art'), 'module header illustration');
+  await go('#/p/33'); ok(await page.$('.ph .ph-art'), 'agent header illustration');
+});
+
 await suite('T5 Search (Ctrl+K)', async () => {
   await go('#/p/2');
   await page.keyboard.press('Control+k');

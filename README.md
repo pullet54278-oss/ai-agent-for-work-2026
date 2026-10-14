@@ -64,10 +64,10 @@ AXE=path/to/axe.min.js node tests/e2e.mjs   # เพิ่มการตรว�
 1. Netlify → Add new site → Import from Git → เลือก repo นี้ (ค่า build อ่านจาก `netlify.toml`)
 2. หรือแบบลากวาง: `npm run build` แล้วลากโฟลเดอร์ `dist/` ไปที่ Netlify Drop (ต้องลากทั้งโฟลเดอร์ เพราะมี `_headers` และ `vendor/`)
 
-## โลโก้ Copilot ทางการ
+## โลโก้และภาพประกอบ
 
-ส่วนที่ 1 ของต้นฉบับและ `CLAUDE.md` ห้ามใช้โลโก้ Microsoft/Copilot แต่คำสั่งงานรอบล่าสุดขอโลโก้ Copilot ทางการ
-แอปจึงไม่ฝังไฟล์โลโก้ Microsoft ไว้ในโค้ด ถ้าเจ้าของงานได้รับอนุญาตให้ใช้ ให้วางไฟล์ที่ `assets/brand/copilot-logo.svg` (หรือ `.png`)
-แล้ว build ใหม่ โลโก้จะแสดงข้างคำว่า Copilot ที่แถบบนและหน้าแรกโดยอัตโนมัติ
+- โลโก้ Copilot ทางการ (`assets/brand/copilot-logo.svg`) ใช้ตามคำสั่งเจ้าของงาน แสดงที่แถบบนและหน้าแรก เครื่องหมายการค้าเป็นของ Microsoft — ดู `assets/brand/NOTICE.txt`
+  ถ้าองค์กรมีไฟล์จาก Microsoft brand kit ให้วางทับไฟล์เดิมแล้ว build ใหม่
+- ภาพประกอบทั้งหมดเป็น inline SVG (ไม่มีไฟล์ภาพเพิ่ม): ฉากหน้าแรก ไฟล์ → Prompt → Agent → ผลลัพธ์ และภาพประกอบประจำกลุ่มงาน 18 แบบ ใช้ในหัวทุกหน้าและการ์ดบทเรียน สีตามกลุ่มงานและธีม
 
 © 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret

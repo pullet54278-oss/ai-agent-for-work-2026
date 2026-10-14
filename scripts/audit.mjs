@@ -114,7 +114,7 @@ const html = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8');
 const termsFile = path.join(ROOT, 'content', 'forbidden-terms.txt');
 const terms = fs.existsSync(termsFile) ? fs.readFileSync(termsFile, 'utf8').split('\n').map(s => s.trim()).filter(s => s && !s.startsWith('#')) : [];
 const docNo = html.replace(/<svg[\s\S]*?<\/svg>/g, '').match(/\b(?:SOP|WI|QP|FM|QM|WP|PR|DOC)-\d{2,}[\w-]*/g) || [];
-report.forbidden = { termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), documentNumberPatterns: [...new Set(docNo)], microsoftLogoFiles: fs.readdirSync(path.join(ROOT, 'dist')).filter(f => /copilot|microsoft/i.test(f)) };
+report.forbidden = { termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
 
 await browser.close(); srv.close();
 fs.writeFileSync(path.join(ROOT, 'docs', 'audit-report.json'), JSON.stringify(report, null, 2));

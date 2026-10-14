@@ -1,0 +1,3 @@
+Microsoft Copilot logo — trademark of Microsoft Corporation.
+SVG artwork from @lobehub/icons-static-svg 1.95.1 (MIT), used at the course owner's explicit request.
+Replace copilot-logo.svg with the file from Microsoft's official brand kit if your organisation has one.

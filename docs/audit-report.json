@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T00:13:52.282Z",
+  "generatedAt": "2026-10-14T01:11:00.400Z",
   "pages": [
     {
       "page": "หน้า 2",
@@ -1515,6 +1515,8 @@
     "termsChecked": 0,
     "hits": [],
     "documentNumberPatterns": [],
-    "microsoftLogoFiles": []
+    "brandFiles": [
+      "copilot-logo.svg"
+    ]
   }
 }
