@@ -9,3 +9,4 @@ playwright-report/
 private/*
 !private/README.md
 scripts/excel/.workbook-expected.json
+/ai-excel-formula-mastery.zip
