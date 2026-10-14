@@ -3,7 +3,7 @@
 คู่มือเรียนรู้แบบโต้ตอบ (ภาษาไทย) สำหรับคอร์ส "การใช้งาน AI แบบพาลงมือทำ" · 23 ตุลาคม 2569
 สร้างจาก `content/copilot-ai-agents-for-work.md` (ส่วนที่ 1 = สเปก UI, ส่วนที่ 2 = เนื้อหาทั้งหมด) และ `assets/logo.png`
 
-Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์ชัน 3.0.0** (ดู `CHANGELOG.md`)
+Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์ชัน 3.1.0** (ดู `CHANGELOG.md`)
 
 ## มีอะไรบ้าง
 
@@ -22,7 +22,9 @@ Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์�
 | ส่วนขยายการเรียนรู้ทุกหน้า: เจาะลึก · ตัวอย่าง · Workshop · วิธีตรวจสอบ (แยกจากต้นฉบับ) | ท้ายทุกหน้า |
 | **เส้นทางการเรียน 7 เส้นทาง** — Copilot Agent (เริ่มที่นี่) · Excel/Word/PowerPoint · เบราว์เซอร์ · Tips & Tricks · ประยุกต์ใช้งานจริง · พื้นฐาน · ขยายผลในองค์กร | หน้าแรก / `#/tracks`, `#/track/{key}` |
 | **Deep Learning 36 บทเชิงลึก** (บูรณาการจาก v10) จัด 6 กลุ่ม · แบบทดสอบเฉพาะบท 3 ข้อทุกบท · Prompt Builder/เครื่องมือตัดสินใจ/Checklist · เนื้อหาที่ซ้ำทุกบทรวมไว้ที่หน้าภาพรวม | `#/deep`, `#/d/{1–36}` |
-| **อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot** (อัตโนมัติจาก Microsoft 365 Roadmap) กรองตามหัวข้อ · แสดงเด่นที่หน้าแรก | หน้าแรก / `#/updates` |
+| **อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot** (อัตโนมัติจาก Microsoft 365 Roadmap) สรุปภาษาไทยทุกการ์ด · หน้าแรกแสดง 3 ข่าวเด่น · ข่าวทั้งหมดกดเปิดดูได้ | หน้าแรก / `#/updates` |
+| **PWA** ติดตั้งเป็นแอปบนมือถือ/แท็บเล็ต ใช้ออฟไลน์ได้ · ปุ่ม **รีเฟรช · อัปเดตแอป** | แถบบน / เมนูเครื่องมือ |
+| **Email gate** กรอก Email ที่มีสิทธิ์ครั้งเดียวต่อเครื่อง | หน้าแรกก่อนเข้าใช้งาน |
 | หมายเลขเวอร์ชัน + เครดิตผู้สร้าง Nattapon Yokkret | หน้าแรก (ป้าย v3.0.0) และท้ายทุกหน้า |
 | Light/Dark, Desktop/Tablet/Mobile (ลิ้นชักสารบัญ < 900px + แถบล่าง), ลูกศรซ้าย/ขวาเปลี่ยนหน้า | — |
 
@@ -87,6 +89,20 @@ AXE=path/to/axe.min.js node tests/e2e.mjs   # เพิ่มการตรว�
 
 ตั้งค่าครั้งเดียว: Netlify → Site configuration → Build & deploy → **Build hooks** → Add build hook → คัดลอก URL → Environment variables → เพิ่ม `BUILD_HOOK_URL` = URL นั้น
 หมายเหตุ: Functions ทำงานเฉพาะการ deploy แบบเชื่อม Git หรือ Netlify CLI (`netlify deploy --prod`) — **Netlify Drop (ลากวาง) ไม่รองรับ Functions** หน้าเว็บจะยังแสดง snapshot ได้ตามปกติ
+
+## Email gate (สิทธิ์เข้าใช้งาน)
+
+1. รายชื่อ Email: วางไฟล์ `.txt` / `.csv` / `.xlsx` ใน `private/` (ไม่ถูก commit) หรือ Netlify → Environment variables → `ALLOWED_EMAILS` (คั่นด้วย , หรือขึ้นบรรทัดใหม่) แล้ว build ใหม่
+2. build แปลงทุก Email เป็น SHA-256 (+ salt) แล้วฝังเฉพาะ hash ในหน้าเว็บ · เครื่องผู้ใช้จำ hash ไว้ใน localStorage — เปิดแอปใหม่เข้าได้ทันที, ล้างข้อมูลเว็บไซต์หรือ "ออกจากระบบ" เพื่อเปลี่ยน Email
+3. ถ้าไม่มีรายชื่อ ระบบ gate จะปิด (build แจ้งเตือน)
+
+**ข้อจำกัดสำคัญ:** gate ตรวจในเบราว์เซอร์ จึงกันผู้ใช้ทั่วไปได้ แต่ไม่ใช่ระบบความปลอดภัยระดับเซิร์ฟเวอร์ — ผู้ที่มีความรู้เทคนิคยังเปิดดูไฟล์เนื้อหาได้โดยตรง และ hash ของ Email ที่เดาง่ายอาจถูกเดาได้ ถ้าต้องการปิดกั้นจริงให้ใช้ Netlify Password Protection / Identity หรือ Edge Function
+
+## PWA และการอัปเดตแอป
+
+- `manifest.webmanifest` + ไอคอนใน `assets/icons/` (สร้างด้วย `node scripts/make-icons.mjs` จาก `assets/app-icon.png` ถ้ามี ไม่มีจะใช้ `assets/logo.png`) · `sw.js` แคชตัวแอปให้ใช้ออฟไลน์ (หน้าเว็บใช้เครือข่ายก่อน 4 วินาทีแล้วค่อยใช้แคช, ไฟล์อื่น stale-while-revalidate, `/api/` และ `version.json` ไม่แคช)
+- ทุก build มี `version.json` (version + build id) · ปุ่มรีเฟรชตรวจไฟล์นี้: ถ้ามีเวอร์ชันใหม่ → ติดตั้ง Service Worker ใหม่แล้วโหลดหน้าใหม่, ถ้าล่าสุดแล้ว → รีเฟรชข่าวและข้อมูล · แอปตรวจเองเมื่อเปิดและทุกครั้งที่กลับมาที่แอป (ไม่บ่อยกว่า 15 นาที)
+- ติดตั้ง: Android/Chrome/Edge → เมนูเครื่องมือ "ติดตั้งเป็นแอป" · iPhone/iPad → Safari ปุ่มแชร์ → "เพิ่มไปยังหน้าจอโฮม"
 
 ## โลโก้และภาพประกอบ
 

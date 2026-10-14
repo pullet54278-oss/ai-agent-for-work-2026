@@ -9,6 +9,9 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - `content/supplements.mjs` ส่วนขยายการเรียนรู้ (เจาะลึก/ตัวอย่าง/Workshop/วิธีตรวจสอบ) — แยกจากต้นฉบับ แสดงในกรอบ "ส่วนขยายการเรียนรู้"
 - `content/deep-learning-v10.html` ต้นฉบับ Deep Learning 36 บท (v10) · `content/deep-quizzes.mjs` แบบทดสอบเฉพาะบท · `content/tracks.mjs` เส้นทางการเรียน 7 เส้นทาง (Copilot Agent ลำดับแรก) — build แปลงผ่าน `scripts/lib/deep.mjs` (กฎ SANITIZE แทนชื่อตำแหน่ง/เลขที่เอกสาร) และ `deep-render.mjs` → `dist/deep-data.js`
 - `data/copilot-updates.json` snapshot อัปเดต Copilot จาก Microsoft 365 Roadmap (`scripts/fetch-updates.mjs`, `scripts/lib/updates.mjs`) · `netlify/functions/` API สด `/api/copilot-updates` + build ใหม่รายวันผ่าน `BUILD_HOOK_URL`
+- `data/updates-th.json` หัวข้อ/สรุปข่าวภาษาไทย (key = Roadmap ID) — เมื่อ snapshot มีข่าวใหม่ build จะเตือนจำนวนที่ยังไม่แปล ให้เติมคำแปลแล้ว build ใหม่ (ข่าวที่ไม่มีคำแปลแสดงสรุปอัตโนมัติ)
+- PWA: `src/sw.js` (build เติม build id + precache) · `assets/icons/` สร้างด้วย `node scripts/make-icons.mjs` จาก `assets/app-icon.png` (ถ้ามี) · build เขียน `manifest.webmanifest`, `sw.js`, `version.json`
+- Email gate: `scripts/lib/gate.mjs` อ่านรายชื่อจาก `private/` (gitignored) หรือ env `ALLOWED_EMAILS` ฝังเฉพาะ hash — **ห้าม commit รายชื่อ Email และห้ามใส่ Email ตัวจริงใน dist/**
 - เวอร์ชันแอปอ่านจาก `package.json` (แสดงบนหน้าแรกและท้ายหน้า) ขึ้นเวอร์ชันพร้อมบันทึกใน `CHANGELOG.md`
 - `data/` ข้อมูลเสริมที่ MD สูญหายตอนแปลงจากหน้าเว็บ (Prompt Lab 11 หมวด, ชื่อปุ่ม Agent, Office chips, Agent #28) build จะตรวจว่าตรงกับ MD เมื่อมีทั้งสองที่
 - `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)

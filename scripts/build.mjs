@@ -9,6 +9,7 @@ import { pageSupplement, renderSupplement } from '../content/supplements.mjs';
 import { buildDeep, DEEP_GROUPS } from './lib/deep.mjs';
 import { renderDeepLesson, quizHTML, checklistHTML } from './lib/deep-render.mjs';
 import { TRACKS } from '../content/tracks.mjs';
+import { loadAllowed, hashEmail, GATE_SALT } from './lib/gate.mjs';
 
 const t0 = Date.now();
 const DIST = path.join(ROOT, 'dist');
@@ -139,6 +140,14 @@ for (const t of TRACKS) for (const s of t.steps) {
 }
 const updates = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'copilot-updates.json'), 'utf8'));
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+const updatesTh = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'updates-th.json'), 'utf8')).items;
+const thMissing = updates.items.filter(i => !updatesTh[i.id]).length;
+if (thMissing) warnings.push(`อัปเดต Copilot: ${thMissing}/${updates.items.length} รายการยังไม่มีคำแปลใน data/updates-th.json → ใช้สรุปภาษาไทยอัตโนมัติจากสถานะ/วันที่`);
+const buildId = pkg.version + '-' + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);
+// email gate: only salted hashes reach dist/
+const allowed = loadAllowed(ROOT);
+const gate = { on: allowed.emails.length > 0, salt: GATE_SALT, h: allowed.emails.map(hashEmail).sort() };
+if (!gate.on) warnings.push('Email gate ปิดอยู่: ไม่พบรายชื่อ Email (วางไฟล์ใน private/ หรือตั้ง ALLOWED_EMAILS)');
 
 // ---- appendices ----
 const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/g, '<div class="table-wrap" tabindex="0"><table class="tbl">').replace(/<\/table>/g, '</table></div>').replace(/(https?:\/\/[^\s<]+)/g, (m, u, off, s) => s.slice(Math.max(0, off - 6), off).includes('href=') ? m : `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
@@ -147,7 +156,7 @@ const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/
 const data = {
   meta: {
     title: 'Copilot AI Agents for Work 2026', subtitle: 'AI Agents for Work 2026', event: 'การใช้งาน AI แบบพาลงมือทำ · 23 ตุลาคม 2569',
-    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
+    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, buildId, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
   },
   groups: Object.fromEntries(Object.entries(groups).map(([k, v]) => [k, { name: v.name, c: GROUP_COLORS[k], icon: GROUP_ICON[k] }])),
   readiness,
@@ -161,7 +170,7 @@ const data = {
   websites: Object.values(websites),
   deepGroups: DEEP_GROUPS,
   deepIndex: deep.lessons.map(l => ({ n: l.n, title: l.title, outcome: l.outcome, group: l.group, icon: l.icon, text: Object.values(deepRendered[l.n]).join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 2500) })),
-  tracks, related, updates,
+  tracks, related, updates, updatesTh,
   deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
 
@@ -180,6 +189,7 @@ const html = tpl
   .replace('/*__CSS__*/', () => css)
   .replace('<!--__SPRITE__-->', () => sprite)
   .replace('/*__DATA__*/', () => json)
+  .replace('/*__GATE__*/', () => JSON.stringify(gate))
   .replace('/*__JS__*/', () => js)
   .replace(/__BUILD__/g, data.meta.built);
 
@@ -192,12 +202,28 @@ fs.copyFileSync(path.join(ROOT, 'assets', 'logo.png'), path.join(DIST, 'logo.png
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.full.min.js'), path.join(DIST, 'vendor', 'xlsx.full.min.js'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.LICENSE'), path.join(DIST, 'vendor', 'xlsx.LICENSE.txt'));
 if (fs.existsSync(path.join(ROOT, 'assets', 'favicon.svg'))) fs.copyFileSync(path.join(ROOT, 'assets', 'favicon.svg'), path.join(DIST, 'favicon.svg'));
+// ---- PWA: icons, manifest, service worker, version.json ----
+fs.mkdirSync(path.join(DIST, 'icons'), { recursive: true });
+const iconFiles = fs.readdirSync(path.join(ROOT, 'assets', 'icons')).filter(f => f.endsWith('.png'));
+for (const f of iconFiles) fs.copyFileSync(path.join(ROOT, 'assets', 'icons', f), path.join(DIST, 'icons', f));
+fs.writeFileSync(path.join(DIST, 'manifest.webmanifest'), JSON.stringify({
+  id: './', name: 'Copilot AI Agents for Work 2026', short_name: 'Copilot Agents', description: 'คู่มือเรียนรู้ Microsoft Copilot และ Copilot Agent แบบลงมือทำ',
+  lang: 'th', dir: 'ltr', start_url: './', scope: './', display: 'standalone', display_override: ['standalone', 'minimal-ui'], orientation: 'any',
+  background_color: '#F4F6FB', theme_color: '#2557E0', categories: ['education', 'productivity'],
+  icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }],
+  shortcuts: [{ name: 'เรียน Copilot Agent', url: './#/track/agent' }, { name: 'อัปเดตล่าสุด', url: './#/updates' }, { name: 'Agent Directory', url: './#/agents' }]
+}, null, 1));
+const precache = ['./', `deep-data.js?v=${encodeURIComponent(buildId)}`, 'logo.png', 'favicon.svg', 'manifest.webmanifest', ...iconFiles.map(f => 'icons/' + f), ...(copilotLogo ? ['brand/' + copilotLogo] : [])];
+const swSrc = fs.readFileSync(path.join(ROOT, 'src', 'sw.js'), 'utf8').replaceAll('__BUILD_ID__', buildId).replaceAll('__PRECACHE__', JSON.stringify(precache));
+if (/__[A-Z_]+__/.test(swSrc)) throw new Error('sw.js: unfilled placeholder');
+fs.writeFileSync(path.join(DIST, 'sw.js'), swSrc);
+fs.writeFileSync(path.join(DIST, 'version.json'), JSON.stringify({ version: pkg.version, build: buildId, built: new Date().toISOString() }));
 if (copilotLogo) { fs.mkdirSync(path.join(DIST, 'brand'), { recursive: true }); fs.copyFileSync(path.join(brandDir, copilotLogo), path.join(DIST, 'brand', copilotLogo)); }
 // ---- Netlify headers: strict CSP with hashes of the inline scripts in this build ----
 const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => `'sha256-${crypto.createHash('sha256').update(m[1]).digest('base64')}'`);
 const csp = [
   "default-src 'self'", `script-src 'self' ${hashes.join(' ')}`, "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com", "img-src 'self' data: blob:", "connect-src 'self'", "object-src 'none'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"
+  "font-src 'self' https://fonts.gstatic.com", "img-src 'self' data: blob:", "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com", "manifest-src 'self'", "worker-src 'self'", "object-src 'none'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"
 ].join('; ');
 fs.writeFileSync(path.join(DIST, '_headers'), `/*
   Content-Security-Policy: ${csp}
@@ -214,7 +240,21 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
 
 /deep-data.js
   Cache-Control: public, max-age=0, must-revalidate
+
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+/version.json
+  Cache-Control: no-store
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=0, must-revalidate
+
+/icons/*
+  Cache-Control: public, max-age=604800
 `);
-fs.writeFileSync(path.join(DIST, 'build-report.json'), JSON.stringify({ built: new Date().toISOString(), pages: rendered.length + 1, deepLessons: deep.lessons.length, deepReport: deep.report, updates: { fetchedAt: updates.fetchedAt, items: updates.items.length }, version: pkg.version, agents: Object.keys(agents).length, bytes: Buffer.byteLength(html), warnings }, null, 2));
+fs.writeFileSync(path.join(DIST, 'build-report.json'), JSON.stringify({ built: new Date().toISOString(), pages: rendered.length + 1, deepLessons: deep.lessons.length, deepReport: deep.report, updates: { fetchedAt: updates.fetchedAt, items: updates.items.length }, version: pkg.version, buildId, gate: { on: gate.on, count: gate.h.length, sources: allowed.sources }, updatesTh: { translated: updates.items.length - thMissing, total: updates.items.length }, agents: Object.keys(agents).length, bytes: Buffer.byteLength(html), warnings }, null, 2));
 console.log(`built dist/index.html  ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB  pages=${rendered.length + 1} agents=${Object.keys(agents).length}  ${Date.now() - t0}ms`);
 for (const w of warnings) console.log('  ⚠', w);

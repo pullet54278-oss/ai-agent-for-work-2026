@@ -185,6 +185,7 @@ const copyLine = () => `<p class="copy-line">${esc(D.meta.copyright)}</p><p clas
 
 // ---------- router ----------
 function route() {
+  if (!gateOk()) return;
   const h = location.hash.replace(/^#\/?/, '');
   closeDrawer(); closeMenus(); clearTimers();
   const m = h.match(/^p\/(\d+)$/);
@@ -492,7 +493,7 @@ function renderHome() {
     <p class="hero-desc">คู่มือเรียนรู้ Microsoft Copilot เชิงลึก <b>เริ่มที่ Copilot Agent</b> ตั้งแต่แนวคิด สร้าง ทดสอบ จนนำไปใช้กับงานจริง ต่อด้วย Copilot ใน Excel, Word, PowerPoint การใช้งานบนเบราว์เซอร์ และเทคนิคขั้นสูง</p>
     <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#/track/agent">${ic('bot')}<span>เริ่มเรียน Copilot Agent →</span></a><a class="btn btn-outline btn-lg" href="#/p/${moduleOf(chByKey.pmode)}">เริ่มที่ Prompt Mode →</a><button type="button" class="btn btn-subtle btn-lg" data-open-finder>${ic('people_team')}<span>ค้นหา Agent ตามกลุ่มงาน</span></button></div>
   </div><div class="hero-art">${heroScene()}</div></div></section>
-  ${updatesPanelHTML(6, true)}
+  ${updatesPanelHTML(true)}
   <section class="cgroup tracks-sec"><h2 class="sec">${ic('compass_northwest')}<span>เส้นทางการเรียน</span></h2><p>เรียงตามความสำคัญ เริ่มจาก Copilot Agent · แต่ละเส้นทางรวมหน้าในคอร์สหลักและบทเรียนเชิงลึกที่พูดเรื่องเดียวกันไว้ด้วยกัน</p>${tracksGridHTML()}</section>
   <div class="stats">
     <div class="stat-tile"><span class="st-ic">${ic('bot')}</span><div><b>${AGL.length}</b><span>Agent พร้อมการตั้งค่าคัดลอกได้</span></div></div>
@@ -549,7 +550,7 @@ function relatedHTML(n) {
 let deepP = null;
 function loadDeep() {
   if (window.__DEEP) return Promise.resolve(window.__DEEP);
-  if (!deepP) deepP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'deep-data.js'; sc.onload = () => { for (const p of DEEPP) p.html = window.__DEEP.lessons[p.k].html; res(window.__DEEP); }; sc.onerror = () => { deepP = null; rej(new Error('deep-data.js')); }; document.head.appendChild(sc); });
+  if (!deepP) deepP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'deep-data.js?v=' + encodeURIComponent(D.meta.buildId); sc.onload = () => { for (const p of DEEPP) p.html = window.__DEEP.lessons[p.k].html; res(window.__DEEP); }; sc.onerror = () => { deepP = null; rej(new Error('deep-data.js')); }; document.head.appendChild(sc); });
   return deepP;
 }
 function renderDeepHome() {
@@ -609,17 +610,55 @@ function initDecision(box) {
 let UPD = D.updates; let updTopic = 'all'; let liveState = 'snapshot';
 const UPD_TOPICS = [['all', 'ทั้งหมด'], ['agent', 'Copilot Agent'], ['office', 'Excel · Word · PowerPoint'], ['teams', 'Teams · Outlook'], ['browser', 'เบราว์เซอร์ · SharePoint'], ['admin', 'ความปลอดภัย · ผู้ดูแลระบบ'], ['general', 'อื่น ๆ']];
 const thDate = iso => { try { return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok' }).format(new Date(iso)); } catch (e) { return iso; } };
-function updItemsHTML(limit) {
-  const items = (UPD && UPD.items || []).filter(i => updTopic === 'all' || i.topic === updTopic);
-  const shown = limit ? items.slice(0, limit) : items;
-  if (!shown.length) return '<p class="empty">ไม่มีรายการในหมวดนี้</p>';
-  return `<ul class="upd-list">${shown.map(i => `<li class="upd" data-topic="${esc(i.topic)}"><div class="upd-top">${i.statusTh ? `<span class="upd-st st-${esc(i.status.replace(/\s/g, '').toLowerCase())}">${esc(i.statusTh)}</span>` : ''}${i.agent ? `<span class="upd-ag">${ic('bot')}Agent</span>` : ''}${i.products.map(x => `<span class="upd-pr">${esc(x)}</span>`).join('')}</div><a class="upd-t" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">${esc(i.title)} ${ic('open')}</a>${i.summary ? `<p class="upd-s">${esc(i.summary)}</p>` : ''}<p class="upd-d">${i.preview ? `Preview: ${esc(i.preview)} · ` : ''}${i.ga ? `GA: ${esc(i.ga)} · ` : ''}Roadmap ID ${esc(i.id)}</p></li>`).join('')}</ul>${limit && items.length > limit ? `<a class="btn btn-outline" href="#/updates">${ic('arrow_right')}<span>ดูทั้งหมด ${items.length} รายการ</span></a>` : ''}`;
+const UPD_TH = D.updatesTh || {};
+const TH_MON = { January: 'ม.ค.', February: 'ก.พ.', March: 'มี.ค.', April: 'เม.ย.', May: 'พ.ค.', June: 'มิ.ย.', July: 'ก.ค.', August: 'ส.ค.', September: 'ก.ย.', October: 'ต.ค.', November: 'พ.ย.', December: 'ธ.ค.' };
+const thWhen = s => { const m = String(s || '').match(/([A-Z][a-z]+)\s+CY(\d{4})/); return m && TH_MON[m[1]] ? `${TH_MON[m[1]]} ${+m[2] + 543}` : String(s || ''); };
+const ST_EXPL = { 'In development': 'Microsoft กำลังพัฒนา ยังใช้งานไม่ได้', 'Rolling out': 'เริ่มทยอยเปิดให้บางบัญชี อาจยังไม่เห็นทันที', 'Launched': 'เปิดใช้แล้ว (ขึ้นกับ License และการตั้งค่าองค์กร)' };
+const topicTh = k => (UPD_TOPICS.find(x => x[0] === k) || [0, 'Microsoft Copilot'])[1];
+const timelineTh = i => [i.preview ? `ทดลองใช้ (Preview): ${thWhen(i.preview)}` : '', i.ga ? `เปิดใช้ทั่วไป (GA): ${thWhen(i.ga)}` : ''].filter(Boolean).join(' · ');
+// Thai headline + plain-language summary: hand-written (data/updates-th.json) or generated from status/dates for brand-new items
+function thOf(i) {
+  const t = UPD_TH[i.id];
+  if (t) return { t: t.t, s: t.s, w: t.w, auto: false };
+  const when = timelineTh(i);
+  return { t: i.title, s: `ข่าวใหม่ในหมวด ${topicTh(i.topic)}${i.products.length ? ' สำหรับ ' + i.products.join(', ') : ''} · สถานะ “${i.statusTh || 'ไม่ระบุ'}”${i.status && ST_EXPL[i.status] ? ' (' + ST_EXPL[i.status] + ')' : ''}${when ? ' · ' + when : ''} · ข่าวนี้เพิ่งเข้ามา ยังไม่มีคำอธิบายภาษาไทย อ่านต้นฉบับด้านล่าง`, w: i.topic === 'admin' ? 'ผู้ดูแลระบบ' : '', auto: true };
 }
-function updatesPanelHTML(limit, home) {
+// 3 highlight stories: Agent first, usable-now and everyday-user news ranked higher, one per topic
+function featuredUpd(items) {
+  const now = Date.now();
+  const monthIdx = s => { const m = String(s || '').match(/([A-Z][a-z]+)\s+CY(\d{4})/); const k = m ? Object.keys(TH_MON).indexOf(m[1]) : -1; return k < 0 ? null : Date.UTC(+m[2], k, 15); };
+  // news value: GA/preview from ~4 months ago up to the coming year counts as current; long-launched items drop
+  const fresh = i => { const g = monthIdx(i.ga) ?? monthIdx(i.preview); if (g == null) return 0; const d = (g - now) / 864e5; return d < -120 ? -4 : d <= 365 ? 2 : 0.5; };
+  const score = i => { const t = UPD_TH[i.id]; return fresh(i) + (i.agent ? 3 : 0) + (i.status === 'Launched' ? 2.5 : i.status === 'Rolling out' ? 2 : 0) + (t ? 1.5 : 0) + (t && t.w === 'ผู้ใช้ทั่วไป' ? 2.5 : 0) + (['agent', 'office', 'browser', 'teams'].includes(i.topic) ? 1 : 0) - Math.min(4, Math.max(0, now - Date.parse(i.updated || 0)) / 864e5 / 15); };
+  const ranked = [...items].sort((a, b) => score(b) - score(a));
+  const out = []; const seen = new Set();
+  for (const i of ranked) { if (out.length === 3) break; if (!seen.has(i.topic)) { out.push(i); seen.add(i.topic); } }
+  for (const i of ranked) { if (out.length === 3) break; if (!out.includes(i)) out.push(i); }
+  return out.sort((a, b) => (b.topic === 'agent') - (a.topic === 'agent'));
+}
+function updCard(i, feat) {
+  const th = thOf(i); const when = timelineTh(i);
+  return `<li class="upd${feat ? ' feat' : ''}" data-topic="${esc(i.topic)}"><div class="upd-top">${i.statusTh ? `<span class="upd-st st-${esc(i.status.replace(/\s/g, '').toLowerCase())}" title="${esc(ST_EXPL[i.status] || '')}">${esc(i.statusTh)}</span>` : ''}${i.agent ? `<span class="upd-ag">${ic('bot')}Agent</span>` : ''}${th.w ? `<span class="upd-who">${ic('person')}เหมาะกับ${esc(th.w)}</span>` : ''}</div>
+  <a class="upd-t" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer"${th.auto ? ' lang="en"' : ''}>${esc(th.t)} ${ic('open')}</a>${th.auto ? '' : `<p class="upd-en" lang="en">${esc(i.title)}</p>`}
+  <p class="upd-s">${esc(th.s)}</p>
+  <p class="upd-d">${when ? `${ic('timer')}<span>${esc(when)}</span>` : ''}${i.products.length ? `<span>${esc(i.products.join(' · '))}</span>` : ''}<span>Roadmap ID ${esc(i.id)}</span></p>
+  ${i.summary ? `<details class="upd-orig"><summary>อ่านต้นฉบับภาษาอังกฤษ (Microsoft)</summary><p lang="en">${esc(i.summary)}</p></details>` : ''}</li>`;
+}
+function updItemsHTML() {
+  const items = (UPD && UPD.items || []).filter(i => updTopic === 'all' || i.topic === updTopic);
+  if (!items.length) return '<p class="empty">ไม่มีรายการในหมวดนี้</p>';
+  return `<ul class="upd-list">${items.map(i => updCard(i, false)).join('')}</ul>`;
+}
+let updAllOpen = false;
+function updatesPanelHTML(home) {
   const u = UPD || { items: [] };
-  return `<section class="updates${home ? ' home' : ''}" aria-labelledby="updH" data-upd-limit="${limit || 0}"><div class="upd-head"><div><h2 id="updH">${ic('arrow_sync')}<span>อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot</span></h2><p class="upd-meta"><span class="live-dot ${liveState}" aria-hidden="true"></span><span data-upd-meta>${updMetaText()}</span></p></div><span class="badge-verify">${ic('warning')}<span>ข้อมูลจาก Microsoft · ตรวจกับบัญชีจริงก่อนสอน</span></span></div>
+  const feat = featuredUpd(u.items);
+  return `<section class="updates${home ? ' home' : ''}" aria-labelledby="updH${home ? 'h' : 'p'}"><div class="upd-head"><div><h2 id="updH${home ? 'h' : 'p'}">${ic('arrow_sync')}<span>${home ? 'อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot' : '3 ข่าวเด่นตอนนี้'}</span></h2><p class="upd-meta"><span class="live-dot ${liveState}" aria-hidden="true"></span><span data-upd-meta>${updMetaText()}</span></p></div><span class="badge-verify">${ic('warning')}<span>ข้อมูลจาก Microsoft · ตรวจกับบัญชีจริงก่อนสอน</span></span></div>
+  ${home ? '<p class="upd-lead">3 ข่าวเด่นที่คัดมาให้ (Copilot Agent ก่อน) · สรุปเป็นภาษาไทยให้อ่านเข้าใจง่าย</p>' : ''}
+  <ul class="upd-list feat-list">${feat.map(i => updCard(i, true)).join('')}</ul>
+  ${home ? `<a class="btn btn-primary upd-more" href="#/updates">${ic('arrow_right')}<span>ดูข่าวทั้งหมด ${u.items.length} รายการ</span></a>` : `<details class="upd-all" data-upd-all${updAllOpen ? ' open' : ''}><summary>${ic('text_bullet_list_square')}<span>ดูข่าวทั้งหมด ${u.items.length} รายการ · กรองตามหมวด</span>${ic('chevron_right', 'chev')}</summary>
   <div class="fchips upd-chips" role="group" aria-label="กรองหมวดอัปเดต">${UPD_TOPICS.map(([k, t]) => `<button type="button" class="fchip" data-ut="${k}" aria-pressed="${updTopic === k}">${esc(t)} (${k === 'all' ? u.items.length : u.items.filter(i => i.topic === k).length})</button>`).join('')}</div>
-  <div data-upd-list>${updItemsHTML(limit)}</div></section>`;
+  <div data-upd-list>${updItemsHTML()}</div></details>`}</section>`;
 }
 function updMetaText() {
   if (!UPD) return 'ยังไม่มีข้อมูล';
@@ -627,13 +666,13 @@ function updMetaText() {
 }
 function wireUpdates(root) {
   $$('.updates', root).forEach(sec => {
-    const limit = +sec.dataset.updLimit;
-    $$('[data-ut]', sec).forEach(b => b.addEventListener('click', () => { updTopic = b.dataset.ut; $$('[data-ut]', sec).forEach(x => x.setAttribute('aria-pressed', x.dataset.ut === updTopic)); $('[data-upd-list]', sec).innerHTML = updItemsHTML(limit); }));
+    const all = $('[data-upd-all]', sec); if (all) all.addEventListener('toggle', () => { updAllOpen = all.open; });
+    $$('[data-ut]', sec).forEach(b => b.addEventListener('click', () => { updTopic = b.dataset.ut; $$('[data-ut]', sec).forEach(x => x.setAttribute('aria-pressed', x.dataset.ut === updTopic)); $('[data-upd-list]', sec).innerHTML = updItemsHTML(); }));
   });
 }
 let liveTried = false;
-async function refreshUpdates() {
-  if (liveTried || !/^https?:$/.test(location.protocol)) return; liveTried = true;
+async function refreshUpdates(force) {
+  if ((liveTried && !force) || !/^https?:$/.test(location.protocol)) return; liveTried = true;
   try {
     const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 9000);
     const r = await fetch('/api/copilot-updates', { headers: { accept: 'application/json' }, signal: ctl.signal }); clearTimeout(t);
@@ -641,13 +680,13 @@ async function refreshUpdates() {
     const j = await r.json();
     if (!j.items || !j.items.length) throw new Error('empty');
     UPD = j; liveState = 'live';
-    $$('.updates').forEach(sec => { const limit = +sec.dataset.updLimit; const home = sec.classList.contains('home'); sec.outerHTML = updatesPanelHTML(limit, home); });
+    $$('.updates').forEach(sec => { sec.outerHTML = updatesPanelHTML(sec.classList.contains('home')); });
     wireUpdates($('#main'));
   } catch (e) { liveState = 'snapshot'; }
 }
 function renderUpdatesPage() {
   cur = null;
-  setMain(`<header class="ph" style="--dc:var(--accent)">${art('arrow_sync')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>อัปเดตล่าสุด</span></nav><h1>อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot</h1><p class="short">ฟีเจอร์ที่กำลังพัฒนา กำลังทยอยเปิดใช้ และเปิดใช้แล้ว จาก Microsoft 365 Roadmap · หน้าเว็บดึงข้อมูลใหม่อัตโนมัติ (ฝั่งเซิร์ฟเวอร์รีเฟรชทุก 6 ชั่วโมง และ build ใหม่ทุกวัน)</p></header>${updatesPanelHTML(0, false)}<p class="src-note">${ic('info')} หัวข้อและคำอธิบายเป็นภาษาอังกฤษตามต้นฉบับของ Microsoft · กดหัวข้อเพื่อเปิดรายละเอียดใน Microsoft 365 Roadmap · ความพร้อมใช้งานขึ้นกับบัญชี License และนโยบายองค์กร</p>${copyLine()}`, 'อัปเดตล่าสุด Copilot');
+  setMain(`<header class="ph" style="--dc:var(--accent)">${art('arrow_sync')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>อัปเดตล่าสุด</span></nav><h1>อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot</h1><p class="short">ฟีเจอร์ที่กำลังพัฒนา กำลังทยอยเปิดใช้ และเปิดใช้แล้ว จาก Microsoft 365 Roadmap · หน้าเว็บดึงข้อมูลใหม่อัตโนมัติ (ฝั่งเซิร์ฟเวอร์รีเฟรชทุก 6 ชั่วโมง และ build ใหม่ทุกวัน)</p></header><div class="upd-legend" role="note"><b>อ่านสถานะข่าว:</b>${Object.entries(ST_EXPL).map(([k, v]) => `<span><i class="upd-st st-${k.replace(/\s/g, '').toLowerCase()}">${esc({ 'In development': 'กำลังพัฒนา', 'Rolling out': 'กำลังทยอยเปิดใช้', 'Launched': 'เปิดใช้แล้ว' }[k])}</i> ${esc(v)}</span>`).join('')}<span><b>Preview</b> = ช่วงทดลองใช้ก่อนเปิดจริง · <b>GA</b> = เปิดใช้ทั่วไป (ปีเป็น พ.ศ.)</span></div>${updatesPanelHTML(false)}<p class="src-note">${ic('info')} หัวข้อและสรุปภาษาไทยเรียบเรียงโดยผู้สร้างคู่มือเพื่อให้อ่านง่าย (ไม่ใช่คำแปลทางการของ Microsoft) · ต้นฉบับภาษาอังกฤษอยู่ในแต่ละการ์ด · กดหัวข้อเพื่อเปิด Microsoft 365 Roadmap · ความพร้อมใช้งานขึ้นกับบัญชี License และนโยบายองค์กร</p>${copyLine()}`, 'อัปเดตล่าสุด Copilot');
   wireUpdates($('#main')); refreshUpdates(); renderTOC();
 }
 
@@ -877,6 +916,7 @@ $('#cmdQ').addEventListener('keydown', e => {
 });
 function trap(modal, e) { const f = $$('button,input,select,textarea,a[href],[tabindex]:not([tabindex="-1"])', modal).filter(x => !x.disabled && x.offsetParent !== null); if (!f.length) return; const first = f[0], last = f[f.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
 document.addEventListener('keydown', e => {
+  if (document.body.classList.contains('gated')) return;
   const k = e.key;
   if ((e.ctrlKey || e.metaKey) && (k === 'k' || k === 'K')) { e.preventDefault(); $('#cmd').hidden ? openCmd() : closeCmd(); return; }
   if (k === 'Escape') { if (!$('#cmd').hidden) return closeCmd(); if (!$('#finder').hidden) return closeFinder(); if (!$('#toolsMenu').hidden) { closeMenus(); $('#toolsBtn').focus(); return; } closeDrawer(); return; }
@@ -890,12 +930,162 @@ document.addEventListener('keydown', e => {
 window.addEventListener('hashchange', route);
 mq.addEventListener && mq.addEventListener('change', () => { if (!mq.matches) closeDrawer(); });
 
+// ---------- Email gate (once per device) ----------
+const GATE = (() => { try { return JSON.parse(document.getElementById('gate-cfg').textContent); } catch (e) { return { on: false, h: [] }; } })();
+const GATE_KEY = 'cpa26-gate';
+// SHA-256 (hex): Web Crypto when available, small pure-JS fallback for insecure origins
+function sha256js(str) {
+  const b = new TextEncoder().encode(str); const K = []; const H = [];
+  const isP = n => { for (let f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+  for (let n = 2, i = 0; i < 64; n++) if (isP(n)) { if (i < 8) H[i] = (Math.pow(n, 1 / 2) * 2 ** 32) | 0; K[i++] = (Math.pow(n, 1 / 3) * 2 ** 32) | 0; }
+  const l = b.length, w = new Uint8Array(((l + 9 + 63) >> 6) << 6); w.set(b); w[l] = 0x80; const dv = new DataView(w.buffer); dv.setUint32(w.length - 4, l * 8); dv.setUint32(w.length - 8, Math.floor(l / 2 ** 29));
+  const r = (x, n) => (x >>> n) | (x << (32 - n));
+  for (let o = 0; o < w.length; o += 64) {
+    const W = new Array(64); for (let i = 0; i < 16; i++) W[i] = dv.getUint32(o + i * 4);
+    for (let i = 16; i < 64; i++) { const s0 = r(W[i - 15], 7) ^ r(W[i - 15], 18) ^ (W[i - 15] >>> 3), s1 = r(W[i - 2], 17) ^ r(W[i - 2], 19) ^ (W[i - 2] >>> 10); W[i] = (W[i - 16] + s0 + W[i - 7] + s1) | 0; }
+    let [a, bb, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) { const t1 = (h + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + W[i]) | 0, t2 = ((r(a, 2) ^ r(a, 13) ^ r(a, 22)) + ((a & bb) ^ (a & c) ^ (bb & c))) | 0; h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = bb; bb = a; a = (t1 + t2) | 0; }
+    [a, bb, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) | 0; });
+  }
+  return H.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+async function sha256(str) {
+  try { if (crypto && crypto.subtle) return [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)))].map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { /* fall back */ }
+  return sha256js(str);
+}
+const maskEmail = e => { const [u, d] = e.split('@'); return (u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '•••' + u.slice(-1)) + '@' + d; };
+let gatePassed = false; // this session (also covers browsers where storage is blocked)
+const gateOk = () => { if (!GATE.on || gatePassed) return true; const g = store.get(GATE_KEY, null); return !!(g && g.h && GATE.h.includes(g.h)); };
+function gateThen(go) {
+  if (gateOk()) { go(); return; }
+  const lock = ['#topbar', '.shell', '.bottombar'].map(s => $(s)).filter(Boolean);
+  lock.forEach(el => { el.inert = true; el.setAttribute('aria-hidden', 'true'); });
+  document.body.classList.add('gated');
+  const old = store.get(GATE_KEY, null);
+  document.body.insertAdjacentHTML('beforeend', `<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT"><form class="gate-card" id="gateForm" novalidate>
+    <div class="gate-logos"><span class="logo-chip"><img src="logo.png" alt="AI Agent for Work" width="140" height="39"></span>${D.meta.copilotLogo ? `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="40" height="40">` : ''}</div>
+    <h1 id="gateT"><span>Copilot</span> AI Agents for Work 2026</h1>
+    <p class="gate-sub">${old ? 'Email ที่เคยใช้ในเครื่องนี้ไม่อยู่ในรายชื่อผู้มีสิทธิ์แล้ว กรุณากรอก Email ใหม่' : 'กรอก Email ที่ลงทะเบียนไว้เพื่อเข้าใช้งาน · กรอกครั้งเดียวต่อเครื่อง ครั้งต่อไปเปิดแอปเข้าได้ทันที'}</p>
+    <label for="gateEmail">Email</label>
+    <div class="input-ic">${ic('mail')}<input id="gateEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" required placeholder="name@example.com"></div>
+    <p class="gate-err" id="gateErr" role="alert" aria-live="assertive"></p>
+    <button type="submit" class="btn btn-primary gate-go">${ic('lock_closed')}<span>เข้าใช้งาน</span></button>
+    <p class="gate-note">${ic('shield_checkmark')}<span>เครื่องนี้จะจำเฉพาะค่าที่เข้ารหัสแบบทางเดียว (SHA-256) ของ Email ไม่เก็บ Email ตัวจริง และไม่ส่งข้อมูลออกไปที่ใด · ล้างข้อมูลเว็บไซต์หรือกด “ออกจากระบบ” ในเมนูเครื่องมือเพื่อเปลี่ยน Email</span></p>
+    <p class="gate-ver">เวอร์ชัน ${esc(D.meta.version)} · ${esc(D.meta.copyright)}</p></form></div>`);
+  const inp = $('#gateEmail'), err = $('#gateErr');
+  setTimeout(() => inp.focus(), 50);
+  $('#gateForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const em = inp.value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { err.textContent = 'รูปแบบ Email ไม่ถูกต้อง'; inp.setAttribute('aria-invalid', 'true'); inp.focus(); return; }
+    const h = await sha256(GATE.salt + em);
+    if (!GATE.h.includes(h)) { err.textContent = 'Email นี้ยังไม่มีสิทธิ์เข้าใช้งาน · ตรวจการสะกด หรือติดต่อผู้รับผิดชอบคอร์ส'; inp.setAttribute('aria-invalid', 'true'); inp.select(); return; }
+    gatePassed = true;
+    store.set(GATE_KEY, { h, m: maskEmail(em), at: new Date().toISOString() });
+    $('#gate').remove(); document.body.classList.remove('gated');
+    lock.forEach(el => { el.inert = false; el.removeAttribute('aria-hidden'); });
+    go(); renderAppMenu(); toast('ยินดีต้อนรับ · เครื่องนี้จำการเข้าใช้งานแล้ว');
+  });
+}
+function gateSignOut() {
+  try { localStorage.removeItem(GATE_KEY); } catch (e) { /* ignore */ }
+  location.reload();
+}
+
+// ---------- PWA: service worker, install, "รีเฟรช อัปเดตแอป" ----------
+let swReg = null, installEvt = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+async function latestVersion() {
+  const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+function waitForWorker(reg, ms) {
+  return new Promise(res => {
+    const done = () => res(reg.waiting || null);
+    if (reg.waiting) return done();
+    const w = reg.installing; if (!w) return res(null);
+    const t = setTimeout(done, ms);
+    w.addEventListener('statechange', () => { if (w.state === 'installed' || w.state === 'redundant') { clearTimeout(t); done(); } });
+  });
+}
+async function activateWaiting(reg) {
+  if (!reg || !reg.waiting) return false;
+  await new Promise(res => { const t = setTimeout(res, 3000); navigator.serviceWorker.addEventListener('controllerchange', () => { clearTimeout(t); res(); }, { once: true }); reg.waiting.postMessage('SKIP_WAITING'); });
+  return true;
+}
+let updating = false;
+async function updateApp() {
+  if (updating) return; updating = true;
+  const btn = $('#updateBtn'); btn.classList.add('spin'); btn.setAttribute('aria-busy', 'true');
+  try {
+    toast('กำลังตรวจสอบเวอร์ชันใหม่…');
+    let v = null;
+    try { v = await latestVersion(); } catch (e) { v = null; }
+    if (!v) { toast(`ออฟไลน์หรือเชื่อมต่อไม่ได้ · ใช้เวอร์ชัน ${D.meta.version} ที่บันทึกในเครื่อง`); return; }
+    if (v.build === D.meta.buildId) {
+      if (swReg) { try { await swReg.update(); } catch (e) { /* ignore */ } await activateWaiting(swReg); }
+      await refreshUpdates(true);
+      route();
+      toast(`เป็นเวอร์ชันล่าสุดแล้ว (v${D.meta.version}) · รีเฟรชข้อมูลและข่าวแล้ว`);
+      return;
+    }
+    toast(`พบเวอร์ชันใหม่ v${v.version} · กำลังอัปเดต…`);
+    if (swReg) { try { await swReg.update(); } catch (e) { /* ignore */ } await waitForWorker(swReg, 8000); await activateWaiting(swReg); }
+    else { try { for (const k of await caches.keys()) if (k.startsWith('cpa26-')) await caches.delete(k); } catch (e) { /* no cache api */ } }
+    location.reload();
+  } finally { updating = false; btn.classList.remove('spin'); btn.removeAttribute('aria-busy'); }
+}
+function showUpdateReady(v) {
+  $('#updateBtn .upd-dot').hidden = false;
+  $('#updateBtn').setAttribute('aria-label', `มีเวอร์ชันใหม่ v${v.version} · กดเพื่ออัปเดตแอป`);
+  if ($('#updBanner')) return;
+  document.body.insertAdjacentHTML('beforeend', `<div class="upd-banner" id="updBanner" role="status">${ic('arrow_sync')}<span>มีเวอร์ชันใหม่ <b>v${esc(v.version)}</b> พร้อมใช้งาน</span><button type="button" class="btn btn-primary" data-upd-now>อัปเดตเลย</button><button type="button" class="btn btn-icon" data-upd-later aria-label="ปิด">${ic('dismiss')}</button></div>`);
+  $('#updBanner [data-upd-now]').addEventListener('click', updateApp);
+  $('#updBanner [data-upd-later]').addEventListener('click', () => $('#updBanner').remove());
+}
+let lastCheck = 0;
+async function autoCheck() {
+  if (!/^https?:$/.test(location.protocol) || Date.now() - lastCheck < 15 * 60e3) return; lastCheck = Date.now();
+  try { const v = await latestVersion(); if (v.build !== D.meta.buildId) showUpdateReady(v); else if (swReg && swReg.waiting) swReg.waiting.postMessage('SKIP_WAITING'); } catch (e) { /* offline */ }
+}
+function initPWA() {
+  $('#updateBtn').addEventListener('click', updateApp);
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register('sw.js').then(reg => { swReg = reg; }).catch(() => { /* SW unavailable */ });
+  }
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; renderAppMenu(); });
+  window.addEventListener('appinstalled', () => { installEvt = null; renderAppMenu(); toast('ติดตั้งแอปเรียบร้อย · เปิดจากหน้าจอโฮมได้เลย'); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoCheck(); });
+  setTimeout(autoCheck, 4000);
+  renderAppMenu();
+}
+async function installApp() {
+  if (installEvt) { installEvt.prompt(); try { await installEvt.userChoice; } catch (e) { /* ignore */ } installEvt = null; renderAppMenu(); return; }
+  toast(isIOS() ? 'iPhone/iPad: เปิดใน Safari แตะปุ่มแชร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”' : 'เปิดเมนูของเบราว์เซอร์ แล้วเลือก “ติดตั้งแอป” หรือ “เพิ่มลงในหน้าจอหลัก”');
+}
+function renderAppMenu() {
+  const m = $('#toolsMenu'); $$('[data-app-act]', m).forEach(x => x.remove()); const sep = $('.menu-sep', m); if (sep) sep.remove();
+  const g = store.get(GATE_KEY, null);
+  const items = [['update', 'arrow_sync', 'รีเฟรช · อัปเดตแอป', `เวอร์ชัน ${D.meta.version} · ตรวจเวอร์ชันใหม่และโหลดข่าวล่าสุด`]];
+  if (!isStandalone()) items.push(['install', 'arrow_download', 'ติดตั้งเป็นแอป (มือถือ/แท็บเล็ต/คอม)', installEvt ? 'ติดตั้งบนเครื่องนี้ เปิดเต็มจอและใช้ออฟไลน์ได้' : 'วิธีเพิ่มไปยังหน้าจอโฮม']);
+  if (GATE.on && g && g.m) items.push(['signout', 'person', 'ออกจากระบบ (เปลี่ยน Email)', 'เข้าใช้งานด้วย ' + g.m]);
+  m.insertAdjacentHTML('beforeend', '<hr class="menu-sep">' + items.map(([k, i, t, sub]) => `<a role="menuitem" href="#" data-app-act="${k}">${ic(i)}<span>${esc(t)}<small>${esc(sub)}</small></span></a>`).join(''));
+  // same actions in the contents drawer (phones hide the tools menu)
+  $('#sbApp').innerHTML = `${g && g.m && GATE.on ? `<p class="sb-user">${ic('person')}<span>${esc(g.m)}</span></p>` : ''}<div class="sb-app-btns">${items.map(([k, i, t]) => `<button type="button" class="btn btn-subtle" data-app-act="${k}">${ic(i)}<span>${esc({ update: 'อัปเดตแอป', install: 'ติดตั้งแอป', signout: 'ออกจากระบบ' }[k] || t)}</span></button>`).join('')}</div><p class="sb-ver">เวอร์ชัน ${esc(D.meta.version)}</p>`;
+  $$('[data-app-act]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); closeMenus(); const k = a.dataset.appAct; if (k === 'update') updateApp(); else if (k === 'install') installApp(); else if (k === 'signout') gateSignOut(); }));
+}
+
 // ---------- boot ----------
 if (!location.hash) { const last = store.get('cpa26-last', null); if (last && PI.has(last) && last !== 1) { /* stay on home; resume card offered */ } }
 if (D.meta.copilotLogo) $('.brand-t').insertAdjacentHTML('beforebegin', `<span class="brand-sep" aria-hidden="true"></span><img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="30" height="30">`);
 updateProgress();
-route();
-// reset the sequential-focus starting point so the first Tab reaches the skip link
-try { document.body.setAttribute('tabindex', '-1'); document.body.focus({ preventScroll: true }); document.body.removeAttribute('tabindex'); } catch (e) { /* ignore */ }
+initPWA();
+gateThen(() => {
+  route();
+  // reset the sequential-focus starting point so the first Tab reaches the skip link
+  try { document.body.setAttribute('tabindex', '-1'); document.body.focus({ preventScroll: true }); document.body.removeAttribute('tabindex'); } catch (e) { /* ignore */ }
+});
 window.__app = { D, done, visited, AG, ATT, cmdSearch: q => { cmdSearch(q); return cmdRes.map(r => r.x.n || r.x.href); } };
 })();

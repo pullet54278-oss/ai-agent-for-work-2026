@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseSource, codeBlocks, urlsOf, ROOT } from './lib/source.mjs';
 import { marked } from 'marked';
-import { serve, launch } from '../tests/lib.mjs';
+import { serve, launch, seededContext } from '../tests/lib.mjs';
 
 const src = parseSource();
 const pages = src.chapters.flatMap(c => c.pages);
@@ -47,7 +47,7 @@ function atomsOf(md) {
 
 const { srv, url } = await serve();
 const browser = await launch();
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const page = await (await seededContext(browser, { viewport: { width: 1440, height: 900 } })).newPage();
 const consoleErrors = [];
 page.on('pageerror', e => consoleErrors.push(e.message));
 await page.goto(url);
@@ -132,7 +132,10 @@ const html = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8') + (f
 const termsFile = path.join(ROOT, 'content', 'forbidden-terms.txt');
 const terms = fs.existsSync(termsFile) ? fs.readFileSync(termsFile, 'utf8').split('\n').map(s => s.trim()).filter(s => s && !s.startsWith('#')) : [];
 const docNo = html.replace(/<svg[\s\S]*?<\/svg>/g, '').match(/\b(?:SOP|WI|QP|FM|QM|WP|PR|DOC)-\d{2,}[\w-]*/g) || [];
-report.forbidden = { termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), jobTitles: [...new Set(html.match(/\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])], documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
+const { loadAllowed } = await import('./lib/gate.mjs');
+const allowedEmails = loadAllowed(ROOT).emails;
+const distAll = fs.readdirSync(path.join(ROOT, 'dist'), { recursive: true }).filter(f => /\.(html|js|json|webmanifest|txt)$/.test(f)).map(f => fs.readFileSync(path.join(ROOT, 'dist', f), 'utf8')).join('\n');
+report.forbidden = { allowedEmailsChecked: allowedEmails.length, plainEmailsInDist: allowedEmails.filter(e => distAll.toLowerCase().includes(e)).length, termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), jobTitles: [...new Set(html.match(/\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])], documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
 
 await browser.close(); srv.close();
 fs.writeFileSync(path.join(ROOT, 'docs', 'audit-report.json'), JSON.stringify(report, null, 2));
@@ -143,4 +146,4 @@ console.log(`deep lessons ${report.deep.lessons} · atoms ${report.deep.atoms} �
 console.log('forbidden:', JSON.stringify(report.forbidden));
 for (const m of report.deep.missing.slice(0, 25)) console.log('  ✗', m.page, JSON.stringify(m.text));
 for (const m of report.missing.slice(0, 40)) console.log('  ✗', m.page, JSON.stringify(m.missing.slice(0, 4)));
-process.exitCode = t.missing || report.deep.missing.length || consoleErrors.length || report.home.some(x => !x.ok) || report.forbidden.hits.length || report.forbidden.jobTitles.length ? 1 : 0;
+process.exitCode = t.missing || report.deep.missing.length || consoleErrors.length || report.home.some(x => !x.ok) || report.forbidden.hits.length || report.forbidden.jobTitles.length || report.forbidden.plainEmailsInDist ? 1 : 0;

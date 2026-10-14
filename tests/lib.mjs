@@ -3,6 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { hashEmail, GATE_SALT, loadAllowed } from '../scripts/lib/gate.mjs';
 
 export const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 export const DIST = path.join(ROOT, 'dist');
@@ -21,6 +22,18 @@ function netlifyHeaders() {
   return out;
 }
 
+// Email gate under test: the server swaps the build's gate list for a test list, so the real gate code runs
+export const TEST_EMAIL = 'learner@example.com';
+export const TEST_GATE = { on: true, salt: GATE_SALT, h: [hashEmail(TEST_EMAIL), hashEmail('second.person@example.org')].sort() };
+// init script: mark this device as already signed in (served pages: test email · file://: first real allowed email, if any)
+export function gateSeed() {
+  const real = loadAllowed(ROOT).emails[0];
+  return { script: ({ a, b }) => { try { if (!localStorage.getItem('cpa26-gate')) localStorage.setItem('cpa26-gate', JSON.stringify({ h: location.protocol === 'file:' ? b : a, m: 'le•••r@example.com', at: '2026-10-14T00:00:00Z' })); } catch (e) { } }, arg: { a: hashEmail(TEST_EMAIL), b: real ? hashEmail(real) : '' } };
+}
+export async function seededContext(browser, opts = {}) {
+  const ctx = await browser.newContext(opts); const s = gateSeed(); await ctx.addInitScript(s.script, s.arg); return ctx;
+}
+
 export function serve(port = 0) {
   const H = netlifyHeaders();
   return new Promise(res => {
@@ -31,7 +44,8 @@ export function serve(port = 0) {
       if (!f.startsWith(DIST)) { r.writeHead(403); r.end(); return; }
       fs.readFile(f, (e, b) => {
         if (e) { r.writeHead(404); r.end('not found'); return; }
-        r.writeHead(200, { ...H, 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' });
+        if (path.basename(f) === 'index.html') b = Buffer.from(b.toString('utf8').replace(/(<script type="application\/json" id="gate-cfg">)[\s\S]*?(<\/script>)/, (m, a, c) => a + JSON.stringify(TEST_GATE) + c));
+        r.writeHead(200, { ...H, 'content-type': TYPES[path.extname(f)] || (f.endsWith('.webmanifest') ? 'application/manifest+json' : 'application/octet-stream') });
         r.end(b);
       });
     }).listen(port, '127.0.0.1', () => res({ srv, url: `http://127.0.0.1:${srv.address().port}/` }));

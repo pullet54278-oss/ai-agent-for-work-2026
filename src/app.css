@@ -828,3 +828,76 @@ a.callout>div{flex:1}
 .deep-body .badge-verify{display:flex;flex-wrap:wrap;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 .deep-body .badge-verify>span{min-width:0;flex:1 1 12rem}
 .deep-body li,.deep-body p,.deep-body td,.deep-body th,.deep-body h2,.deep-body h3{overflow-wrap:anywhere}
+
+/* ===== v3.1 — Thai news cards, 3 featured, PWA, email gate ===== */
+.upd-lead{margin:-4px 0 12px;color:var(--ink-2);font-size:14px}
+.feat-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+.upd.feat{background:var(--surface);border-color:color-mix(in srgb,var(--accent) 28%,var(--line));box-shadow:var(--shadow4);padding:16px 18px;gap:8px;position:relative}
+.upd.feat::before{content:"";position:absolute;inset:0 0 auto;height:3px;border-radius:var(--r12) var(--r12) 0 0;background:var(--brand)}
+.upd.feat .upd-t{font-size:17px}
+.upd-s{display:block;-webkit-line-clamp:unset;overflow:visible;color:var(--ink);font-size:14.5px;line-height:1.65}
+.upd-en{margin:-2px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.45}
+.upd-who{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;display:inline-flex;gap:4px;align-items:center;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.upd-who .ic{width:13px;height:13px}
+.upd-d{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font:500 12px/1.45 var(--font);margin-top:auto}
+.upd-d .ic{width:14px;height:14px;color:var(--accent)}
+.upd-d span:first-of-type{font-weight:600;color:var(--ink)}
+.upd-orig{font-size:13px;border-top:1px dashed var(--line);padding-top:6px}
+.upd-orig summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none}
+.upd-orig summary::-webkit-details-marker{display:none}
+.upd-orig summary::before{content:"▸ ";}
+.upd-orig[open] summary::before{content:"▾ ";}
+.upd-orig p{margin:6px 0 0;color:var(--ink-2);line-height:1.55}
+.upd-more{margin-top:4px}
+.upd-all{margin-top:16px;border:1px solid var(--line);border-radius:var(--r12);background:var(--surface-2)}
+.upd-all>summary{display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer;font-weight:700;font-size:16px;list-style:none;border-radius:var(--r12)}
+.upd-all>summary::-webkit-details-marker{display:none}
+.upd-all>summary:hover{background:var(--accent-soft)}
+.upd-all>summary .ic{color:var(--accent)}
+.upd-all>summary .chev{margin-left:auto;transition:transform .2s var(--ease-out)}
+.upd-all[open]>summary .chev{transform:rotate(90deg)}
+.upd-all>.upd-chips,.upd-all>[data-upd-list]{padding:0 14px}
+.upd-all>[data-upd-list]{padding-bottom:14px}
+.upd-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:18px 0 0;padding:12px 16px;border-radius:var(--r12);background:var(--surface);border:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.upd-legend>b{color:var(--ink)}
+.upd-legend i{font-style:normal;margin-right:4px}
+@media (max-width:1100px){.feat-list{grid-template-columns:minmax(0,1fr)}}
+
+/* refresh / update button */
+#updateBtn{position:relative}
+#updateBtn.spin .ic{animation:spin .9s linear infinite}
+.upd-dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 2px var(--surface)}
+.upd-dot[hidden]{display:none}
+.menu-sep{border:0;border-top:1px solid var(--line);margin:6px 0}
+.upd-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:85;display:flex;gap:10px;align-items:center;padding:10px 10px 10px 16px;border-radius:var(--r12);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow28);max-width:calc(100vw - 32px);font-size:14.5px;animation:enter .35s var(--ease-out) both}
+.upd-banner>.ic{color:var(--accent);flex:none}
+@media (max-width:899px){.upd-banner{bottom:calc(78px + env(safe-area-inset-bottom,0px))}}
+
+/* email gate */
+body.gated{overflow:hidden}
+.gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));overflow:auto;background:radial-gradient(1200px 600px at 10% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%),radial-gradient(900px 500px at 110% 110%,color-mix(in srgb,#7650CF 22%,transparent),transparent 60%),var(--bg)}
+.gate-card{width:min(440px,100%);display:flex;flex-direction:column;gap:10px;padding:28px 26px 22px;border-radius:var(--r16);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow28);animation:enter .45s var(--ease-out) both}
+.gate-logos{display:flex;gap:12px;align-items:center;margin-bottom:4px}
+.gate-logos .logo-chip{background:#fff;border-radius:var(--r8);padding:6px 10px;display:inline-flex}
+.gate h1{font-size:26px;line-height:1.25;margin:4px 0 0}
+.gate h1 span{font-size:34px;display:block;color:var(--ink)}
+.gate-sub{margin:0 0 6px;color:var(--ink-2);font-size:14.5px;line-height:1.6}
+.gate label{font-weight:700;font-size:14px}
+.gate input{font-size:16px}
+.gate-err{min-height:1.2em;margin:0;color:#D13438;font-size:13.5px;font-weight:600}
+.gate-go{justify-content:center;min-height:46px;font-size:16px}
+.gate-note{display:flex;gap:8px;align-items:flex-start;margin:6px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.55}
+.gate-note .ic{flex:none;color:var(--green-t);width:18px;height:18px}
+.gate-ver{margin:4px 0 0;font-size:12px;color:var(--ink-2);text-align:center}
+@media (prefers-reduced-motion:reduce){#updateBtn.spin .ic{animation:none}}
+/* installed app: respect device notches */
+@media (display-mode: standalone){.topbar{padding-top:env(safe-area-inset-top,0px)}}
+@media (max-width:430px){.topbar .btn-icon,.topbar .btn-search{width:38px;min-width:38px;padding:0}.brand-sep{display:none}.brand{gap:6px}.logo-chip img{height:22px}.brand-t b{font-size:18px}.tb-menu{margin-right:2px}}
+@media (max-width:360px){.brand-t{display:none}}
+.sb-app{border-top:1px solid var(--line);padding:8px 12px 2px}
+.sb-app:empty{display:none}
+.sb-user{display:flex;gap:6px;align-items:center;margin:0 0 4px;font-size:12.5px;color:var(--ink-2)}
+.sb-user .ic{width:15px;height:15px}
+.sb-app-btns{display:flex;flex-wrap:wrap;gap:4px}
+.sb-app-btns .btn{min-height:34px;padding:4px 10px;font-size:13px}
+.sb-ver{margin:4px 0 0;font-size:11.5px;color:var(--ink-2)}

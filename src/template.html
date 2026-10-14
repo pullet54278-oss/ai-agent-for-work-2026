@@ -11,6 +11,13 @@
 <meta property="og:description" content="คู่มือเรียนรู้แบบโต้ตอบ · การใช้งาน AI แบบพาลงมือทำ">
 <meta property="og:image" content="logo.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Copilot Agents">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
@@ -33,6 +40,7 @@
       <button type="button" class="btn btn-subtle" id="toolsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="toolsMenu"><svg class="ic"><use href="#i-toolbox"/></svg><span class="tb-lbl">เครื่องมือ</span></button>
       <div class="menu" id="toolsMenu" role="menu" hidden></div>
     </div>
+    <button type="button" class="btn btn-icon" id="updateBtn" aria-label="รีเฟรช อัปเดตแอปเป็นเวอร์ชันล่าสุด" title="รีเฟรช · อัปเดตแอป"><svg class="ic"><use href="#i-arrow_sync"/></svg><i class="upd-dot" hidden></i></button>
     <button type="button" class="btn btn-icon" id="themeBtn" aria-label="สลับโหมดสว่าง/มืด"><svg class="ic ic-sun"><use href="#i-weather_sunny"/></svg><svg class="ic ic-moon"><use href="#i-weather_moon"/></svg></button>
     <a class="tb-prog" href="#/progress" id="progLink" aria-label="ความคืบหน้า"><span id="progTxt">เรียนแล้ว 0/155</span></a>
   </div>
@@ -47,6 +55,7 @@
       <select id="tocGroup"><option value="">ทุกกลุ่มงาน</option></select>
     </div>
     <div class="sb-list" id="tocList"></div>
+    <div class="sb-app" id="sbApp" aria-label="แอป"></div>
     <p class="sb-foot">© 2026 Copilot AI Agents for Work</p>
   </nav>
   <div class="scrim" id="scrim" hidden></div>
@@ -72,6 +81,7 @@
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script type="application/json" id="gate-cfg">/*__GATE__*/</script>
 <script type="application/json" id="app-data">/*__DATA__*/</script>
 <script>/*__JS__*/</script>
 </body>

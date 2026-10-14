@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { serve, launch, ROOT } from './lib.mjs';
+import { serve, launch, ROOT, seededContext, TEST_EMAIL } from './lib.mjs';
 
 const results = [];
 let current = '';
@@ -26,9 +26,9 @@ fs.writeFileSync(path.join(FIX, 'virus.exe'), 'MZ');
 
 const { srv, url } = await serve();
 const browser = await launch();
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, permissions: ['clipboard-read', 'clipboard-write'] });
+const ctx = await seededContext(browser, { viewport: { width: 1440, height: 900 }, permissions: ['clipboard-read', 'clipboard-write'], serviceWorkers: 'block' });
 const SNAP = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'copilot-updates.json'), 'utf8'));
-const LIVE = { ...SNAP, fetchedAt: new Date(Date.now() + 60000).toISOString(), live: true, items: [{ ...SNAP.items[0], id: '999001', title: 'LIVE TEST: Copilot agent item', topic: 'agent', agent: true }, ...SNAP.items.slice(1)] };
+const LIVE = { ...SNAP, fetchedAt: new Date(Date.now() + 60000).toISOString(), live: true, items: [{ ...SNAP.items[0], id: '999001', url: 'https://www.microsoft.com/microsoft-365/roadmap?id=999001', title: 'LIVE TEST: Copilot agent item', topic: 'agent', agent: true }, ...SNAP.items.slice(1)] };
 let apiMode = 'live';
 await ctx.route('**/api/copilot-updates', r => apiMode === 'live' ? r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(LIVE) }) : r.fulfill({ status: 502, contentType: 'application/json', body: '{"error":"x"}' }));
 const page = await ctx.newPage();
@@ -37,6 +37,7 @@ page.on('pageerror', e => errors.push(e.message));
 page.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)/.test(m.text()) && !/ERR_TUNNEL|ERR_PROXY|net::ERR/.test(m.text()) && !(apiMode !== 'live' && /status of 502/.test(m.text()))) errors.push(m.text()); });
 const go = async h => { await page.evaluate(x => { location.hash = x; }, h); await page.waitForTimeout(60); };
 const text = sel => page.$eval(sel, e => e.textContent.trim());
+const text2 = (pg, sel) => pg.$eval(sel, e => e.textContent.trim());
 const clip = () => page.evaluate(() => navigator.clipboard.readText());
 await page.goto(url);
 await page.waitForSelector('.hero');
@@ -145,24 +146,120 @@ await suite('Deep Learning 36 lessons', async () => {
   ok(!/ผู้จัดการ|หัวหน้างาน|\bSOP-\d{2,}/.test(html), 'job titles / document numbers replaced');
 });
 
-await suite('Auto-updates (Microsoft 365 Roadmap)', async () => {
+await suite('Auto-updates (Microsoft 365 Roadmap) · Thai summaries · 3 featured', async () => {
+  const TH = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'updates-th.json'), 'utf8')).items;
   apiMode = 'live';
   await page.goto(url); await page.waitForSelector('.updates.home');
   await page.waitForFunction(() => document.querySelector('.updates .live-dot.live'), null, { timeout: 8000 });
-  ok((await text('.updates')).includes('LIVE TEST: Copilot agent item'), 'homepage shows live updates from /api/copilot-updates');
-  ok((await text('.updates [data-upd-meta]')).includes('ข้อมูลสด'), 'live indicator');
-  eq(await page.$$eval('.updates.home .upd', l => l.length), 6, '6 items on home');
-  await page.click('.updates.home [data-ut="agent"]');
-  ok(await page.$$eval('.updates.home .upd', l => l.every(e => e.dataset.topic === 'agent')), 'topic filter Agent');
-  await page.click('.updates.home a[href="#/updates"]'); await page.waitForTimeout(80);
-  ok((await page.$$eval('.updates .upd', l => l.length)) > 6, 'updates page lists all');
+  ok((await text('.updates [data-upd-meta]')).includes('ข้อมูลสด'), 'live indicator (data from /api/copilot-updates)');
+  eq(await page.$$eval('.updates.home .upd', l => l.length), 3, 'home shows only 3 featured stories');
+  eq(await page.$$eval('.updates.home .upd.feat', l => l.length), 3, 'featured cards styled');
+  eq(await page.$eval('.updates.home .upd', e => e.dataset.topic), 'agent', 'first featured story is Copilot Agent');
+  ok(await page.$$eval('.updates.home .upd-t', l => l.every(a => /[฀-๿]/.test(a.textContent))), 'featured headlines are Thai');
+  ok(await page.$$eval('.updates.home .upd-s', l => l.every(p => /[฀-๿]/.test(p.textContent) && p.textContent.length > 40)), 'featured cards have a Thai plain-language summary');
+  ok(await page.$$eval('.updates.home .upd', l => l.every(e => e.querySelector('.upd-en') && e.querySelector('details.upd-orig'))), 'English original title + collapsible original summary kept');
+  eq(await page.$$eval('.updates.home [data-ut]', l => l.length), 0, 'full list / filters hidden from home');
+  ok((await text('.updates.home .upd-more')).includes(String(LIVE.items.length)), 'button shows total count');
+  await page.click('.updates.home .upd-more'); await page.waitForSelector('.upd-all');
+  eq(await page.evaluate(() => location.hash), '#/updates', '"ดูข่าวทั้งหมด" opens updates page');
+  eq(await page.$$eval('.updates .feat-list .upd', l => l.length), 3, 'updates page: 3 featured on top');
+  ok(!(await page.$eval('.upd-all', d => d.open)) && !(await page.isVisible('.upd-all [data-upd-list]')), 'all news hidden until clicked');
+  await page.click('.upd-all > summary');
+  eq(await page.$$eval('.upd-all .upd', l => l.length), LIVE.items.length, 'click → all items listed');
+  const known = LIVE.items.find(i => TH[i.id] && i.preview && /CY2026/.test(i.preview));
+  ok((await page.$eval(`.upd-all .upd a[href$="id=${known.id}"]`, a => a.textContent)).includes(TH[known.id].t), 'translated headline from data/updates-th.json');
+  ok((await page.$eval(`.upd-all .upd a[href$="id=${known.id}"]`, a => a.closest('.upd').querySelector('.upd-d').textContent)).includes('2569'), 'timeline converted to Thai months / พ.ศ.');
+  const auto = await page.$eval('.upd-all .upd a[href$="id=999001"]', a => a.closest('.upd').textContent);
+  ok(auto.includes('LIVE TEST: Copilot agent item') && auto.includes('ยังไม่มีคำอธิบายภาษาไทย'), 'brand-new item without translation gets an automatic Thai summary');
+  await page.click('.upd-all [data-ut="agent"]');
+  ok(await page.$$eval('.upd-all .upd', l => l.length > 0 && l.every(e => e.dataset.topic === 'agent')), 'topic filter Agent');
   ok(await page.$$eval('.upd-t', l => l.every(a => a.href.startsWith('https://www.microsoft.com/microsoft-365/roadmap?id=') && a.target === '_blank')), 'items link to official roadmap');
+  ok((await text('.upd-legend')).includes('Preview'), 'status legend explains Preview / GA');
   const p2 = await ctx.newPage(); apiMode = 'fail';
   await p2.goto(url); await p2.waitForSelector('.updates.home'); await p2.waitForTimeout(500);
   ok((await p2.textContent('.updates [data-upd-meta]')).includes('ข้อมูล ณ การ build ล่าสุด'), 'falls back to build snapshot when API unavailable');
-  eq(await p2.$$eval('.updates.home .upd', l => l.length), 6, 'snapshot items rendered');
+  eq(await p2.$$eval('.updates.home .upd', l => l.length), 3, 'snapshot: 3 featured rendered');
   await p2.close(); apiMode = 'live';
   ok(SNAP.items.length >= 20 && SNAP.items.every(i => /^https:\/\/www\.microsoft\.com\//.test(i.url) && i.title), 'snapshot holds real Copilot roadmap items (' + SNAP.items.length + ', fetched ' + SNAP.fetchedAt + ')');
+  eq(SNAP.items.filter(i => !TH[i.id]).length, 0, 'every snapshot item has a Thai translation');
+});
+await suite('Email gate (once per device)', async () => {
+  const gctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  const g = await gctx.newPage(); const errs = []; g.on('pageerror', e => errs.push(e.message));
+  await g.goto(url); await g.waitForSelector('#gate');
+  ok(!(await g.$('.hero')), 'content not rendered before email');
+  ok(await g.$eval('#topbar', e => e.inert && e.getAttribute('aria-hidden') === 'true'), 'app behind gate is inert');
+  await g.keyboard.press('Control+K'); ok(await g.isHidden('#cmd'), 'shortcuts disabled while gated');
+  await g.fill('#gateEmail', 'not-an-email'); await g.click('.gate-go');
+  ok((await g.textContent('#gateErr')).includes('รูปแบบ'), 'invalid format rejected');
+  await g.fill('#gateEmail', 'stranger@example.com'); await g.click('.gate-go'); await g.waitForTimeout(100);
+  ok((await g.textContent('#gateErr')).includes('ยังไม่มีสิทธิ์'), 'email not on list rejected');
+  ok(await g.$('#gate'), 'still locked');
+  await g.fill('#gateEmail', '  ' + TEST_EMAIL.toUpperCase() + ' '); await g.click('.gate-go');
+  await g.waitForSelector('.hero');
+  ok(!(await g.$('#gate')), 'allowed email (any case/spaces) opens the app');
+  const stored = await g.evaluate(() => localStorage.getItem('cpa26-gate'));
+  ok(/"h":"[0-9a-f]{64}"/.test(stored) && !stored.includes(TEST_EMAIL), 'device stores only the SHA-256 hash (+ masked email), not the email');
+  const html = await g.content();
+  ok(!html.includes(TEST_EMAIL), 'allowed emails are not present in the page (hashes only)');
+  ok(!/"h":\[[^\]]*@/.test(fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8').match(/id="gate-cfg">([\s\S]*?)<\/script>/)[1]), 'dist gate config holds no plain-text emails');
+  await g.reload(); await g.waitForSelector('.hero');
+  ok(!(await g.$('#gate')), 'remembered after reload');
+  const g2 = await gctx.newPage(); await g2.goto(url + '#/agents'); await g2.waitForSelector('#main h1');
+  ok(!(await g2.$('#gate')), 'remembered when the app is opened again (new tab/window)');
+  await g2.close();
+  await g.click('#bbToc'); await g.waitForTimeout(250);
+  ok((await g.textContent('#sbApp')).includes('le•••r@example.com') && await g.isVisible('#sbApp [data-app-act="update"]'), 'phone: drawer shows masked email + update/install/sign-out');
+  await Promise.all([g.waitForNavigation(), g.click('#sbApp [data-app-act="signout"]')]);
+  await g.waitForSelector('#gate'); ok(true, 'sign out → asks for email again');
+  await g.evaluate(() => localStorage.setItem('cpa26-gate', JSON.stringify({ h: 'f'.repeat(64), m: 'x' })));
+  await g.reload(); await g.waitForSelector('#gate');
+  ok((await g.textContent('.gate-sub')).includes('ไม่อยู่ในรายชื่อ'), 'removed from list → access revoked on next open');
+  await g.fill('#gateEmail', TEST_EMAIL); await g.press('#gateEmail', 'Enter'); await g.waitForSelector('.hero');
+  ok(true, 'Enter key submits');
+  eq(errs.length, 0, 'no page errors');
+  await gctx.close();
+});
+await suite('PWA + refresh / update app', async () => {
+  const pctx = await seededContext(browser, { viewport: { width: 820, height: 1180 } });
+  const p = await pctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+  await p.goto(url); await p.waitForSelector('.hero');
+  const man = await p.evaluate(async () => { const l = document.querySelector('link[rel="manifest"]'); const r = await fetch(l.href); return { ct: r.headers.get('content-type'), j: await r.json() }; });
+  ok(man.j.display === 'standalone' && man.j.start_url && man.j.short_name, 'web app manifest (standalone)');
+  ok(['192x192', '512x512'].every(sz => man.j.icons.some(i => i.sizes === sz)) && man.j.icons.some(i => i.purpose === 'maskable'), 'manifest icons 192 / 512 / maskable');
+  const dims = await p.evaluate(async srcs => Promise.all(srcs.map(s => new Promise(res => { const im = new Image(); im.onload = () => res(im.naturalWidth + 'x' + im.naturalHeight); im.onerror = () => res('ERR'); im.src = s; }))), [...man.j.icons.map(i => i.src), 'icons/apple-touch-icon.png']);
+  eq(dims.join(','), [...man.j.icons.map(i => i.sizes), '180x180'].join(','), 'icon files load at the declared sizes');
+  ok(await p.$('link[rel="apple-touch-icon"]') && await p.$('meta[name="apple-mobile-web-app-capable"]'), 'iOS home-screen icon + meta');
+  await p.evaluate(() => navigator.serviceWorker.ready);
+  await p.waitForFunction(() => navigator.serviceWorker.controller || (location.reload(), false), null, { timeout: 10000 }).catch(() => {});
+  await p.waitForSelector('.hero');
+  ok(await p.evaluate(() => !!navigator.serviceWorker.controller), 'service worker controls the page');
+  ok(await p.evaluate(async () => (await caches.keys()).some(k => k.startsWith('cpa26-'))), 'app shell precached');
+  await pctx.setOffline(true);
+  await p.reload(); await p.waitForSelector('.hero', { timeout: 10000 });
+  ok(true, 'opens offline (from service-worker cache)');
+  await p.goto(url + '#/d/2'); await p.waitForSelector('#main .deep-body', { timeout: 10000 });
+  ok(true, 'deep lesson opens offline');
+  await p.click('#updateBtn'); await p.waitForTimeout(400);
+  ok((await p.textContent('#toast')).includes('ออฟไลน์'), 'refresh while offline explains it uses the saved version');
+  await pctx.setOffline(false);
+  await p.goto(url); await p.waitForSelector('.hero');
+  await p.click('#updateBtn');
+  await p.waitForFunction(() => /เป็นเวอร์ชันล่าสุดแล้ว/.test(document.querySelector('#toast').textContent), null, { timeout: 10000 });
+  ok(true, 'refresh button: up to date → refreshes data and says so');
+  const V = JSON.parse(fs.readFileSync(path.join(ROOT, 'dist', 'version.json'), 'utf8'));
+  await p.route('**/version.json*', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...V, version: '9.9.9', build: 'next-build' }) }));
+  await p.reload(); await p.waitForSelector('#updBanner', { timeout: 10000 });
+  ok((await text2(p, '#updBanner')).includes('9.9.9') && await p.isVisible('#updateBtn .upd-dot'), 'new version detected automatically → banner + dot on refresh button');
+  await Promise.all([p.waitForNavigation({ timeout: 20000 }), p.click('#updBanner [data-upd-now]')]);
+  await p.waitForSelector('.hero'); ok(true, '"อัปเดตเลย" installs the new version and reloads');
+  await p.unroute('**/version.json*');
+  await p.click('#toolsBtn');
+  ok(await p.isVisible('#toolsMenu [data-app-act="update"]') && await p.isVisible('#toolsMenu [data-app-act="install"]'), 'tools menu: refresh/update + install app');
+  await p.click('#toolsMenu [data-app-act="install"]'); await p.waitForTimeout(200);
+  ok((await p.textContent('#toast')).length > 10, 'install shows how to add to home screen');
+  eq(errs.length, 0, 'no page errors');
+  await pctx.close();
 });
 
 await suite('Version + credit', async () => {
@@ -420,7 +517,9 @@ await suite('Storage unavailable', async () => {
   const p2 = await ctx.newPage();
   await p2.addInitScript(() => { Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } }); });
   const errs = []; p2.on('pageerror', e => errs.push(e.message));
-  await p2.goto(url + '#/p/33'); await p2.waitForSelector('#main h1');
+  await p2.goto(url + '#/p/33'); await p2.waitForSelector('#gate');
+  await p2.fill('#gateEmail', TEST_EMAIL); await p2.click('.gate-go'); await p2.waitForSelector('#main h1');
+  ok(true, 'without storage the gate asks every visit, then works');
   await p2.click('#doneBtn');
   eq(errs.length, 0, 'no errors when localStorage throws');
   await p2.close();
@@ -488,7 +587,7 @@ await suite('T12 Accessibility', async () => {
   const axePath = process.env.AXE;
   if (axePath && fs.existsSync(axePath)) {
     const viol = {};
-    const actx = await browser.newContext({ viewport: { width: 1440, height: 900 }, bypassCSP: true, reducedMotion: 'reduce' }); // CSP would block the injected axe script
+    const actx = await seededContext(browser, { serviceWorkers: 'block', viewport: { width: 1440, height: 900 }, bypassCSP: true, reducedMotion: 'reduce' }); // CSP would block the injected axe script
     const p = await actx.newPage();
     for (const r of ['#/', '#/p/2', '#/p/14', '#/p/33', '#/p/34', '#/p/9', '#/p/23', '#/p/70', '#/agents', '#/builder/1', '#/progress']) {
       for (const theme of ['light', 'dark']) {
