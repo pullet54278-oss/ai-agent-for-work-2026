@@ -901,3 +901,7 @@ body.gated{overflow:hidden}
 .sb-app-btns{display:flex;flex-wrap:wrap;gap:4px}
 .sb-app-btns .btn{min-height:34px;padding:4px 10px;font-size:13px}
 .sb-ver{margin:4px 0 0;font-size:11.5px;color:var(--ink-2)}
+.gate-icon{width:88px;height:88px;align-self:center;margin:-4px 0 2px;filter:drop-shadow(0 10px 22px rgba(118,80,207,.28));animation:float 6s ease-in-out infinite}
+.gate-logos{justify-content:center}
+.gate h1,.gate-sub{text-align:center}
+@media (prefers-reduced-motion:reduce){.gate-icon{animation:none}}

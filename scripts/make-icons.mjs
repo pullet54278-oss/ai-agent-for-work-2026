@@ -12,11 +12,19 @@ const src = own || path.join(ROOT, 'assets', 'logo.png');
 fs.mkdirSync(OUT, { recursive: true });
 const im = args => execFileSync('convert', args, { stdio: 'inherit' });
 
-// "any" icons: the full image; when only the wide logo exists, centre it on a white tile
-// maskable: content kept inside the 80% safe zone on a white background
-const sizes = [['icon-192.png', 192, 0.86], ['icon-512.png', 512, 0.86], ['apple-touch-icon.png', 180, 0.84], ['favicon-32.png', 32, 0.96], ['maskable-512.png', 512, 0.66]];
-for (const [name, s, fit] of sizes) {
-  const inner = Math.round(s * (own && !name.startsWith('maskable') ? 1 : fit));
-  im([src, '-background', 'white', '-alpha', 'remove', '-resize', `${inner}x${inner}`, '-gravity', 'center', '-extent', `${s}x${s}`, '-strip', path.join(OUT, name)]);
+const BG = '#F4F3F9'; // matches the light glass tile of the owner's icon
+// clean faint speckles in the soft glow edge (alpha < ~12%) before scaling
+const clean = ['-channel', 'A', '-level', '12%,100%', '+channel'];
+// [file, size, content fraction, flatten on BG?]
+//  any (Android/desktop): transparent · apple-touch (iOS shows transparency as black): flattened, full bleed
+//  maskable: flattened, content inside the 80% safe zone
+const sizes = own
+  ? [['icon-192.png', 192, 1, false], ['icon-512.png', 512, 1, false], ['favicon-32.png', 32, 1, false], ['apple-touch-icon.png', 180, 1.06, true], ['maskable-512.png', 512, 0.84, true]]
+  : [['icon-192.png', 192, 0.86, true], ['icon-512.png', 512, 0.86, true], ['favicon-32.png', 32, 0.96, true], ['apple-touch-icon.png', 180, 0.84, true], ['maskable-512.png', 512, 0.66, true]];
+for (const [name, s, fit, flat] of sizes) {
+  const inner = Math.round(s * fit);
+  const args = [src, ...(own ? clean : []), '-filter', 'Lanczos', '-resize', `${inner}x${inner}`, '-background', flat ? (own ? BG : 'white') : 'none', '-gravity', 'center', '-extent', `${s}x${s}`];
+  if (flat) args.push('-alpha', 'remove', '-alpha', 'off');
+  im([...args, '-strip', path.join(OUT, name)]);
 }
 console.log(`icons from ${path.relative(ROOT, src)} → assets/icons/ (${sizes.map(s => s[0]).join(', ')})`);

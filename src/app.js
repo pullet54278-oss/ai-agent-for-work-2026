@@ -963,7 +963,7 @@ function gateThen(go) {
   document.body.classList.add('gated');
   const old = store.get(GATE_KEY, null);
   document.body.insertAdjacentHTML('beforeend', `<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT"><form class="gate-card" id="gateForm" novalidate>
-    <div class="gate-logos"><span class="logo-chip"><img src="logo.png" alt="AI Agent for Work" width="140" height="39"></span>${D.meta.copilotLogo ? `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="40" height="40">` : ''}</div>
+    <img class="gate-icon" src="icons/icon-192.png" alt="" width="88" height="88"><div class="gate-logos"><span class="logo-chip"><img src="logo.png" alt="AI Agent for Work" width="140" height="39"></span>${D.meta.copilotLogo ? `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="40" height="40">` : ''}</div>
     <h1 id="gateT"><span>Copilot</span> AI Agents for Work 2026</h1>
     <p class="gate-sub">${old ? 'Email ที่เคยใช้ในเครื่องนี้ไม่อยู่ในรายชื่อผู้มีสิทธิ์แล้ว กรุณากรอก Email ใหม่' : 'กรอก Email ที่ลงทะเบียนไว้เพื่อเข้าใช้งาน · กรอกครั้งเดียวต่อเครื่อง ครั้งต่อไปเปิดแอปเข้าได้ทันที'}</p>
     <label for="gateEmail">Email</label>
