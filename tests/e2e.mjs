@@ -209,7 +209,7 @@ await suite('Email gate (once per device)', async () => {
   ok(!(await g2.$('#gate')), 'remembered when the app is opened again (new tab/window)');
   await g2.close();
   await g.click('#bbToc'); await g.waitForTimeout(250);
-  ok((await g.textContent('#sbApp')).includes('le•••r@example.com') && await g.isVisible('#sbApp [data-app-act="update"]'), 'phone: drawer shows masked email + update/install/sign-out');
+  ok((await g.textContent('#sbApp')).includes('le•••r@e•••.com') && await g.isVisible('#sbApp [data-app-act="update"]'), 'phone: drawer shows masked email + update/install/sign-out');
   await Promise.all([g.waitForNavigation(), g.click('#sbApp [data-app-act="signout"]')]);
   await g.waitForSelector('#gate'); ok(true, 'sign out → asks for email again');
   await g.evaluate(() => localStorage.setItem('cpa26-gate', JSON.stringify({ h: 'f'.repeat(64), m: 'x' })));

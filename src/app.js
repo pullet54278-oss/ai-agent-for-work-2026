@@ -953,7 +953,8 @@ async function sha256(str) {
   try { if (crypto && crypto.subtle) return [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)))].map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { /* fall back */ }
   return sha256js(str);
 }
-const maskEmail = e => { const [u, d] = e.split('@'); return (u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '•••' + u.slice(-1)) + '@' + d; };
+// mask both parts: no full name and no organisation domain is ever shown on screen
+const maskEmail = e => { const [u, d] = e.split('@'); const dot = d.indexOf('.'); return (u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '•••' + u.slice(-1)) + '@' + d[0] + '•••' + (dot > 0 ? d.slice(dot) : ''); };
 let gatePassed = false; // this session (also covers browsers where storage is blocked)
 const gateOk = () => { if (!GATE.on || gatePassed) return true; const g = store.get(GATE_KEY, null); return !!(g && g.h && GATE.h.includes(g.h)); };
 function gateThen(go) {

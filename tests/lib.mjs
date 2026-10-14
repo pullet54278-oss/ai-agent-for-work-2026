@@ -28,7 +28,7 @@ export const TEST_GATE = { on: true, salt: GATE_SALT, h: [hashEmail(TEST_EMAIL),
 // init script: mark this device as already signed in (served pages: test email · file://: first real allowed email, if any)
 export function gateSeed() {
   const real = loadAllowed(ROOT).emails[0];
-  return { script: ({ a, b }) => { try { if (!localStorage.getItem('cpa26-gate')) localStorage.setItem('cpa26-gate', JSON.stringify({ h: location.protocol === 'file:' ? b : a, m: 'le•••r@example.com', at: '2026-10-14T00:00:00Z' })); } catch (e) { } }, arg: { a: hashEmail(TEST_EMAIL), b: real ? hashEmail(real) : '' } };
+  return { script: ({ a, b }) => { try { if (!localStorage.getItem('cpa26-gate')) localStorage.setItem('cpa26-gate', JSON.stringify({ h: location.protocol === 'file:' ? b : a, m: 'le•••r@e•••.com', at: '2026-10-14T00:00:00Z' })); } catch (e) { } }, arg: { a: hashEmail(TEST_EMAIL), b: real ? hashEmail(real) : '' } };
 }
 export async function seededContext(browser, opts = {}) {
   const ctx = await browser.newContext(opts); const s = gateSeed(); await ctx.addInitScript(s.script, s.arg); return ctx;

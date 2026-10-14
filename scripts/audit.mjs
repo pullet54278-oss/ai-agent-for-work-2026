@@ -135,7 +135,7 @@ const docNo = html.replace(/<svg[\s\S]*?<\/svg>/g, '').match(/\b(?:SOP|WI|QP|FM|
 const { loadAllowed } = await import('./lib/gate.mjs');
 const allowedEmails = loadAllowed(ROOT).emails;
 const distAll = fs.readdirSync(path.join(ROOT, 'dist'), { recursive: true }).filter(f => /\.(html|js|json|webmanifest|txt)$/.test(f)).map(f => fs.readFileSync(path.join(ROOT, 'dist', f), 'utf8')).join('\n');
-report.forbidden = { allowedEmailsChecked: allowedEmails.length, plainEmailsInDist: allowedEmails.filter(e => distAll.toLowerCase().includes(e)).length, termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), jobTitles: [...new Set(html.match(/\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])], documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
+report.forbidden = { allowedEmailsChecked: allowedEmails.length, plainEmailsInDist: allowedEmails.filter(e => distAll.toLowerCase().includes(e)).length, termsChecked: terms.length, hits: terms.filter(t => html.toLowerCase().includes(t.toLowerCase())), jobTitles: [...new Set(html.match(/\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])], documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
 
 await browser.close(); srv.close();
 fs.writeFileSync(path.join(ROOT, 'docs', 'audit-report.json'), JSON.stringify(report, null, 2));
