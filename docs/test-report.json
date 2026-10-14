@@ -1,14 +1,30 @@
 {
-  "generatedAt": "2026-10-14T01:12:21.479Z",
-  "pass": 179,
+  "generatedAt": "2026-10-14T02:51:17.071Z",
+  "pass": 234,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
-      "pass": 15,
+      "pass": 21,
       "fail": 0
     },
     "Brand + illustrations": {
       "pass": 8,
+      "fail": 0
+    },
+    "Copilot Agent first + learning paths": {
+      "pass": 9,
+      "fail": 0
+    },
+    "Deep Learning 36 lessons": {
+      "pass": 28,
+      "fail": 0
+    },
+    "Auto-updates (Microsoft 365 Roadmap)": {
+      "pass": 9,
+      "fail": 0
+    },
+    "Version + credit": {
+      "pass": 3,
       "fail": 0
     },
     "T5 Search (Ctrl+K)": {

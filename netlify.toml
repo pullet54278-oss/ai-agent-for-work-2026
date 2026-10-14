@@ -1,4 +1,4 @@
-# Netlify: build from the Markdown source on every deploy
+# Netlify: build from the Markdown/HTML sources on every deploy
 [build]
   command = "npm run build"
   publish = "dist"
@@ -8,10 +8,10 @@
   # tests use Playwright locally only; never download browsers on Netlify
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 
-# Security headers (incl. a CSP with per-build script hashes) are generated into dist/_headers by scripts/build.mjs.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
-[[redirects]]
-  # single-page app with hash routing: unknown paths fall back to the app
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Security headers for static files (incl. a CSP with per-build script hashes) are generated into
+# dist/_headers by scripts/build.mjs. Function responses set their own headers in code.
+# The app uses hash routing (#/...), so no SPA rewrite rule is needed.

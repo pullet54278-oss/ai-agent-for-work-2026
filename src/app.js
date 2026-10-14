@@ -15,11 +15,18 @@ const store = {
 };
 
 // ---------- data ----------
-const TOTAL = D.meta.totalPages;
+const DEEP0 = 1000;
+const TOTAL = D.meta.totalPages + D.meta.deepTotal;
 const HOME = { n: 1, title: 'หน้าแรก: Copilot AI Agents for Work 2026', type: 'home', chapter: 1, icon: 'home', typeLabel: 'หน้าแรก' };
-const PAGES = [HOME, ...D.pages].sort((a, b) => a.n - b.n);
+const DEEPCH = D.deepGroups.map((g, i) => ({ n: 101 + i, key: g.key, title: g.th, en: g.name, desc: g.desc, group: g.key, goals: [], deep: true, pages: D.deepIndex.filter(l => l.group === g.key).map(l => DEEP0 + l.n), agents: 0 }));
+const DEEPP = D.deepIndex.map(l => ({ n: DEEP0 + l.n, k: l.n, title: l.title, type: 'deep', typeLabel: 'Deep Learning', icon: 'hat_graduation', chapter: DEEPCH.find(c => c.key === l.group).n, header: { short: l.outcome ? 'ผลลัพธ์หลังเรียน: ' + l.outcome : '' }, outcome: l.outcome, text: l.text, html: null }));
+const PAGES = [HOME, ...D.pages, ...DEEPP].sort((a, b) => a.n - b.n);
 const PI = new Map(PAGES.map(p => [p.n, p]));
-const CH = new Map(D.chapters.map(c => [c.n, c]));
+const CH = new Map([...D.chapters, ...DEEPCH].map(c => [c.n, c]));
+const ALLCH = [...D.chapters, ...DEEPCH];
+const isDeep = n => n > DEEP0;
+const hrefOf = n => isDeep(n) ? `#/d/${n - DEEP0}` : `#/p/${n}`;
+const refN = r => { const [k, v] = r.split(':'); return k === 'd' ? DEEP0 + +v : +v; };
 const AG = D.agents;
 const AGL = Object.values(AG).sort((a, b) => a.id - b.id);
 CH.get(1).pages = [1, ...CH.get(1).pages];
@@ -69,7 +76,7 @@ function toggleDone(n) {
   if (done.has(n)) done.delete(n); else { done.add(n); visited.add(n); }
   saveProgress(); updateProgress(); renderTOC();
   const b = $('#doneBtn'); if (b) setDoneBtn(b, done.has(n));
-  if (!before && chapterDone(ch) === ch.pages.length) toast(`จบบทที่ ${ch.n} แล้ว`);
+  if (!before && chapterDone(ch) === ch.pages.length) toast(ch.deep ? `จบกลุ่ม ${ch.title} แล้ว` : `จบบทที่ ${ch.n} แล้ว`);
   else if (done.has(n)) toast('บันทึกว่าเรียนหน้านี้แล้ว');
 }
 function setDoneBtn(b, is) {
@@ -83,13 +90,13 @@ const openCh = new Set(store.get('cpa26-open', []));
 function renderTOC() {
   const q = $('#tocQ').value.trim().toLowerCase();
   const g = $('#tocGroup').value;
-  const html = D.chapters.map(ch => {
+  const html = ALLCH.map(ch => {
     const pages = ch.pages.map(n => PI.get(n)).filter(p => (!g || pageGroup(p) === g || (p.type === 'module' && ch.group === g)) && (!q || p.title.toLowerCase().includes(q) || String(p.n) === q));
     if (!pages.length) return '';
     const exp = q || g || openCh.has(ch.n) || (cur && cur.chapter === ch.n);
     const d = chapterDone(ch);
-    return `<div class="ch" style="${gvar(ch.group)}"><button type="button" class="ch-h" data-ch="${ch.n}" aria-expanded="${!!exp}" aria-controls="pl-${ch.n}">${ic('chevron_right', 'chev')}<span class="ch-n">${String(ch.n).padStart(2, '0')}</span><span class="ch-t">${esc(ch.title)}</span>${ring(d, ch.pages.length)}<span class="sr-only">เรียนแล้ว ${d} จาก ${ch.pages.length} หน้า</span></button>
-    <ul class="pl" id="pl-${ch.n}" ${exp ? '' : 'hidden'}>${pages.map(p => `<li style="${gvar(pageGroup(p))}"><a href="#/p/${p.n}" ${cur && cur.n === p.n ? 'aria-current="page"' : ''}><span class="pn">${p.n}</span><span class="pt">${esc(p.title)}</span><span class="dot ${done.has(p.n) ? 'd' : visited.has(p.n) ? 'v' : ''}" title="${done.has(p.n) ? 'เรียนแล้ว' : visited.has(p.n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`).join('')}</ul></div>`;
+    return `${ch.n === 101 ? '<p class="sb-sec">' + ic('hat_graduation') + ' <span>Deep Learning · 36 บทเชิงลึก</span></p>' : ''}<div class="ch" style="${gvar(ch.group)}"><button type="button" class="ch-h" data-ch="${ch.n}" aria-expanded="${!!exp}" aria-controls="pl-${ch.n}">${ic('chevron_right', 'chev')}<span class="ch-n">${ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span class="ch-t">${esc(ch.title)}</span>${ring(d, ch.pages.length)}<span class="sr-only">เรียนแล้ว ${d} จาก ${ch.pages.length} หน้า</span></button>
+    <ul class="pl" id="pl-${ch.n}" ${exp ? '' : 'hidden'}>${pages.map(p => `<li style="${gvar(pageGroup(p))}"><a href="${hrefOf(p.n)}" ${cur && cur.n === p.n ? 'aria-current="page"' : ''}><span class="pn">${isDeep(p.n) ? p.k : p.n}</span><span class="pt">${esc(p.title)}</span><span class="dot ${done.has(p.n) ? 'd' : visited.has(p.n) ? 'v' : ''}" title="${done.has(p.n) ? 'เรียนแล้ว' : visited.has(p.n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`).join('')}</ul></div>`;
   }).join('');
   $('#tocList').innerHTML = html || '<p class="empty">ไม่พบหน้าที่ตรงกับตัวกรอง</p>';
 }
@@ -102,7 +109,9 @@ const SCENES = {
   eng: ['wrench', 'settings', 'flash'], ci: ['arrow_trending_lines', 'target_arrow', 'lightbulb'], rep: ['board', 'slide_text', 'document_text'],
   pb: ['people_community', 'scales', 'heart_pulse'], hat: ['heart_pulse', 'timer', 'clipboard_task'], brl: ['shield_task', 'heart_pulse', 'data_bar_vertical'],
   lp: ['vehicle_truck', 'timer', 'compass_northwest'], erp: ['receipt', 'apps', 'cart'], feed: ['food_grains', 'building_factory', 'scales'],
-  lab: ['beaker', 'eye', 'shield_checkmark'], qms: ['shield_checkmark', 'document_bullet_list', 'ribbon'], cis: ['leaf_two', 'arrow_sync', 'cloud']
+  lab: ['beaker', 'eye', 'shield_checkmark'], qms: ['shield_checkmark', 'document_bullet_list', 'ribbon'], cis: ['leaf_two', 'arrow_sync', 'cloud'],
+  d1: ['lightbulb', 'book_open', 'sparkle'], d2: ['window', 'table', 'slide_text'], d3: ['bot', 'flowchart', 'plug_connected'], d4: ['shield_checkmark', 'lock_closed', 'eye'],
+  d5: ['data_bar_vertical', 'clipboard_task', 'leaf_two'], d6: ['hat_graduation', 'trophy', 'rocket']
 };
 const CH_ICON = { intro: 'lightbulb', pmode: 'sparkle', acct: 'people_team', build: 'toolbox', personal: 'person', handoff: 'mail', wf: 'flowchart', office: 'window', arch: 'organization' };
 let illN = 0;
@@ -153,23 +162,26 @@ const art = icon => illus('gen', icon);
 function headerHTML(p) {
   const ch = CH.get(p.chapter);
   const a = p.agent ? AG[p.agent] : null;
-  const crumb = `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/p/${moduleOf(ch)}">บทที่ ${ch.n} · ${esc(ch.title)}</a><span class="pill">${ic(p.icon)}<span>${esc(p.typeLabel)}</span></span><span class="pill">หน้า ${p.n} / ${TOTAL}</span></nav>`;
+  const crumb = isDeep(p.n)
+    ? `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/deep">Deep Learning</a><span aria-hidden="true">›</span><span>${esc(ch.title)}</span><span class="pill">${ic('hat_graduation')}<span>บทเชิงลึก ${p.k} / ${D.meta.deepTotal}</span></span></nav>`
+    : `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/p/${moduleOf(ch)}">บทที่ ${ch.n} · ${esc(ch.title)}</a><span class="pill">${ic(p.icon)}<span>${esc(p.typeLabel)}</span></span><span class="pill">หน้า ${p.n} / ${D.meta.totalPages}</span></nav>`;
   let meta = '';
   if (p.type === 'agent' || p.type === 'agentflow') {
     const ready = p.header.ready || a.readinessName;
     meta = `<div class="ph-meta"><span class="pill g">${ic(D.groups[a.group].icon)}<span>${esc(p.header.group || a.groupName)}</span></span>${readyBadge(ready)}<span class="pill">${ic('bot')}<span>Agent #${a.id}</span></span></div>`;
   }
   const big = p.type === 'module';
-  return `<header class="ph${big ? ' ph-module' : ''}">${illus(pageGroup(p), p.type === 'agent' || p.type === 'agentflow' ? 'bot' : big ? (CH_ICON[ch.key] || null) : p.icon, 'ph-art')}${crumb}<h1>${esc(p.title)}</h1>${p.header.short ? `<p class="short">${esc(p.header.short)}</p>` : ''}${meta}</header>`;
+  if (isDeep(p.n)) meta = `<div class="ph-meta"><span class="pill g">${ic(D.deepGroups.find(g => g.key === ch.key).icon)}<span>${esc(ch.en)}</span></span>${p.outcome ? `<span class="pill">${ic('target_arrow')}<span>ผลลัพธ์หลังเรียน</span></span>` : ''}</div>`;
+  return `<header class="ph${big ? ' ph-module' : ''}">${illus(pageGroup(p), p.type === 'agent' || p.type === 'agentflow' ? 'bot' : big ? (CH_ICON[ch.key] || null) : isDeep(p.n) ? null : p.icon, 'ph-art')}${crumb}<h1>${esc(p.title)}</h1>${p.header.short ? `<p class="short">${esc(p.header.short)}</p>` : ''}${meta}</header>`;
 }
 const READYK = { 'Copilot-assisted': 'assist', 'Connected Automation': 'connected', 'Concept Design': 'concept' };
 function readyBadge(name) { const k = READYK[name] || 'assist'; return `<span class="ready ready-${k}" title="${esc(D.readiness[k].th)}">${ic(k === 'connected' ? 'plug_connected' : k === 'concept' ? 'lightbulb' : 'sparkle')}<span>${esc(name)}</span></span>`; }
 function pagerHTML(n) {
   const i = PAGES.findIndex(p => p.n === n);
   const pv = PAGES[i - 1], nx = PAGES[i + 1];
-  return `<nav class="pager" aria-label="เปลี่ยนหน้า">${pv ? `<a href="#/p/${pv.n}" rel="prev"><small>← ก่อนหน้า</small><b>${esc(pv.title)}</b></a>` : ''}${nx ? `<a class="nx" href="#/p/${nx.n}" rel="next"><small>เรียนต่อ →</small><b>${esc(nx.title)}</b></a>` : ''}</nav>`;
+  return `<nav class="pager" aria-label="เปลี่ยนหน้า">${pv ? `<a href="${hrefOf(pv.n)}" rel="prev"><small>← ก่อนหน้า</small><b>${esc(pv.title)}</b></a>` : ''}${nx ? `<a class="nx" href="${hrefOf(nx.n)}" rel="next"><small>เรียนต่อ →</small><b>${esc(nx.title)}</b></a>` : ''}</nav>`;
 }
-const copyLine = () => `<p class="copy-line">${esc(D.meta.copyright)}</p>`;
+const copyLine = () => `<p class="copy-line">${esc(D.meta.copyright)}</p><p class="ver-line">เวอร์ชัน ${esc(D.meta.version)} · ผู้สร้าง ${esc(D.meta.author)} · build ${esc(D.meta.built)}</p>`;
 
 // ---------- router ----------
 function route() {
@@ -177,6 +189,11 @@ function route() {
   closeDrawer(); closeMenus(); clearTimers();
   const m = h.match(/^p\/(\d+)$/);
   if (m && PI.has(+m[1])) return +m[1] === 1 ? renderHome() : renderPage(+m[1]);
+  const dm = h.match(/^d\/(\d+)$/); if (dm && PI.has(DEEP0 + +dm[1])) return renderPage(DEEP0 + +dm[1]);
+  if (h === 'deep') return renderDeepHome();
+  const tm = h.match(/^track\/([a-z]+)$/); if (tm && D.tracks.some(t => t.key === tm[1])) return renderTrack(tm[1]);
+  if (h === 'tracks') return renderTracks();
+  if (h === 'updates') return renderUpdatesPage();
   if (h === 'agents') return renderDirectoryPage();
   const b = h.match(/^builder(?:\/(\d+))?$/); if (b) return renderStudio(b[1] ? +b[1] : null);
   if (h === 'progress') return renderProgress();
@@ -195,9 +212,14 @@ function setMain(html, title, n) {
 }
 
 function renderPage(n) {
-  const p = PI.get(n); cur = p;
+  const p = PI.get(n);
+  if (isDeep(n) && p.html == null) {
+    $('#main').innerHTML = '<div class="wrap"><p class="empty">' + ic('arrow_sync') + ' กำลังโหลดบทเรียนเชิงลึก…</p></div>';
+    return loadDeep().then(() => { if (location.hash === hrefOf(n)) renderPage(n); }, () => { $('#main').innerHTML = '<div class="wrap"><p class="empty">โหลดบทเรียนเชิงลึกไม่ได้ (ไฟล์ deep-data.js)</p></div>'; });
+  }
+  cur = p;
   visited.add(n); saveProgress(); store.set('cpa26-last', n);
-  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}<div class="content">${p.html}</div>${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
+  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}<div class="content${isDeep(n) ? ' deep-body' : ''}">${p.html}</div>${isDeep(n) ? '' : relatedHTML(n)}${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
   setDoneBtn($('#doneBtn'), done.has(n));
   mount($('#main'), p);
   renderTOC(); scrollTocToCurrent(); updateProgress();
@@ -211,6 +233,9 @@ function mount(root, p) {
   $$('[data-calc]', root).forEach(initCalc);
   $$('[data-tabs]', root).forEach(initTabs);
   $$('.vlist', root).forEach(el => initChecklist(el, p ? p.n : 0));
+  $$('[data-quiz]', root).forEach(initQuiz);
+  $$('[data-deep-pb]', root).forEach(initDeepPB);
+  $$('[data-decision]', root).forEach(initDecision);
 }
 
 // ---------- tabs ----------
@@ -232,6 +257,9 @@ function initTabs(box) {
 
 // ---------- supplement checklist (remembered per page) ----------
 function initChecklist(list, n) {
+  const cnt = list.parentElement && $('[data-vcount]', list.parentElement);
+  const upd = () => { if (cnt) cnt.textContent = `ทำแล้ว ${$$('input:checked', list).length}/${$$('input', list).length} ข้อ`; };
+  list.addEventListener('change', upd); setTimeout(upd);
   const all = store.get('cpa26-chk', {});
   const key = n + ':' + (list.dataset.k || '0');
   const on = new Set(all[key] || []);
@@ -421,6 +449,10 @@ const GROUPS3 = [
   ['Agent จาก Workflow งานจริง', 'Agent ที่ออกแบบจากขั้นตอนงานจริงของ 9 กระบวนการ', ['wf', 'pb', 'hat', 'brl', 'lp', 'erp', 'feed', 'lab', 'qms', 'cis']]
 ];
 const TOOLS = [
+  ['#/track/agent', 'bot', 'เส้นทาง Copilot Agent', 'เส้นทางหลัก: แนวคิด สร้าง ทดสอบ และนำ Agent ไปใช้จริง'],
+  ['#/updates', 'arrow_sync', 'อัปเดตล่าสุด Copilot', 'ข่าวฟีเจอร์ใหม่จาก Microsoft 365 Roadmap อัปเดตอัตโนมัติ'],
+  ['#/deep', 'hat_graduation', 'Deep Learning 36 บท', 'บทเรียนเชิงลึก Workshop และแบบทดสอบประจำบท'],
+  ['#/tracks', 'compass_northwest', 'เส้นทางการเรียนทั้งหมด', 'Agent · Office · เบราว์เซอร์ · Tips · งานจริง · Governance'],
   ['#/agents', 'people_team', 'Agent Directory', 'ค้นหาและกรอง Agent ทั้ง 67 ตัวตามกลุ่มงานและระดับความพร้อม'],
   ['#/builder', 'toolbox', 'Agent Builder Studio', 'เขียนการตั้งค่า Agent เอง พร้อมตัวนับและตรวจกติกา URL'],
   ['#/p/9', 'edit', 'Prompt Builder', 'กรอกงานของคุณ ได้ Prompt 3 แบบทันที'],
@@ -440,37 +472,183 @@ function heroAnim() {
   ${nodes.map(([t, s, i, x, y], k) => `<g class="node ${k === 2 ? 'agent' : ''}" transform="translate(${x} ${y})">${k === 2 ? '<rect class="pulse" x="-6" y="-6" width="192" height="92" rx="18" fill="none" stroke="url(#hgrad)" stroke-width="2"/>' : ''}<rect width="180" height="80" rx="14"/><g transform="translate(16 22) scale(1.5)" class="icon" fill="currentColor"><use href="#i-${i}" width="24" height="24"/></g><text x="64" y="38">${t}</text><text class="sub" x="64" y="58">${s}</text></g>`).join('')}
   </svg>`;
 }
+function chapterCardHTML(c) {
+  const d = chapterDone(c);
+  const deepG = c.deep ? D.deepGroups.find(g => g.key === c.key) : null;
+  return `<a class="ccard ${c.key === 'pmode' ? 'feature' : ''}" href="${hrefOf(c.deep ? c.pages[0] : moduleOf(c))}" style="${gvar(c.group)}"><span class="cc-art">${illus(c.group, c.deep ? deepG.icon : CH_ICON[c.key] || null, 'cc-svg')}</span><span class="cn">${ic(c.deep ? deepG.icon : D.groups[c.group].icon)} ${c.deep ? 'Deep Learning · ' + esc(deepG.name) : 'บทที่ ' + c.n}</span><b>${esc(c.title)}</b><small>${c.deep ? `บท ${deepG.a}–${deepG.b} · ${c.pages.length} บท` : `${c.pages.length} หน้า${c.agents ? ` · ${c.agents} Agent` : ''}`}${d ? ` · เรียนแล้ว ${d}` : ''}</small><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / c.pages.length * 100)}%"></i></span></a>`;
+}
 function renderHome() {
   cur = HOME; visited.add(1); saveProgress();
   const last = store.get('cpa26-last', null);
   const lastP = last && PI.get(last);
   const chByKey = Object.fromEntries(D.chapters.map(c => [c.key, c]));
-  const card = k => {
-    const c = chByKey[k]; if (!c) return '';
-    const d = chapterDone(c);
-    return `<a class="ccard ${k === 'pmode' ? 'feature' : ''}" href="#/p/${moduleOf(c)}" style="${gvar(c.group)}"><span class="cc-art">${illus(c.group, CH_ICON[c.key] || null, 'cc-svg')}</span><span class="cn">${ic(D.groups[c.group].icon)} บทที่ ${c.n}</span><b>${esc(c.title)}</b><small>${c.pages.length} หน้า${c.agents ? ` · ${c.agents} Agent` : ''}${d ? ` · เรียนแล้ว ${d}` : ''}</small><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / c.pages.length * 100)}%"></i></span></a>`;
-  };
   const groupsN = Object.keys(D.groups).filter(g => g !== 'gen').length;
   const mark = D.meta.copilotLogo ? `<img class="copilot-mark" src="${esc(D.meta.copilotLogo)}" alt="Microsoft Copilot" width="96" height="96">` : '';
   setMain(`<section class="hero" aria-labelledby="heroT"><div class="hero-grid"><div class="hero-txt">
     <span class="logo-chip"><img src="logo.png" alt="AI Agent for Work" width="167" height="46"></span>
     <div class="hero-word">${mark}<h1 id="heroT">Copilot</h1></div>
     <p class="hero-sub">AI Agents for Work 2026</p>
-    <p class="hero-ev"><span class="pill">${ic('hat_graduation')}<span>${esc(D.meta.event)}</span></span></p>
-    <p class="hero-desc">คู่มือเรียนรู้การใช้ Copilot ตั้งแต่แนบไฟล์และเขียน Prompt ไปจนถึงสร้าง Agent ที่ทำงานซ้ำได้ ครอบคลุมงานฟาร์ม การวางแผน การเงิน ห้องปฏิบัติการ และระบบคุณภาพ</p>
-    <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#/p/${moduleOf(chByKey.pmode)}">เริ่มที่ Prompt Mode →</a><button type="button" class="btn btn-outline btn-lg" data-open-finder>${ic('people_team')}<span>ค้นหา Agent ตามกลุ่มงาน</span></button></div>
+    <p class="hero-ev"><span class="pill">${ic('hat_graduation')}<span>${esc(D.meta.event)}</span></span><span class="pill pill-ver">${ic('tag')}<span>v${esc(D.meta.version)}</span></span></p>
+    <p class="hero-desc">คู่มือเรียนรู้ Microsoft Copilot เชิงลึก <b>เริ่มที่ Copilot Agent</b> ตั้งแต่แนวคิด สร้าง ทดสอบ จนนำไปใช้กับงานจริง ต่อด้วย Copilot ใน Excel, Word, PowerPoint การใช้งานบนเบราว์เซอร์ และเทคนิคขั้นสูง</p>
+    <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#/track/agent">${ic('bot')}<span>เริ่มเรียน Copilot Agent →</span></a><a class="btn btn-outline btn-lg" href="#/p/${moduleOf(chByKey.pmode)}">เริ่มที่ Prompt Mode →</a><button type="button" class="btn btn-subtle btn-lg" data-open-finder>${ic('people_team')}<span>ค้นหา Agent ตามกลุ่มงาน</span></button></div>
   </div><div class="hero-art">${heroScene()}</div></div></section>
+  ${updatesPanelHTML(6, true)}
+  <section class="cgroup tracks-sec"><h2 class="sec">${ic('compass_northwest')}<span>เส้นทางการเรียน</span></h2><p>เรียงตามความสำคัญ เริ่มจาก Copilot Agent · แต่ละเส้นทางรวมหน้าในคอร์สหลักและบทเรียนเชิงลึกที่พูดเรื่องเดียวกันไว้ด้วยกัน</p>${tracksGridHTML()}</section>
   <div class="stats">
     <div class="stat-tile"><span class="st-ic">${ic('bot')}</span><div><b>${AGL.length}</b><span>Agent พร้อมการตั้งค่าคัดลอกได้</span></div></div>
     <div class="stat-tile"><span class="st-ic">${ic('people_team')}</span><div><b>${groupsN}</b><span>กลุ่มงาน</span></div></div>
     <div class="stat-tile"><span class="st-ic">${ic('book_open')}</span><div><b>${D.chapters.length}</b><span>บทเรียน</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('hat_graduation')}</span><div><b>${D.meta.deepTotal}</b><span>บทเชิงลึก (Deep Learning)</span></div></div>
     <div class="stat-tile"><span class="st-ic">${ic('trophy')}</span><div><b>${done.size}</b><span>หน้าที่เรียนแล้ว จาก ${TOTAL}</span></div></div>
   </div>
-  ${lastP && last !== 1 ? `<a class="callout resume" href="#/p/${last}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>หน้า ${last} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
+  ${lastP && last !== 1 ? `<a class="callout resume" href="${hrefOf(last)}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>${isDeep(last) ? 'Deep Learning บท ' + lastP.k : 'หน้า ' + last} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
   <section class="cgroup"><h2 class="sec">${ic('toolbox')}<span>เครื่องมือ</span></h2><div class="tools">${TOOLS.map(([h, i, t, s]) => `<a class="tool" href="${h}"><span class="ti">${ic(i)}</span><span><b>${esc(t)}</b><small>${esc(s)}</small></span></a>`).join('')}</div></section>
-  ${GROUPS3.map(([t, s, keys]) => `<section class="cgroup"><h2 class="sec">${ic('book_open')}<span>${esc(t)}</span></h2><p>${esc(s)}</p><div class="ccards">${keys.map(card).join('')}</div></section>`).join('')}
+  ${GROUPS3.map(([t, s, keys]) => `<section class="cgroup"><h2 class="sec">${ic('book_open')}<span>${esc(t)}</span></h2><p>${esc(s)}</p><div class="ccards">${keys.map(k => chByKey[k] ? chapterCardHTML(chByKey[k]) : '').join('')}</div></section>`).join('')}
+  <section class="cgroup"><h2 class="sec">${ic('hat_graduation')}<span>Deep Learning · 36 บทเชิงลึก</span></h2><p>บทเรียนเชิงลึกพร้อม Workshop, Prompt Builder และแบบทดสอบประจำบท · <a href="#/deep">ดูภาพรวมและหลักคิดร่วม</a></p><div class="ccards">${DEEPCH.map(chapterCardHTML).join('')}</div></section>
   ${copyLine()}`, '', 1);
+  wireUpdates($('#main')); refreshUpdates();
   renderTOC(); updateProgress();
+}
+
+// ---------- Learning paths ----------
+const trackItems = t => t.steps.flatMap(s => s.items).map(refN);
+const trackDone = t => { const it = [...new Set(trackItems(t))]; return [it.filter(n => done.has(n)).length, it.length]; };
+const TRACK_ART = { agent: 'eng', office: 'data', browser: 'lp', tips: 'ci', apply: 'farm', foundation: 'qms', implement: 'rep' };
+function tracksGridHTML() {
+  return `<div class="tracks">${D.tracks.map(t => { const [d, n] = trackDone(t); const nd = new Set(trackItems(t).filter(isDeep)).size; return `<a class="track ${t.star ? 'star' : ''}" href="#/track/${t.key}" style="${gvar(TRACK_ART[t.key] || 'gen')}"><span class="tr-art">${illus(TRACK_ART[t.key] || 'gen', t.icon, 'tr-svg')}</span><span class="tr-b">${t.star ? `<span class="tr-star">${ic('star_f')} เริ่มที่นี่ · ไฮไลต์หลัก</span>` : ''}<b>${esc(t.title)}</b><small>${esc(t.sub)}</small>${t.star ? `<ol class="tr-steps">${t.steps.map(x => `<li>${esc(x.t)}</li>`).join('')}</ol>` : ''}<span class="tr-meta">${t.steps.length} ขั้น · ${n - nd} หน้าคอร์สหลัก · ${nd} บทเชิงลึก${d ? ` · เรียนแล้ว ${d}` : ''}</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / n * 100)}%"></i></span></span></a>`; }).join('')}</div>`;
+}
+function itemCardHTML(n) {
+  const p = PI.get(n); if (!p) return '';
+  const deep = isDeep(n);
+  const a = p.agent ? AG[p.agent] : null;
+  return `<li><a class="toc-card" href="${hrefOf(n)}" style="${gvar(pageGroup(p))}"><span class="tc-ic">${ic(deep ? 'hat_graduation' : p.icon)}</span><span class="tc-b"><small>${deep ? 'บทเชิงลึก ' + p.k + ' · ' + esc(CH.get(p.chapter).title) : 'คอร์สหลัก · หน้า ' + n + ' · ' + esc(p.typeLabel)}</small><b>${esc(p.title)}</b>${deep && p.outcome ? `<span class="tc-s">${esc(p.outcome)}</span>` : a && p.type === 'agent' ? `<span class="tc-s">${esc(a.short)}</span>` : ''}</span><span class="dot ${done.has(n) ? 'd' : visited.has(n) ? 'v' : ''}" title="${done.has(n) ? 'เรียนแล้ว' : visited.has(n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`;
+}
+function renderTracks() {
+  cur = null;
+  setMain(`<header class="ph" style="--dc:var(--accent)">${art('compass_northwest')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>เส้นทางการเรียน</span></nav><h1>เส้นทางการเรียน</h1><p class="short">7 เส้นทาง เรียงตามความสำคัญ เริ่มที่ Copilot Agent · เนื้อหาที่ซ้ำกันระหว่างคอร์สหลักกับบทเชิงลึกถูกร้อยไว้ในขั้นเดียวกัน</p></header>${tracksGridHTML()}${copyLine()}`, 'เส้นทางการเรียน');
+  renderTOC();
+}
+function renderTrack(key) {
+  cur = null;
+  const t = D.tracks.find(x => x.key === key); const [d, n] = trackDone(t);
+  const g = TRACK_ART[key] || 'gen';
+  const next = trackItems(t).find(x => !done.has(x));
+  setMain(`<div style="${gvar(g)}"><header class="ph ph-module">${illus(g, t.icon, 'ph-art')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><a href="#/tracks">เส้นทางการเรียน</a></nav>${t.star ? `<span class="tr-star">${ic('star_f')} ไฮไลต์หลักของคอร์ส</span>` : ''}<h1>${esc(t.title)}</h1><p class="short">${esc(t.sub)}</p><div class="ph-meta"><span class="pill g">${ic('checkmark_circle')}<span>เรียนแล้ว ${d}/${n}</span></span>${next ? `<a class="btn btn-primary" href="${hrefOf(next)}">${ic('play')}<span>${d ? 'เรียนต่อ' : 'เริ่มเรียน'}: ${esc(PI.get(next).title)}</span></a>` : `<span class="pill">${ic('trophy')}<span>จบเส้นทางนี้แล้ว</span></span>`}</div></header>
+  <ol class="track-steps">${t.steps.map((s, i) => `<li class="tstep"><div class="tstep-h"><span class="step-n">${i + 1}</span><h2>${esc(s.t.replace(/^\d+ · /, ''))}</h2></div><ul class="toc-cards">${s.items.map(r => itemCardHTML(refN(r))).join('')}</ul></li>`).join('')}</ol>${copyLine()}</div>`, t.title);
+  renderTOC();
+}
+function relatedHTML(n) {
+  const deep = isDeep(n);
+  const list = deep ? (D.related.d[n - DEEP0] || []) : (D.related.p[n] || []).map(k => DEEP0 + k);
+  const inTracks = D.tracks.filter(t => trackItems(t).includes(n));
+  if (!list.length && !inTracks.length) return '';
+  return `<section class="related">${list.length ? `<h2 class="sec">${ic(deep ? 'book_open' : 'hat_graduation')}<span>${deep ? 'เรียนคู่กับคอร์สหลัก' : 'เจาะลึกต่อใน Deep Learning'}</span></h2><ul class="toc-cards">${list.map(itemCardHTML).join('')}</ul>` : ''}${inTracks.length ? `<p class="rel-tracks">${ic('compass_northwest')}<span>อยู่ในเส้นทาง:</span>${inTracks.map(t => `<a class="pill" href="#/track/${t.key}">${esc(t.title)}</a>`).join('')}</p>` : ''}</section>`;
+}
+
+// ---------- Deep Learning ----------
+let deepP = null;
+function loadDeep() {
+  if (window.__DEEP) return Promise.resolve(window.__DEEP);
+  if (!deepP) deepP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'deep-data.js'; sc.onload = () => { for (const p of DEEPP) p.html = window.__DEEP.lessons[p.k].html; res(window.__DEEP); }; sc.onerror = () => { deepP = null; rej(new Error('deep-data.js')); }; document.head.appendChild(sc); });
+  return deepP;
+}
+function renderDeepHome() {
+  cur = null;
+  const st = D.deepStats || {};
+  const body = sh => `<div class="deep-sec">${sh.principles}</div><section class="deep-w"><h2>${ic('warning')}<span>ข้อจำกัดและสถานะฟีเจอร์ (ใช้กับทุกบท)</span></h2>${sh.limits.replace(/^<section[^>]*>[\s\S]*?<\/h2>/, '').replace(/<\/section>$/, '')}</section>${sh.quiz}${sh.checklist}`;
+  setMain(`<div style="--dc:var(--accent)"><header class="ph ph-module">${illus('d3', 'hat_graduation', 'ph-art')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>Deep Learning</span></nav><h1>Deep Learning · 36 บทเชิงลึก</h1><p class="short">บทเรียนเชิงลึกเกี่ยวกับ Microsoft Copilot แบ่ง 6 กลุ่ม ตั้งแต่พื้นฐาน แอป Microsoft 365, AI Agents ไปจนถึงความปลอดภัยและการนำไปใช้จริง</p><div class="ph-meta"><a class="btn btn-primary" href="#/d/13">${ic('bot')}<span>เริ่มที่กลุ่ม AI Agents (บท 13)</span></a><a class="btn btn-outline" href="#/d/1">เริ่มบทที่ 1</a></div></header>
+  <div class="callout tip">${ic('info')}<div><b>ปรับจากต้นฉบับ v10 ให้กระชับ</b><p>ส่วนที่ซ้ำกันทุกบท (หลักคิด Input → Process → Output → Verify, ข้อจำกัดฟีเจอร์, แบบทดสอบ 5 ข้อชุดเดิม และ Checklist) รวมไว้ในหน้านี้ที่เดียว · เนื้อหาเชิงลึกที่ซ้ำข้ามบท ${st.deduped || 0} ส่วนแสดงครั้งเดียวพร้อมลิงก์ · แต่ละบทมีแบบทดสอบเฉพาะหัวข้อ 3 ข้อแทน</p></div></div>
+  ${DEEPCH.map(c => `<section class="cgroup" style="${gvar(c.group)}"><h2 class="sec">${ic(D.deepGroups.find(g => g.key === c.key).icon)}<span>${esc(c.title)} · ${esc(c.en)}</span></h2><p>${esc(c.desc)}</p><ul class="toc-cards">${c.pages.map(itemCardHTML).join('')}</ul></section>`).join('')}
+  <section class="cgroup" id="deep-shared"><h2 class="sec">${ic('lightbulb')}<span>หลักคิดร่วม แบบทดสอบ และ Checklist ของทุกบท</span></h2><div class="deep-body" id="deepShared"><p class="empty">${ic('arrow_sync')} กำลังโหลด…</p></div></section>${copyLine()}</div>`, 'Deep Learning');
+  loadDeep().then(d => { const el = $('#deepShared'); if (el) { el.innerHTML = body(d.shared); mount(el, { n: DEEP0 }); } }, () => { const el = $('#deepShared'); if (el) el.innerHTML = '<p class="empty">โหลดไม่ได้</p>'; });
+  renderTOC();
+}
+function initQuiz(box) {
+  const fs = $$('fieldset', box); const res = $('.qres', box);
+  const best = store.get('cpa26-quiz', {});
+  if (best[box.dataset.quiz] != null) res.textContent = `คะแนนครั้งก่อน ${best[box.dataset.quiz]}/${fs.length}`;
+  $('[data-quiz-check]', box).addEventListener('click', () => {
+    let score = 0, miss = 0;
+    fs.forEach(f => {
+      const a = +f.dataset.a; const sel = $('input:checked', f); const why = $('.qwhy', f); const opts = $$('.qopt', f);
+      opts.forEach((o, k) => o.classList.toggle('right', k === a));
+      if (!sel) { miss++; why.hidden = false; why.className = 'qwhy miss'; why.textContent = 'ยังไม่ได้ตอบ'; return; }
+      const ok = +sel.value === a; if (ok) score++;
+      sel.closest('.qopt').classList.toggle('wrong', !ok);
+      why.hidden = false; why.className = 'qwhy ' + (ok ? 'ok' : 'no');
+      why.textContent = (ok ? '✓ ถูกต้อง · ' : '✗ คำตอบที่ถูก: ' + opts[a].textContent.trim() + ' · ') + $('.qwhy-t', f).textContent;
+    });
+    res.textContent = `คะแนน ${score}/${fs.length}${miss ? ` · ยังไม่ได้ตอบ ${miss} ข้อ` : score === fs.length ? ' · ยอดเยี่ยม!' : ''}`;
+    const b = store.get('cpa26-quiz', {}); b[box.dataset.quiz] = Math.max(score, b[box.dataset.quiz] || 0); store.set('cpa26-quiz', b);
+    if (score === fs.length) toast('ทำแบบทดสอบได้คะแนนเต็ม');
+  });
+  $('[data-quiz-reset]', box).addEventListener('click', () => { $$('input', box).forEach(i => { i.checked = false; }); $$('.qopt', box).forEach(o => o.classList.remove('right', 'wrong')); $$('.qwhy', box).forEach(w => { w.hidden = true; }); res.textContent = ''; });
+}
+function initDeepPB(box) {
+  const f = $$('textarea[data-f]', box); const out = $('[data-pb-out]', box); const lesson = box.dataset.lesson;
+  const key = 'cpa26-dpb-' + box.dataset.deepPb; const saved = store.get(key, {});
+  f.forEach(t => { if (saved[t.dataset.f]) t.value = saved[t.dataset.f]; });
+  const gen = () => {
+    if (box.dataset.variant === 'ecosystem') {
+      const v = f.map(t => t.value.trim() || '[กรุณาระบุ]');
+      out.textContent = ['บทบาท: คุณเป็นผู้ช่วย Microsoft Copilot สำหรับงานองค์กร ต้องยึดหลักฐานและสิทธิ์ข้อมูล', 'เป้าหมายงาน: ' + v[0], 'แหล่งข้อมูลที่ได้รับอนุญาต: ' + v[1], 'ข้อจำกัด/สิ่งที่ห้ามทำ: ' + v[2], 'รูปแบบผลลัพธ์/ผู้ตรวจรับ: ' + v[3], 'ขั้นตอน: 1. ตรวจความครบถ้วนของข้อมูล 2. แยกข้อเท็จจริงออกจากข้อเสนอ 3. สร้างผลลัพธ์ตามรูปแบบที่กำหนด 4. ระบุแหล่งอ้างอิงและวันที่/เวอร์ชัน 5. ระบุข้อมูลที่ไม่พบหรือไม่แน่ใจ 6. เสนอคำถามติดตาม', 'ข้อห้าม: ห้ามแต่งหลักฐาน ห้ามอ้างว่ามีสิทธิ์เข้าถึงข้อมูลที่ไม่ได้รับอนุญาต และห้ามตัดสินผลความปลอดภัย/กฎหมาย/การตรวจประเมินแทนผู้รับผิดชอบ', 'เกณฑ์ตรวจรับ: ถูกต้องตามเอกสาร, ตรวจย้อนกลับได้, ไม่เปิดเผยข้อมูลเกินสิทธิ์, ผ่าน Human Review'].join('\n');
+    } else {
+      const v = f.map(t => t.value.trim() || '[ระบุข้อมูล]');
+      out.textContent = ['บทบาท: ผู้เชี่ยวชาญด้าน Microsoft Copilot ที่ตรวจสอบข้อมูลอย่างรอบคอบ', 'หัวข้อ: ' + lesson, 'เป้าหมายและผู้ใช้: ' + v[0], 'ข้อมูลที่ใช้และข้อจำกัด: ' + v[1], 'ผลลัพธ์ที่ต้องการและเกณฑ์ตรวจรับ: ' + v[2], 'ให้ทำงานเป็นขั้นตอน แยกข้อเท็จจริง สมมติฐาน และสิ่งที่ต้องตรวจสอบ', 'อ้างอิงหลักฐานที่ได้รับอนุญาต ระบุความไม่แน่นอน ห้ามสร้างตัวเลขหรือฟีเจอร์ที่ไม่ยืนยัน', 'แสดงผลเป็นตาราง Step | Owner | Evidence | Risk | Action', 'ห้ามดำเนินการที่กระทบระบบจริงก่อนผู้มีอำนาจอนุมัติ'].join('\n');
+    }
+    const sv = {}; f.forEach(t => { sv[t.dataset.f] = t.value; }); store.set(key, sv);
+  };
+  f.forEach(t => t.addEventListener('input', gen)); gen();
+}
+function initDecision(box) {
+  const sel = $('select', box); const show = () => $$('.dec-item', box).forEach(x => { x.hidden = x.dataset.v !== sel.value; });
+  sel.addEventListener('change', show); show();
+}
+
+// ---------- Microsoft Copilot updates (auto) ----------
+let UPD = D.updates; let updTopic = 'all'; let liveState = 'snapshot';
+const UPD_TOPICS = [['all', 'ทั้งหมด'], ['agent', 'Copilot Agent'], ['office', 'Excel · Word · PowerPoint'], ['teams', 'Teams · Outlook'], ['browser', 'เบราว์เซอร์ · SharePoint'], ['admin', 'ความปลอดภัย · ผู้ดูแลระบบ'], ['general', 'อื่น ๆ']];
+const thDate = iso => { try { return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok' }).format(new Date(iso)); } catch (e) { return iso; } };
+function updItemsHTML(limit) {
+  const items = (UPD && UPD.items || []).filter(i => updTopic === 'all' || i.topic === updTopic);
+  const shown = limit ? items.slice(0, limit) : items;
+  if (!shown.length) return '<p class="empty">ไม่มีรายการในหมวดนี้</p>';
+  return `<ul class="upd-list">${shown.map(i => `<li class="upd" data-topic="${esc(i.topic)}"><div class="upd-top">${i.statusTh ? `<span class="upd-st st-${esc(i.status.replace(/\s/g, '').toLowerCase())}">${esc(i.statusTh)}</span>` : ''}${i.agent ? `<span class="upd-ag">${ic('bot')}Agent</span>` : ''}${i.products.map(x => `<span class="upd-pr">${esc(x)}</span>`).join('')}</div><a class="upd-t" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">${esc(i.title)} ${ic('open')}</a>${i.summary ? `<p class="upd-s">${esc(i.summary)}</p>` : ''}<p class="upd-d">${i.preview ? `Preview: ${esc(i.preview)} · ` : ''}${i.ga ? `GA: ${esc(i.ga)} · ` : ''}Roadmap ID ${esc(i.id)}</p></li>`).join('')}</ul>${limit && items.length > limit ? `<a class="btn btn-outline" href="#/updates">${ic('arrow_right')}<span>ดูทั้งหมด ${items.length} รายการ</span></a>` : ''}`;
+}
+function updatesPanelHTML(limit, home) {
+  const u = UPD || { items: [] };
+  return `<section class="updates${home ? ' home' : ''}" aria-labelledby="updH" data-upd-limit="${limit || 0}"><div class="upd-head"><div><h2 id="updH">${ic('arrow_sync')}<span>อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot</span></h2><p class="upd-meta"><span class="live-dot ${liveState}" aria-hidden="true"></span><span data-upd-meta>${updMetaText()}</span></p></div><span class="badge-verify">${ic('warning')}<span>ข้อมูลจาก Microsoft · ตรวจกับบัญชีจริงก่อนสอน</span></span></div>
+  <div class="fchips upd-chips" role="group" aria-label="กรองหมวดอัปเดต">${UPD_TOPICS.map(([k, t]) => `<button type="button" class="fchip" data-ut="${k}" aria-pressed="${updTopic === k}">${esc(t)} (${k === 'all' ? u.items.length : u.items.filter(i => i.topic === k).length})</button>`).join('')}</div>
+  <div data-upd-list>${updItemsHTML(limit)}</div></section>`;
+}
+function updMetaText() {
+  if (!UPD) return 'ยังไม่มีข้อมูล';
+  return `${liveState === 'live' ? 'ข้อมูลสด' : 'ข้อมูล ณ การ build ล่าสุด'} · ${esc(UPD.source.name)} · ดึงข้อมูลเมื่อ ${thDate(UPD.fetchedAt)} · ระบบอัปเดตอัตโนมัติ`;
+}
+function wireUpdates(root) {
+  $$('.updates', root).forEach(sec => {
+    const limit = +sec.dataset.updLimit;
+    $$('[data-ut]', sec).forEach(b => b.addEventListener('click', () => { updTopic = b.dataset.ut; $$('[data-ut]', sec).forEach(x => x.setAttribute('aria-pressed', x.dataset.ut === updTopic)); $('[data-upd-list]', sec).innerHTML = updItemsHTML(limit); }));
+  });
+}
+let liveTried = false;
+async function refreshUpdates() {
+  if (liveTried || !/^https?:$/.test(location.protocol)) return; liveTried = true;
+  try {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 9000);
+    const r = await fetch('/api/copilot-updates', { headers: { accept: 'application/json' }, signal: ctl.signal }); clearTimeout(t);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    if (!j.items || !j.items.length) throw new Error('empty');
+    UPD = j; liveState = 'live';
+    $$('.updates').forEach(sec => { const limit = +sec.dataset.updLimit; const home = sec.classList.contains('home'); sec.outerHTML = updatesPanelHTML(limit, home); });
+    wireUpdates($('#main'));
+  } catch (e) { liveState = 'snapshot'; }
+}
+function renderUpdatesPage() {
+  cur = null;
+  setMain(`<header class="ph" style="--dc:var(--accent)">${art('arrow_sync')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>อัปเดตล่าสุด</span></nav><h1>อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot</h1><p class="short">ฟีเจอร์ที่กำลังพัฒนา กำลังทยอยเปิดใช้ และเปิดใช้แล้ว จาก Microsoft 365 Roadmap · หน้าเว็บดึงข้อมูลใหม่อัตโนมัติ (ฝั่งเซิร์ฟเวอร์รีเฟรชทุก 6 ชั่วโมง และ build ใหม่ทุกวัน)</p></header>${updatesPanelHTML(0, false)}<p class="src-note">${ic('info')} หัวข้อและคำอธิบายเป็นภาษาอังกฤษตามต้นฉบับของ Microsoft · กดหัวข้อเพื่อเปิดรายละเอียดใน Microsoft 365 Roadmap · ความพร้อมใช้งานขึ้นกับบัญชี License และนโยบายองค์กร</p>${copyLine()}`, 'อัปเดตล่าสุด Copilot');
+  wireUpdates($('#main')); refreshUpdates(); renderTOC();
 }
 
 // ---------- Agent directory (finder modal + page) ----------
@@ -513,12 +691,12 @@ function closeFinder() { if ($('#finder').hidden) return; $('#finder').hidden = 
 let SIDX = null, cmdRes = [], cmdSel = 0;
 const strip = h => h.replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
 function buildIndex() {
-  SIDX = PAGES.filter(p => p.n !== 1).map(p => {
+  SIDX = PAGES.filter(p => p.n !== 1 && (p.html || p.text)).map(p => {
     const a = p.agent ? AG[p.agent] : null;
     const ch = CH.get(p.chapter);
-    return { kind: 'page', n: p.n, title: p.title, t: p.title.toLowerCase(), meta: `หน้า ${p.n} · บทที่ ${ch.n} ${ch.title}`, icon: p.icon, g: pageGroup(p),
+    return { kind: 'page', n: p.n, title: p.title, t: p.title.toLowerCase(), meta: isDeep(p.n) ? `Deep Learning บท ${p.k} · ${ch.title}` : `หน้า ${p.n} · บทที่ ${ch.n} ${ch.title}`, icon: p.icon, g: pageGroup(p),
       a: a && (p.type === 'agent' || p.type === 'agentflow') ? [a.name, a.short, a.builder.name, ...a.inputs, ...a.outputs].join(' ').toLowerCase() : '',
-      body: strip(p.html), bl: '' };
+      body: isDeep(p.n) ? p.text : strip(p.html), bl: '' };
   });
   SIDX.forEach(x => { x.bl = x.body.toLowerCase(); });
   TOOLS.forEach(([h, i, t, s]) => SIDX.push({ kind: 'tool', href: h, title: t, t: t.toLowerCase(), meta: 'เครื่องมือ · ' + s, icon: i, g: 'gen', a: s.toLowerCase(), body: '', bl: '' }));
@@ -550,7 +728,7 @@ function cmdRender(terms = []) {
   $('#cmdQ').setAttribute('aria-activedescendant', cmdRes.length ? 'cr-' + cmdSel : '');
   const sel = $(`#cr-${cmdSel}`); if (sel) sel.scrollIntoView({ block: 'nearest' });
 }
-function cmdGo(i) { const r = cmdRes[i]; if (!r) return; closeCmd(); location.hash = r.x.kind === 'tool' ? r.x.href : '#/p/' + r.x.n; }
+function cmdGo(i) { const r = cmdRes[i]; if (!r) return; closeCmd(); location.hash = r.x.kind === 'tool' ? r.x.href : hrefOf(r.x.n); }
 function openCmd() { lastFocus = document.activeElement; closeFinder(); $('#cmd').hidden = false; const q = $('#cmdQ'); q.value = ''; cmdSearch(''); q.focus(); }
 function closeCmd() { if ($('#cmd').hidden) return; $('#cmd').hidden = true; if (lastFocus && document.contains(lastFocus)) lastFocus.focus(); }
 
@@ -638,7 +816,7 @@ function renderProgress() {
   setMain(`<header class="ph" style="--dc:var(--green)">${art('trophy')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>เครื่องมือ</span></nav><h1>Learning Progress</h1><p class="short">ความคืบหน้าบันทึกในเบราว์เซอร์นี้เท่านั้น (localStorage) ไม่ส่งข้อมูลออกไปที่ใด</p></header>
   <div class="card prog-hero"><svg class="big-ring" viewBox="0 0 150 150" role="img" aria-label="เรียนแล้ว ${pct}%"><defs><linearGradient id="pgrad"><stop offset="0" stop-color="#1F5BE3"/><stop offset=".5" stop-color="#22BE97"/><stop offset="1" stop-color="#8A55EA"/></linearGradient></defs><circle class="bgc" cx="75" cy="75" r="${r}"/><circle class="fgc" cx="75" cy="75" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - done.size / TOTAL)}"/><text x="75" y="80" text-anchor="middle">${pct}%</text><text class="s" x="75" y="100" text-anchor="middle">${done.size}/${TOTAL} หน้า</text></svg>
   <div><p><b>เรียนแล้ว ${done.size} หน้า</b> · เปิดดูแล้ว ${visited.size} หน้า · จบแล้ว ${D.chapters.filter(ch => chapterDone(ch) === ch.pages.length).length}/${D.chapters.length} บท</p>${last ? `<a class="btn btn-primary" href="#/p/${last}">${ic('history')}<span>ไปหน้าล่าสุด (หน้า ${last})</span></a> ` : ''}<button type="button" class="btn btn-outline" id="progReset">${ic('arrow_clockwise')}<span>ล้างความคืบหน้า</span></button></div></div>
-  <h2 class="sec">${ic('book_open')}<span>รายบท</span></h2><div class="pchap">${D.chapters.map(ch => { const d = chapterDone(ch); const nx = ch.pages.find(n => !done.has(n)) || moduleOf(ch); return `<a href="#/p/${nx}" style="${gvar(ch.group)}"><span class="n">${String(ch.n).padStart(2, '0')}</span><span><b>${esc(ch.title)}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / ch.pages.length * 100)}%"></i></span></span><small>${d}/${ch.pages.length} หน้า</small></a>`; }).join('')}</div>${copyLine()}`, 'Learning Progress');
+  <h2 class="sec">${ic('book_open')}<span>รายบท</span></h2><div class="pchap">${ALLCH.map(ch => { const d = chapterDone(ch); const nx = ch.pages.find(n => !done.has(n)) || moduleOf(ch); return `<a href="${hrefOf(nx)}" style="${gvar(ch.group)}"><span class="n">${ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span><b>${esc(ch.title)}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / ch.pages.length * 100)}%"></i></span></span><small>${d}/${ch.pages.length} หน้า</small></a>`; }).join('')}</div>${copyLine()}`, 'Learning Progress');
   $('#progReset').addEventListener('click', () => { if (confirm('ล้างความคืบหน้าทั้งหมดในเบราว์เซอร์นี้?')) { done.clear(); visited.clear(); saveProgress(); store.set('cpa26-last', null); store.set('cpa26-chk', {}); updateProgress(); renderProgress(); toast('ล้างความคืบหน้าแล้ว'); } });
   renderTOC(); updateProgress();
 }

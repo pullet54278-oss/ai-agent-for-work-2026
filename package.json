@@ -1,12 +1,14 @@
 {
   "name": "copilot-ai-agents-for-work-2026",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "description": "Interactive learning web app: Copilot AI Agents for Work 2026",
   "scripts": {
     "inventory": "node scripts/inventory.mjs",
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/fetch-updates.mjs && node scripts/build.mjs",
+    "build:offline": "SKIP_UPDATES=1 node scripts/build.mjs",
+    "updates": "node scripts/fetch-updates.mjs",
     "audit": "node scripts/audit.mjs",
     "test": "node scripts/build.mjs && node scripts/audit.mjs && node tests/e2e.mjs",
     "serve": "npx --yes serve dist -l 5173"

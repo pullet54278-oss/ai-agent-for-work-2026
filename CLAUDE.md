@@ -7,6 +7,9 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 ## โครงสร้างโปรเจกต์
 - `content/copilot-ai-agents-for-work.md` **แหล่งความจริงของเนื้อหา** ส่วนที่ 1 = สเปก UI, ส่วนที่ 2 = เนื้อหาทั้งหมด (ใช้ตามเดิมทุกตัวอักษร)
 - `content/supplements.mjs` ส่วนขยายการเรียนรู้ (เจาะลึก/ตัวอย่าง/Workshop/วิธีตรวจสอบ) — แยกจากต้นฉบับ แสดงในกรอบ "ส่วนขยายการเรียนรู้"
+- `content/deep-learning-v10.html` ต้นฉบับ Deep Learning 36 บท (v10) · `content/deep-quizzes.mjs` แบบทดสอบเฉพาะบท · `content/tracks.mjs` เส้นทางการเรียน 7 เส้นทาง (Copilot Agent ลำดับแรก) — build แปลงผ่าน `scripts/lib/deep.mjs` (กฎ SANITIZE แทนชื่อตำแหน่ง/เลขที่เอกสาร) และ `deep-render.mjs` → `dist/deep-data.js`
+- `data/copilot-updates.json` snapshot อัปเดต Copilot จาก Microsoft 365 Roadmap (`scripts/fetch-updates.mjs`, `scripts/lib/updates.mjs`) · `netlify/functions/` API สด `/api/copilot-updates` + build ใหม่รายวันผ่าน `BUILD_HOOK_URL`
+- เวอร์ชันแอปอ่านจาก `package.json` (แสดงบนหน้าแรกและท้ายหน้า) ขึ้นเวอร์ชันพร้อมบันทึกใน `CHANGELOG.md`
 - `data/` ข้อมูลเสริมที่ MD สูญหายตอนแปลงจากหน้าเว็บ (Prompt Lab 11 หมวด, ชื่อปุ่ม Agent, Office chips, Agent #28) build จะตรวจว่าตรงกับ MD เมื่อมีทั้งสองที่
 - `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)
 - `scripts/build.mjs` สร้าง `dist/` (index.html ไฟล์เดียว + logo.png + vendor/ + _headers) · `scripts/inventory.mjs` · `scripts/audit.mjs`
@@ -19,7 +22,7 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - ห้ามใส่ชื่อบริษัท ชื่อฟาร์มหรือโรงงาน ชื่อเอกสาร เลขที่เอกสาร หรือตำแหน่งงานบนเว็บ ใช้คำว่า "ผู้รับผิดชอบ" หรือ "ผู้มีอำนาจอนุมัติ" แทน
 - โลโก้ Copilot ทางการ: เจ้าของงานสั่งให้ใช้ (14 ต.ค. 2569) ไฟล์อยู่ที่ `assets/brand/copilot-logo.svg` (ดู NOTICE.txt) ใช้ตามต้นฉบับ ห้ามดัดแปลงสีหรือรูปทรงโลโก้ ห้ามใช้โลโก้ Microsoft อื่น
 - ห้ามทำตัวอักษร COPILOT เลียนแบบสีหรือรูปแบบโลโก้ คำว่า Copilot ใช้สีตัวอักษรปกติ (สี --ink)
-- ก่อนส่งมอบทุกครั้ง ค้นหาคำต้องห้ามใน dist/index.html ให้ได้ผล 0 (`npm run audit` อ่านรายการจาก content/forbidden-terms.txt)
+- ก่อนส่งมอบทุกครั้ง ค้นหาคำต้องห้ามใน dist/index.html และ dist/deep-data.js ให้ได้ผล 0 (`npm run audit` อ่านรายการจาก content/forbidden-terms.txt)
 
 ## ข้อจำกัดระบบที่ต้องออกแบบตาม
 - บัญชีองค์กรเพิ่มไฟล์เป็น Knowledge ไม่ได้ ใช้เว็บไซต์สาธารณะไม่เกิน 4 แหล่งต่อ Agent

@@ -104,23 +104,43 @@ for (const p of pages) check(`หน้า ${p.n}`, p.md, await grab('#/p/' + p.
 check('ภาคผนวก A', src.appendixA.replace(/^# .+\n/, ''), await grab('#/appendix-a'));
 check('ภาคผนวก B', src.appendixB.replace(/^# .+\n/, ''), await grab('#/appendix-b'));
 
+// ---- Deep Learning (36 lessons from content/deep-learning-v10.html) ----
+const { deepAtoms } = await import('./lib/deep.mjs');
+const DA = deepAtoms();
+async function grabDeep(hash, sel) {
+  await page.evaluate(h => { location.hash = h; }, hash);
+  await page.waitForFunction(s => { const el = document.querySelector(s); return el && !el.querySelector('.empty'); }, sel, { timeout: 15000 });
+  return page.evaluate(s => { const el = document.querySelector(s).closest('#main'); return { text: el.textContent, pres: [], hrefs: [...el.querySelectorAll('a[href]')].map(a => a.getAttribute('href')) }; }, sel);
+}
+report.deep = { lessons: 0, atoms: 0, missing: [] };
+function checkDeep(label, atoms, dom) {
+  const T = squash(dom.text);
+  for (const a of atoms) { report.deep.atoms++; if (!T.includes(squash(a))) report.deep.missing.push({ page: label, text: a.slice(0, 140) }); }
+}
+for (const n of Object.keys(DA.lesson)) { report.deep.lessons++; checkDeep('Deep ' + n, DA.lesson[n], await grabDeep('#/d/' + n, '#main .deep-body')); }
+checkDeep('Deep overview', DA.shared, await grabDeep('#/deep', '#deepShared .deep-sec'));
+report.deep.dropped = DA.dropped.length;
+
 // home page requirements from Part 1
 const home = await grab('#/');
 const homeNeed = ['Copilot', 'AI Agents for Work 2026', 'การใช้งาน AI แบบพาลงมือทำ · 23 ตุลาคม 2569', 'เริ่มที่ Prompt Mode →', 'ค้นหา Agent ตามกลุ่มงาน', '67', 'Agent พร้อมการตั้งค่าคัดลอกได้', '17', 'กลุ่มงาน', '27', 'บทเรียน', 'หน้าที่เรียนแล้ว', '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret'];
 report.home = homeNeed.map(h => ({ text: h, ok: home.text.includes(h) }));
 
 // forbidden-term scan of the built output (CLAUDE.md rule)
-const html = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8');
+const deepJs = path.join(ROOT, 'dist', 'deep-data.js');
+const html = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8') + (fs.existsSync(deepJs) ? fs.readFileSync(deepJs, 'utf8') : ''); // index.html + lazily loaded Deep Learning data
 const termsFile = path.join(ROOT, 'content', 'forbidden-terms.txt');
 const terms = fs.existsSync(termsFile) ? fs.readFileSync(termsFile, 'utf8').split('\n').map(s => s.trim()).filter(s => s && !s.startsWith('#')) : [];
 const docNo = html.replace(/<svg[\s\S]*?<\/svg>/g, '').match(/\b(?:SOP|WI|QP|FM|QM|WP|PR|DOC)-\d{2,}[\w-]*/g) || [];
-report.forbidden = { termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
+report.forbidden = { termsChecked: terms.length, hits: terms.filter(t => html.includes(t)), jobTitles: [...new Set(html.match(/\b(?:Manager|Supervisor)\b|ผู้จัดการ|หัวหน้า(?:งาน|ฟาร์ม)/g) || [])], documentNumberPatterns: [...new Set(docNo)], brandFiles: fs.existsSync(path.join(ROOT, 'dist', 'brand')) ? fs.readdirSync(path.join(ROOT, 'dist', 'brand')) : [] }; // official Copilot logo approved by the owner (2026-10-14)
 
 await browser.close(); srv.close();
 fs.writeFileSync(path.join(ROOT, 'docs', 'audit-report.json'), JSON.stringify(report, null, 2));
 const t = report.totals;
 console.log(`atoms ${t.atoms} · exact ${t.exact} · ordered ${t.ordered} · ui-replaced ${t.uiReplaced} · MISSING ${t.missing}`);
 console.log(`code blocks ${t.codeOk}/${t.code} · urls ${t.urlsOk}/${t.urls} · home ${report.home.filter(x => x.ok).length}/${report.home.length} · console errors ${consoleErrors.length}`);
+console.log(`deep lessons ${report.deep.lessons} · atoms ${report.deep.atoms} · MISSING ${report.deep.missing.length}`);
 console.log('forbidden:', JSON.stringify(report.forbidden));
+for (const m of report.deep.missing.slice(0, 25)) console.log('  ✗', m.page, JSON.stringify(m.text));
 for (const m of report.missing.slice(0, 40)) console.log('  ✗', m.page, JSON.stringify(m.missing.slice(0, 4)));
-process.exitCode = t.missing || consoleErrors.length || report.home.some(x => !x.ok) || report.forbidden.hits.length ? 1 : 0;
+process.exitCode = t.missing || report.deep.missing.length || consoleErrors.length || report.home.some(x => !x.ok) || report.forbidden.hits.length || report.forbidden.jobTitles.length ? 1 : 0;

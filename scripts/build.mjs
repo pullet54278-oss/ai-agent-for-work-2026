@@ -6,6 +6,9 @@ import { ROOT, parseSource, readJSON, builderBlocksOf, tablesOf } from './lib/so
 import { RENDERERS, renderGeneric, typeLabel, TYPE_ICON, READY, readyBadge } from './lib/pages.mjs';
 import { marked, esc, inline, ic, tableHTML } from './lib/render.mjs';
 import { pageSupplement, renderSupplement } from '../content/supplements.mjs';
+import { buildDeep, DEEP_GROUPS } from './lib/deep.mjs';
+import { renderDeepLesson, quizHTML, checklistHTML } from './lib/deep-render.mjs';
+import { TRACKS } from '../content/tracks.mjs';
 
 const t0 = Date.now();
 const DIST = path.join(ROOT, 'dist');
@@ -114,6 +117,29 @@ for (const ch of src.chapters) {
   }
 }
 
+// ---- Deep Learning (36 lessons from v10) ----
+const deep = buildDeep();
+const deepTitle = n => deep.lessons.find(l => l.n === n).title;
+const deepRendered = {};
+for (const l of deep.lessons) deepRendered[l.n] = { html: renderDeepLesson(l, { titleOf: deepTitle }) };
+const deepShared = {
+  principles: deep.shared.principles,
+  limits: deep.shared.limits,
+  quiz: quizHTML('dq0', 'Quiz ทบทวน (5 ข้อ) พร้อมคำอธิบาย — หลักการร่วมของทุกบท', deep.shared.quiz),
+  checklist: checklistHTML('Checklist ก่อนนำไปใช้ (ใช้ได้กับทุกบท)', deep.shared.checklist, 'shared')
+};
+// ---- learning paths + cross references (dedupe overlapping topics by linking, not repeating) ----
+const refTitle = r => { const [k, n] = r.split(':'); return k === 'p' ? pageByN.get(+n).title : deepTitle(+n); };
+const tracks = TRACKS.map(t => ({ ...t, steps: t.steps.map(s => ({ t: s.t, items: s.items.map(r => { if (!refTitle(r)) throw new Error('bad track ref ' + r); return r; }) })) }));
+const related = { p: {}, d: {} };
+for (const t of TRACKS) for (const s of t.steps) {
+  const ps = s.items.filter(r => r[0] === 'p').map(r => +r.slice(2)), ds = s.items.filter(r => r[0] === 'd').map(r => +r.slice(2));
+  for (const d of ds) related.d[d] = [...new Set([...(related.d[d] || []), ...ps])];
+  for (const q of ps) related.p[q] = [...new Set([...(related.p[q] || []), ...ds])];
+}
+const updates = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'copilot-updates.json'), 'utf8'));
+const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+
 // ---- appendices ----
 const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/g, '<div class="table-wrap" tabindex="0"><table class="tbl">').replace(/<\/table>/g, '</table></div>').replace(/(https?:\/\/[^\s<]+)/g, (m, u, off, s) => s.slice(Math.max(0, off - 6), off).includes('href=') ? m : `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
 
@@ -121,7 +147,7 @@ const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/
 const data = {
   meta: {
     title: 'Copilot AI Agents for Work 2026', subtitle: 'AI Agents for Work 2026', event: 'การใช้งาน AI แบบพาลงมือทำ · 23 ตุลาคม 2569',
-    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', totalPages: pages.length + 1, built: new Date().toISOString().slice(0, 10)
+    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
   },
   groups: Object.fromEntries(Object.entries(groups).map(([k, v]) => [k, { name: v.name, c: GROUP_COLORS[k], icon: GROUP_ICON[k] }])),
   readiness,
@@ -132,7 +158,11 @@ const data = {
   pbDefaults: { task: 'จัดลำดับคิวไก่เข้าเชือดรายวัน', file: 'แผนจับไก่รายฟาร์ม และผลตรวจ Salmonella รายฝูง (Excel)', need: 'เรียงคิวตามผล Salmonella ก่อน แล้วตามสถานะการใช้ยา ตรวจเวลางดอาหาร 6–12 ชั่วโมงรวมเวลาขนส่ง', outs: ['ตารางสรุปพร้อมสรุป 5 บรรทัด', 'Dashboard ใน Excel', 'รายงาน Word 1–2 หน้า', 'สไลด์ PowerPoint สำหรับผู้บริหาร', 'Interactive Presentation ไฟล์ HTML'], ref: 'มาตรฐานสวัสดิภาพสัตว์ระหว่างการจับและขนส่งไก่เนื้อ' },
   pmodeTemplates: (() => { const p8 = pageByN.get(8).md; return [...p8.matchAll(/```text\n([\s\S]*?)\n\s*```/g)].map(m => m[1].split('\n').map(l => l.replace(/^ {4}/, '')).join('\n')); })(),
   appendixA: appendix(src.appendixA), appendixB: appendix(src.appendixB),
-  websites: Object.values(websites)
+  websites: Object.values(websites),
+  deepGroups: DEEP_GROUPS,
+  deepIndex: deep.lessons.map(l => ({ n: l.n, title: l.title, outcome: l.outcome, group: l.group, icon: l.icon, text: Object.values(deepRendered[l.n]).join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 2500) })),
+  tracks, related, updates,
+  deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
 
 // ---- brand: optional official Copilot logo (only when the owner supplies an authorised file) ----
@@ -156,6 +186,8 @@ const html = tpl
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(path.join(DIST, 'vendor'), { recursive: true });
 fs.writeFileSync(path.join(DIST, 'index.html'), html);
+// deep lessons load on demand (CSP 'self', works from file:// too)
+fs.writeFileSync(path.join(DIST, 'deep-data.js'), 'window.__DEEP=' + JSON.stringify({ lessons: deepRendered, shared: deepShared }).replace(/</g, '\\u003c') + ';');
 fs.copyFileSync(path.join(ROOT, 'assets', 'logo.png'), path.join(DIST, 'logo.png'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.full.min.js'), path.join(DIST, 'vendor', 'xlsx.full.min.js'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.LICENSE'), path.join(DIST, 'vendor', 'xlsx.LICENSE.txt'));
@@ -179,7 +211,10 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
 
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
+
+/deep-data.js
+  Cache-Control: public, max-age=0, must-revalidate
 `);
-fs.writeFileSync(path.join(DIST, 'build-report.json'), JSON.stringify({ built: new Date().toISOString(), pages: rendered.length + 1, agents: Object.keys(agents).length, bytes: Buffer.byteLength(html), warnings }, null, 2));
+fs.writeFileSync(path.join(DIST, 'build-report.json'), JSON.stringify({ built: new Date().toISOString(), pages: rendered.length + 1, deepLessons: deep.lessons.length, deepReport: deep.report, updates: { fetchedAt: updates.fetchedAt, items: updates.items.length }, version: pkg.version, agents: Object.keys(agents).length, bytes: Buffer.byteLength(html), warnings }, null, 2));
 console.log(`built dist/index.html  ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB  pages=${rendered.length + 1} agents=${Object.keys(agents).length}  ${Date.now() - t0}ms`);
 for (const w of warnings) console.log('  ⚠', w);

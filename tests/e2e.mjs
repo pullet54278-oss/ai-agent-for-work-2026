@@ -27,10 +27,14 @@ fs.writeFileSync(path.join(FIX, 'virus.exe'), 'MZ');
 const { srv, url } = await serve();
 const browser = await launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, permissions: ['clipboard-read', 'clipboard-write'] });
+const SNAP = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'copilot-updates.json'), 'utf8'));
+const LIVE = { ...SNAP, fetchedAt: new Date(Date.now() + 60000).toISOString(), live: true, items: [{ ...SNAP.items[0], id: '999001', title: 'LIVE TEST: Copilot agent item', topic: 'agent', agent: true }, ...SNAP.items.slice(1)] };
+let apiMode = 'live';
+await ctx.route('**/api/copilot-updates', r => apiMode === 'live' ? r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(LIVE) }) : r.fulfill({ status: 502, contentType: 'application/json', body: '{"error":"x"}' }));
 const page = await ctx.newPage();
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
-page.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)/.test(m.text()) && !/ERR_TUNNEL|ERR_PROXY|net::ERR/.test(m.text())) errors.push(m.text()); });
+page.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)/.test(m.text()) && !/ERR_TUNNEL|ERR_PROXY|net::ERR/.test(m.text()) && !(apiMode !== 'live' && /status of 502/.test(m.text()))) errors.push(m.text()); });
 const go = async h => { await page.evaluate(x => { location.hash = x; }, h); await page.waitForTimeout(60); };
 const text = sel => page.$eval(sel, e => e.textContent.trim());
 const clip = () => page.evaluate(() => navigator.clipboard.readText());
@@ -57,8 +61,9 @@ await suite('T4 Navigation: every page renders with correct title', async () => 
   eq(await page.evaluate(() => location.hash), '#/p/34', 'ArrowRight → next page');
   await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(60);
   eq(await page.evaluate(() => location.hash), '#/p/33', 'ArrowLeft → previous page');
-  await go('#/p/155'); ok(!(await page.$('.pager a[rel="next"]')), 'last page has no next');
-  for (const r of ['#/agents', '#/builder', '#/progress', '#/appendix-a', '#/appendix-b', '#/nonexistent']) { await go(r); ok(await page.$('#main h1'), 'route renders ' + r); }
+  await go('#/p/155'); eq(await page.$eval('.pager a[rel="next"]', a => a.getAttribute('href')).catch(() => null), '#/d/1', 'last course page → Deep Learning lesson 1');
+  await go('#/d/36'); await page.waitForSelector('#main .deep-body'); ok(!(await page.$('.pager a[rel="next"]')), 'last deep lesson has no next');
+  for (const r of ['#/agents', '#/builder', '#/progress', '#/appendix-a', '#/appendix-b', '#/deep', '#/tracks', '#/track/agent', '#/updates', '#/d/13', '#/nonexistent']) { await go(r); ok(await page.$('#main h1'), 'route renders ' + r); }
   await go('#/p/2');
   ok((await text('.copy-line')) === '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', 'copyright line on page');
   ok(await page.$('#doneBtn'), 'mark-as-learned button present');
@@ -73,9 +78,99 @@ await suite('Brand + illustrations', async () => {
   ok(h1[1] === 'none', 'Copilot wordmark uses plain text colour (no logo-imitating gradient)');
   ok(h1[2] >= 56, 'Copilot is the largest text on home (' + h1[2] + 'px)');
   ok(await page.$('.hero-scene'), 'hero illustration');
-  eq(await page.$$eval('.ccard .cc-svg', l => l.length), 27, 'illustration on every chapter card');
+  eq(await page.$$eval('.ccard .cc-svg', l => l.length), 33, 'illustration on every chapter card (27 chapters + 6 deep groups)');
   await go('#/p/95'); ok(await page.$('.ph-module .ph-art'), 'module header illustration');
   await go('#/p/33'); ok(await page.$('.ph .ph-art'), 'agent header illustration');
+});
+
+await suite('Copilot Agent first + learning paths', async () => {
+  await go('#/');
+  const cta = await page.$eval('.hero-cta a.btn-primary', e => [e.textContent.trim(), e.getAttribute('href')]);
+  ok(cta[0].includes('เริ่มเรียน Copilot Agent') && cta[1] === '#/track/agent', 'primary CTA = Copilot Agent');
+  ok((await text('.hero-cta')).includes('เริ่มที่ Prompt Mode →'), 'Prompt Mode CTA kept');
+  const order = await page.$$eval('#main > .wrap > section, #main > .wrap > div.stats', l => l.map(e => e.className));
+  ok(order[0].includes('hero') && order[1].includes('updates') && order[2].includes('tracks-sec'), 'home order: hero → live updates → learning paths (' + order.slice(0, 3).join(' | ') + ')');
+  const tracks = await page.$$eval('.tracks .track b', l => l.map(e => e.textContent));
+  eq(tracks[0], 'Copilot Agent', 'first learning path is Copilot Agent');
+  ok(tracks.length === 7 && tracks.some(t => /Excel, Word และ PowerPoint/.test(t)) && tracks.some(t => /เบราว์เซอร์/.test(t)) && tracks.some(t => /Tips & Tricks/.test(t)) && tracks.some(t => /งานจริง/.test(t)), '7 paths: Agent, Office, browser, tips, real work, …');
+  ok(await page.$('.tracks .track.star'), 'Agent path featured');
+  await go('#/track/agent');
+  const items = await page.$$eval('.track-steps .toc-card', l => l.map(a => a.getAttribute('href')));
+  ok(items.length >= 25 && items.some(h => h.startsWith('#/d/')) && items.some(h => h.startsWith('#/p/')), 'Agent path mixes course pages and deep lessons (' + items.length + ')');
+  await page.click('.ph .btn-primary'); await page.waitForTimeout(80);
+  eq(await page.evaluate(() => location.hash), '#/p/3', 'track "start" button opens first item');
+  ok((await text('#main')).includes('เจาะลึกต่อใน Deep Learning') && await page.$('.related a[href="#/d/13"]'), 'course page links to related deep lesson (no duplicated content)');
+});
+
+await suite('Deep Learning 36 lessons', async () => {
+  await go('#/deep');
+  eq(await page.$$eval('#main .cgroup .toc-card[href^="#/d/"]', l => l.length), 36, 'overview lists 36 lessons');
+  await page.waitForSelector('#deepShared .quiz');
+  ok((await text('#deepShared')).includes('Input') && (await text('#deepShared')).includes('Verify'), 'shared principles shown once on overview');
+  for (const n of [1, 7, 13, 22, 35, 36]) {
+    await go('#/d/' + n); await page.waitForSelector('#main .deep-body .deep-sec', { timeout: 8000 });
+    ok((await text('#main h1')).length > 5, `lesson ${n} renders`);
+  }
+  await go('#/d/13'); await page.waitForSelector('#main .quiz');
+  eq(await page.$$eval('#main .quiz fieldset', l => l.length), 3, 'lesson-specific quiz has 3 questions');
+  ok(!(await text('#main .quiz')).includes('ก่อนเริ่มงานควรระบุอะไร'), 'generic 5-question quiz not repeated in lessons');
+  ok(await page.$('#main a.deep-ref[href="#/deep"]'), 'principles replaced by link to overview');
+  ok(await page.$('#main a.deep-ref.dup'), 'duplicated deep block replaced by link to the lesson that keeps it');
+  ok(await page.$('#main .related a[href="#/p/3"]'), 'lesson links to related course pages');
+  await page.click('#main [data-quiz-check]');
+  ok((await text('#main .qres')).includes('ยังไม่ได้ตอบ 3 ข้อ'), 'quiz reports unanswered');
+  const answers = await page.$$eval('#main .quiz fieldset', l => l.map(f => +f.dataset.a));
+  for (let i = 0; i < answers.length; i++) await page.check(`#main input[name="dq13-q${i}"][value="${answers[i]}"]`);
+  await page.click('#main [data-quiz-check]');
+  eq(await text('#main .qres'), 'คะแนน 3/3 · ยอดเยี่ยม!', 'quiz scoring');
+  ok(await page.$('#main .qopt.right'), 'correct answers highlighted');
+  await page.click('#main [data-quiz-reset]'); eq(await text('#main .qres'), '', 'quiz reset');
+  const correctIdx = await page.$$eval('#main .quiz fieldset', l => l.map(f => +f.dataset.a));
+  ok(new Set(Object.values(await page.evaluate(() => { const r = {}; return r; }))).size >= 0 && correctIdx.length === 3, 'answer positions present');
+  await page.fill('#main [data-deep-pb] textarea[data-f="f0"]', 'สรุป KPI รายสัปดาห์');
+  ok((await text('#main [data-pb-out]')).includes('เป้าหมายและผู้ใช้: สรุป KPI รายสัปดาห์') && (await text('#main [data-pb-out]')).includes('หัวข้อ: AI Agents & Agentic Work'), 'deep prompt builder composes live');
+  await page.click('#main [data-deep-pb] [data-copy]'); ok((await clip()).startsWith('บทบาท: ผู้เชี่ยวชาญด้าน Microsoft Copilot'), 'deep prompt copy');
+  await page.check('#main .vlist li:first-child input'); ok((await text('#main [data-vcount]')).startsWith('ทำแล้ว 1/8'), 'deep checklist counter');
+  await go('#/d/1'); await page.waitForSelector('#main [data-decision]');
+  await page.selectOption('#main [data-decision] select', 'action');
+  ok((await text('#main .dec-item:not([hidden])')).includes('Copilot Studio/Workflow'), 'lesson 1 decision tool');
+  eq(await page.$$eval('#main .quiz fieldset', l => l.length), 10, 'lesson 1 keeps its own 10-question quiz');
+  await page.click('#main .deep-nav a[data-scroll]'); eq(await page.evaluate(() => location.hash), '#/d/1', 'in-lesson anchors do not break routing');
+  await page.click('#doneBtn'); ok((await text('#progTxt')).startsWith('เรียนแล้ว') && (await page.$('#tocList a[href="#/d/1"] .dot.d')), 'deep lesson progress tracked in TOC');
+  await page.click('#doneBtn');
+  await page.keyboard.press('Control+k'); await page.fill('#cmdQ', 'Golden Dataset');
+  ok((await page.$$eval('#cmdList li[data-i] b', l => l.map(x => x.textContent))).some(t => /Agent Testing/.test(t)), 'search finds deep lessons'); await page.keyboard.press('Escape');
+  const html = fs.readFileSync(path.join(ROOT, 'dist', 'deep-data.js'), 'utf8');
+  ok(!/\son(click|change)=/.test(html) && !/<script/.test(html), 'no inline handlers or scripts in deep content (CSP-safe)');
+  ok(!/ผู้จัดการ|หัวหน้างาน|\bSOP-\d{2,}/.test(html), 'job titles / document numbers replaced');
+});
+
+await suite('Auto-updates (Microsoft 365 Roadmap)', async () => {
+  apiMode = 'live';
+  await page.goto(url); await page.waitForSelector('.updates.home');
+  await page.waitForFunction(() => document.querySelector('.updates .live-dot.live'), null, { timeout: 8000 });
+  ok((await text('.updates')).includes('LIVE TEST: Copilot agent item'), 'homepage shows live updates from /api/copilot-updates');
+  ok((await text('.updates [data-upd-meta]')).includes('ข้อมูลสด'), 'live indicator');
+  eq(await page.$$eval('.updates.home .upd', l => l.length), 6, '6 items on home');
+  await page.click('.updates.home [data-ut="agent"]');
+  ok(await page.$$eval('.updates.home .upd', l => l.every(e => e.dataset.topic === 'agent')), 'topic filter Agent');
+  await page.click('.updates.home a[href="#/updates"]'); await page.waitForTimeout(80);
+  ok((await page.$$eval('.updates .upd', l => l.length)) > 6, 'updates page lists all');
+  ok(await page.$$eval('.upd-t', l => l.every(a => a.href.startsWith('https://www.microsoft.com/microsoft-365/roadmap?id=') && a.target === '_blank')), 'items link to official roadmap');
+  const p2 = await ctx.newPage(); apiMode = 'fail';
+  await p2.goto(url); await p2.waitForSelector('.updates.home'); await p2.waitForTimeout(500);
+  ok((await p2.textContent('.updates [data-upd-meta]')).includes('ข้อมูล ณ การ build ล่าสุด'), 'falls back to build snapshot when API unavailable');
+  eq(await p2.$$eval('.updates.home .upd', l => l.length), 6, 'snapshot items rendered');
+  await p2.close(); apiMode = 'live';
+  ok(SNAP.items.length >= 20 && SNAP.items.every(i => /^https:\/\/www\.microsoft\.com\//.test(i.url) && i.title), 'snapshot holds real Copilot roadmap items (' + SNAP.items.length + ', fetched ' + SNAP.fetchedAt + ')');
+});
+
+await suite('Version + credit', async () => {
+  await go('#/');
+  const v = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
+  ok((await text('.ver-line')).includes('เวอร์ชัน ' + v) && (await text('.ver-line')).includes('Nattapon Yokkret'), 'version + creator on every page footer');
+  ok((await text('.hero')).includes('v' + v), 'version badge on home');
+  await go('#/d/5'); await page.waitForSelector('#main .deep-body'); ok((await text('.copy-line')).includes('Created by Nattapon Yokkret'), 'credit on deep lessons');
 });
 
 await suite('T5 Search (Ctrl+K)', async () => {
@@ -281,12 +376,12 @@ await suite('T10 Learning progress', async () => {
   await go('#/p/8');
   await page.click('#doneBtn');
   eq(await page.getAttribute('#doneBtn', 'aria-pressed'), 'true', 'mark learned');
-  eq(await text('#progTxt'), 'เรียนแล้ว 1/155', 'progress counter');
+  eq(await text('#progTxt'), 'เรียนแล้ว 1/191', 'progress counter');
   await go('#/p/9'); await page.click('#doneBtn');
   await go('#/p/10'); await page.click('#doneBtn');
   ok((await text('#toast')).includes('จบบทที่ 2 แล้ว'), 'chapter complete toast');
   await page.reload(); await page.waitForSelector('#main h1');
-  eq(await text('#progTxt'), 'เรียนแล้ว 3/155', 'progress persists after reload');
+  eq(await text('#progTxt'), 'เรียนแล้ว 3/191', 'progress persists after reload');
   ok(await page.$('#tocList a[href="#/p/8"] .dot.d'), 'TOC filled dot for learned page');
   await go('#/p/11');
   ok(await page.$('#tocList a[href="#/p/11"] .dot.v'), 'TOC outlined dot for visited page');
@@ -295,7 +390,7 @@ await suite('T10 Learning progress', async () => {
   await go('#/');
   ok((await text('.hero ~ .callout.resume, .callout.resume')).includes('หน้า 11'), 'resume card shows last page');
   await go('#/p/10'); await page.click('#doneBtn');
-  eq(await text('#progTxt'), 'เรียนแล้ว 2/155', 'unmark learned');
+  eq(await text('#progTxt'), 'เรียนแล้ว 2/191', 'unmark learned');
 });
 
 await suite('TOC filter + theme', async () => {
@@ -332,7 +427,7 @@ await suite('Storage unavailable', async () => {
 });
 
 await suite('T11 Responsive (no horizontal scroll, drawer, bottom bar)', async () => {
-  const sample = ['#/', '#/p/14', '#/p/21', '#/p/24', '#/p/31', '#/p/33', '#/p/34', '#/p/9', '#/p/70', '#/p/153', '#/p/30', '#/agents', '#/builder/1', '#/appendix-b', '#/progress', '#/p/95', '#/p/147'];
+  const sample = ['#/', '#/track/agent', '#/tracks', '#/updates', '#/deep', '#/d/1', '#/d/13', '#/d/34', '#/p/14', '#/p/21', '#/p/24', '#/p/31', '#/p/33', '#/p/34', '#/p/9', '#/p/70', '#/p/153', '#/p/30', '#/agents', '#/builder/1', '#/appendix-b', '#/progress', '#/p/95', '#/p/147'];
   for (const [w, h] of [[1440, 900], [1024, 768], [820, 1180], [400, 800], [390, 844], [360, 740]]) {
     const p = await ctx.newPage(); await p.setViewportSize({ width: w, height: h });
     await p.goto(url); await p.waitForSelector('.hero');

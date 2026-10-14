@@ -3,7 +3,7 @@
 คู่มือเรียนรู้แบบโต้ตอบ (ภาษาไทย) สำหรับคอร์ส "การใช้งาน AI แบบพาลงมือทำ" · 23 ตุลาคม 2569
 สร้างจาก `content/copilot-ai-agents-for-work.md` (ส่วนที่ 1 = สเปก UI, ส่วนที่ 2 = เนื้อหาทั้งหมด) และ `assets/logo.png`
 
-Live (Netlify): https://ai-agent-for-work-2026.netlify.app
+Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์ชัน 3.0.0** (ดู `CHANGELOG.md`)
 
 ## มีอะไรบ้าง
 
@@ -20,6 +20,10 @@ Live (Netlify): https://ai-agent-for-work-2026.netlify.app
 | ค้นหา Ctrl+K (ชื่อหน้า, Agent, คำอธิบาย, ข้อมูลที่ใช้, เนื้อหาเต็ม) | ทุกหน้า |
 | Learning Progress (localStorage) + toast "จบบทที่ n แล้ว" | `#/progress` |
 | ส่วนขยายการเรียนรู้ทุกหน้า: เจาะลึก · ตัวอย่าง · Workshop · วิธีตรวจสอบ (แยกจากต้นฉบับ) | ท้ายทุกหน้า |
+| **เส้นทางการเรียน 7 เส้นทาง** — Copilot Agent (เริ่มที่นี่) · Excel/Word/PowerPoint · เบราว์เซอร์ · Tips & Tricks · ประยุกต์ใช้งานจริง · พื้นฐาน · ขยายผลในองค์กร | หน้าแรก / `#/tracks`, `#/track/{key}` |
+| **Deep Learning 36 บทเชิงลึก** (บูรณาการจาก v10) จัด 6 กลุ่ม · แบบทดสอบเฉพาะบท 3 ข้อทุกบท · Prompt Builder/เครื่องมือตัดสินใจ/Checklist · เนื้อหาที่ซ้ำทุกบทรวมไว้ที่หน้าภาพรวม | `#/deep`, `#/d/{1–36}` |
+| **อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot** (อัตโนมัติจาก Microsoft 365 Roadmap) กรองตามหัวข้อ · แสดงเด่นที่หน้าแรก | หน้าแรก / `#/updates` |
+| หมายเลขเวอร์ชัน + เครดิตผู้สร้าง Nattapon Yokkret | หน้าแรก (ป้าย v3.0.0) และท้ายทุกหน้า |
 | Light/Dark, Desktop/Tablet/Mobile (ลิ้นชักสารบัญ < 900px + แถบล่าง), ลูกศรซ้าย/ขวาเปลี่ยนหน้า | — |
 
 ## โครงสร้าง
@@ -27,6 +31,11 @@ Live (Netlify): https://ai-agent-for-work-2026.netlify.app
 ```
 content/copilot-ai-agents-for-work.md   แหล่งความจริงของเนื้อหา (ห้ามตัด/สรุป)
 content/supplements.mjs                 ส่วนขยายการเรียนรู้ (เพิ่มเติมจากต้นฉบับ)
+content/deep-learning-v10.html          ต้นฉบับ Deep Learning 36 บท (v10) — build แปลงเป็น HTML ปลอดภัย (ไม่มี eval) + แทนชื่อตำแหน่ง/เลขที่เอกสาร
+content/deep-quizzes.mjs                แบบทดสอบเฉพาะบท 3 ข้อ (บท 2–36)
+content/tracks.mjs                      เส้นทางการเรียน 7 เส้นทาง (Copilot Agent เป็นลำดับแรก)
+data/copilot-updates.json               snapshot อัปเดต Copilot จาก Microsoft 365 Roadmap (เขียนโดย scripts/fetch-updates.mjs)
+netlify/functions/                      copilot-updates.mjs (API สด /api/copilot-updates) · daily-rebuild.mjs (build ใหม่ทุกวัน)
 content/forbidden-terms.txt             รายการคำต้องห้ามสำหรับ audit (เจ้าของงานเติม)
 data/*.json                             ข้อมูลเสริมที่ MD สูญหาย (Prompt Lab 11 หมวด, ปุ่ม Agent, Office chips, Agent #28)
 src/template.html · app.css · app.js    UI (Fluent 2 + design tokens ส่วนที่ 1), vanilla JS
@@ -44,7 +53,9 @@ legacy/index-v1.html                    เวอร์ชันเดิม (�
 
 ```bash
 npm install            # ติดตั้ง marked (ใช้ตอน build)
-npm run build          # สร้าง dist/
+npm run build          # ดึงอัปเดต Copilot ล่าสุด (ถ้าเครือข่ายใช้ได้) แล้วสร้าง dist/
+npm run build:offline  # สร้าง dist/ จาก snapshot เดิม ไม่ดึงข้อมูลใหม่
+npm run updates        # ดึงอัปเดตอย่างเดียว → data/copilot-updates.json
 npm run inventory      # นับบท/หน้า/Agent/Prompt + ความคลาดเคลื่อน → docs/content-inventory.json
 npm run serve          # เปิด dist/ ที่ http://localhost:5173
 
@@ -63,6 +74,19 @@ AXE=path/to/axe.min.js node tests/e2e.mjs   # เพิ่มการตรว�
 
 1. Netlify → Add new site → Import from Git → เลือก repo นี้ (ค่า build อ่านจาก `netlify.toml`)
 2. หรือแบบลากวาง: `npm run build` แล้วลากโฟลเดอร์ `dist/` ไปที่ Netlify Drop (ต้องลากทั้งโฟลเดอร์ เพราะมี `_headers` และ `vendor/`)
+
+## ระบบอัปเดตอัตโนมัติ (Microsoft Copilot news)
+
+แหล่งข้อมูล: RSS ทางการของ Microsoft 365 Roadmap (`https://www.microsoft.com/releasecommunications/api/v2/m365/rss`) กรองเฉพาะรายการที่เกี่ยวกับ Copilot แล้วจัดหัวข้อ (Copilot Agent / Excel·Word·PowerPoint / Teams·Outlook / เบราว์เซอร์·SharePoint / ความปลอดภัย·ผู้ดูแลระบบ / อื่น ๆ)
+
+| ชั้น | ทำงานอย่างไร |
+|---|---|
+| 1. Snapshot ตอน build | `scripts/fetch-updates.mjs` เขียน `data/copilot-updates.json` แล้วฝังในหน้าเว็บ ถ้าดึงไม่ได้ใช้ snapshot เดิม (build ไม่ล้ม) |
+| 2. API สด | Netlify Function `/api/copilot-updates` ดึง RSS ทุกครั้งที่ cache หมดอายุ (CDN cache 6 ชั่วโมง + stale-while-revalidate) หน้าเว็บเรียกเมื่อเปิด ถ้าไม่สำเร็จแสดง snapshot พร้อมบอกวันที่ข้อมูล |
+| 3. Build ใหม่ทุกวัน | Scheduled Function `daily-rebuild` (06:00 น. เวลาไทย) เรียก Build Hook เพื่อรีเฟรช snapshot และการค้นหา |
+
+ตั้งค่าครั้งเดียว: Netlify → Site configuration → Build & deploy → **Build hooks** → Add build hook → คัดลอก URL → Environment variables → เพิ่ม `BUILD_HOOK_URL` = URL นั้น
+หมายเหตุ: Functions ทำงานเฉพาะการ deploy แบบเชื่อม Git หรือ Netlify CLI (`netlify deploy --prod`) — **Netlify Drop (ลากวาง) ไม่รองรับ Functions** หน้าเว็บจะยังแสดง snapshot ได้ตามปกติ
 
 ## โลโก้และภาพประกอบ
 

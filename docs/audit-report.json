@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T01:11:00.400Z",
+  "generatedAt": "2026-10-14T02:51:52.435Z",
   "pages": [
     {
       "page": "หน้า 2",
@@ -1457,6 +1457,12 @@
     }
   ],
   "consoleErrors": [],
+  "deep": {
+    "lessons": 36,
+    "atoms": 8029,
+    "missing": [],
+    "dropped": 36
+  },
   "home": [
     {
       "text": "Copilot",
@@ -1514,6 +1520,7 @@
   "forbidden": {
     "termsChecked": 0,
     "hits": [],
+    "jobTitles": [],
     "documentNumberPatterns": [],
     "brandFiles": [
       "copilot-logo.svg"
