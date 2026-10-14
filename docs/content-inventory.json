@@ -1,0 +1,698 @@
+{
+  "generatedAt": "2026-10-14T00:14:31.496Z",
+  "source": "content/copilot-ai-agents-for-work.md",
+  "totals": {
+    "chapters": 27,
+    "contentPages": 154,
+    "pagesIncludingHome": 155,
+    "pageTypes": {
+      "objectives": 1,
+      "chat2agent": 1,
+      "anatomy": 2,
+      "outline": 23,
+      "readiness": 1,
+      "map": 2,
+      "pmode": 1,
+      "pbuild": 1,
+      "webref": 1,
+      "accounts": 1,
+      "sp": 1,
+      "module": 19,
+      "build": 1,
+      "instr": 1,
+      "caps": 1,
+      "store": 1,
+      "plab": 1,
+      "websrc": 1,
+      "pers": 5,
+      "handoff": 1,
+      "route": 1,
+      "agent": 66,
+      "agentflow": 14,
+      "calc": 1,
+      "calc2": 1,
+      "office": 4,
+      "matrix": 1
+    },
+    "agentsInRegistry": 67,
+    "agentsInJSON": 67,
+    "agentDetailPages": 66,
+    "agentFlowPages": 14,
+    "codeBlocksTotal": 700,
+    "promptBlocks": 238,
+    "builderConfigBlocks": 462,
+    "otherBlocks": 0,
+    "promptsByPageType": {
+      "outline": 20,
+      "pmode": 4,
+      "webref": 4,
+      "pers": 10,
+      "handoff": 2,
+      "agent": 198
+    },
+    "starterPrompts": 264,
+    "promptLabCategories": 12,
+    "promptLabPromptsJSON": 24,
+    "tables": 0,
+    "tableRows": 0,
+    "uniqueURLs": 42,
+    "appendixBWebsites": 42
+  },
+  "chapters": [
+    {
+      "n": 1,
+      "key": "intro",
+      "group": "gen",
+      "title": "เริ่มต้น: AI Agent และภาพรวมคอร์ส",
+      "pages": 6,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 2,
+      "key": "pmode",
+      "group": "gen",
+      "title": "Prompt Mode: จากไฟล์สู่ Agent",
+      "pages": 3,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 3,
+      "key": "acct",
+      "group": "gen",
+      "title": "บัญชี Personal vs Business และข้อจำกัด Copilot Standard",
+      "pages": 7,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 4,
+      "key": "build",
+      "group": "gen",
+      "title": "สร้างและตั้งค่า Copilot Agent, Agent Store และ Prompt Lab",
+      "pages": 7,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 5,
+      "key": "personal",
+      "group": "gen",
+      "title": "Microsoft 365 Personal กับ Copilot",
+      "pages": 5,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 6,
+      "key": "handoff",
+      "group": "gen",
+      "title": "ส่งต่องานจาก Copilot ในเบราว์เซอร์และอีเมลให้ Agent",
+      "pages": 2,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 7,
+      "key": "data",
+      "group": "data",
+      "title": "Data Consolidation, Excel & Dashboard",
+      "pages": 10,
+      "agents": 4,
+      "flows": 2
+    },
+    {
+      "n": 8,
+      "key": "doc",
+      "group": "farm",
+      "title": "Document Extraction & Data Entry",
+      "pages": 7,
+      "agents": 2,
+      "flows": 2
+    },
+    {
+      "n": 9,
+      "key": "inv",
+      "group": "inv",
+      "title": "Inventory, Vaccine, Medicine & Cost",
+      "pages": 7,
+      "agents": 2,
+      "flows": 2
+    },
+    {
+      "n": 10,
+      "key": "plan",
+      "group": "farm",
+      "title": "Farm Planning & Technical Knowledge",
+      "pages": 7,
+      "agents": 2,
+      "flows": 2
+    },
+    {
+      "n": 11,
+      "key": "fin",
+      "group": "fin",
+      "title": "Finance & Accounting Agents",
+      "pages": 12,
+      "agents": 6,
+      "flows": 3
+    },
+    {
+      "n": 12,
+      "key": "sales",
+      "group": "sales",
+      "title": "Sales & Marketing Agents",
+      "pages": 6,
+      "agents": 3,
+      "flows": 1
+    },
+    {
+      "n": 13,
+      "key": "eng",
+      "group": "eng",
+      "title": "Engineering & Maintenance Agents",
+      "pages": 6,
+      "agents": 3,
+      "flows": 1
+    },
+    {
+      "n": 14,
+      "key": "ci",
+      "group": "ci",
+      "title": "Continuous Improvement, RCA & CAPA",
+      "pages": 7,
+      "agents": 3,
+      "flows": 1
+    },
+    {
+      "n": 15,
+      "key": "wf",
+      "group": "gen",
+      "title": "Agent จาก Workflow งานจริง",
+      "pages": 1,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 16,
+      "key": "pb",
+      "group": "pb",
+      "title": "Workflow: เลี้ยงไก่รุ่นและไก่พ่อแม่พันธุ์",
+      "pages": 5,
+      "agents": 4,
+      "flows": 0
+    },
+    {
+      "n": 17,
+      "key": "hat",
+      "group": "hat",
+      "title": "Workflow: โรงฟักไข่",
+      "pages": 5,
+      "agents": 4,
+      "flows": 0
+    },
+    {
+      "n": 18,
+      "key": "brl",
+      "group": "brl",
+      "title": "Workflow: เลี้ยงไก่เนื้อและสุขภาพสัตว์",
+      "pages": 6,
+      "agents": 5,
+      "flows": 0
+    },
+    {
+      "n": 19,
+      "key": "lp",
+      "group": "lp",
+      "title": "Workflow: วางแผนการผลิตและขนส่ง",
+      "pages": 9,
+      "agents": 7,
+      "flows": 0
+    },
+    {
+      "n": 20,
+      "key": "erp",
+      "group": "erp",
+      "title": "Workflow: ระบบ ERP และงานขาย",
+      "pages": 6,
+      "agents": 5,
+      "flows": 0
+    },
+    {
+      "n": 21,
+      "key": "feed",
+      "group": "feed",
+      "title": "Workflow: โรงงานอาหารสัตว์",
+      "pages": 4,
+      "agents": 3,
+      "flows": 0
+    },
+    {
+      "n": 22,
+      "key": "lab",
+      "group": "lab",
+      "title": "Workflow: ห้องปฏิบัติการ",
+      "pages": 5,
+      "agents": 4,
+      "flows": 0
+    },
+    {
+      "n": 23,
+      "key": "qms",
+      "group": "qms",
+      "title": "Workflow: ระบบคุณภาพและการควบคุมเอกสาร",
+      "pages": 4,
+      "agents": 3,
+      "flows": 0
+    },
+    {
+      "n": 24,
+      "key": "cis",
+      "group": "cis",
+      "title": "Workflow: พัฒนาอย่างต่อเนื่องและความยั่งยืน",
+      "pages": 5,
+      "agents": 4,
+      "flows": 0
+    },
+    {
+      "n": 25,
+      "key": "office",
+      "group": "gen",
+      "title": "Copilot ใน Excel, Word & PowerPoint",
+      "pages": 4,
+      "agents": 0,
+      "flows": 0
+    },
+    {
+      "n": 26,
+      "key": "rep",
+      "group": "rep",
+      "title": "Reporting, Presentation & Communication",
+      "pages": 4,
+      "agents": 2,
+      "flows": 0
+    },
+    {
+      "n": 27,
+      "key": "arch",
+      "group": "gen",
+      "title": "Agent Architecture, Governance & Next Steps",
+      "pages": 4,
+      "agents": 0,
+      "flows": 0
+    }
+  ],
+  "issues": [
+    {
+      "sev": "info",
+      "area": "TOC",
+      "msg": "บทที่ 1 สารบัญระบุ 7 หน้า แต่พบหัวข้อ \"### หน้า\" 6 หน้า (หน้า 1 = หน้าแรก ซึ่งสเปกอยู่ในส่วนที่ 1 ไม่มีเนื้อหาในส่วนที่ 2)"
+    },
+    {
+      "sev": "high",
+      "area": "Agent",
+      "msg": "Agent #28 \"Accounting & Financial Analysis Agent\" ไม่มีหน้า Agent (page-type: agent) ในส่วนที่ 2 มีเพียงหน้า Flow หน้า 73 \"Accounting & Financial Analysis Agent: 7 ขั้นตอน\""
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#1 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2837 ≠ นับจริง 2864 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#4 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1657 ≠ นับจริง 1681 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#2 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1746 ≠ นับจริง 1770 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#3 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1737 ≠ นับจริง 1761 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#5 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1690 ≠ นับจริง 1714 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#6 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1667 ≠ นับจริง 1691 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#7 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1714 ≠ นับจริง 1738 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#8 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1683 ≠ นับจริง 1707 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#9 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1679 ≠ นับจริง 1703 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#10 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1644 ≠ นับจริง 1668 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#22 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2058 ≠ นับจริง 2082 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#23 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2275 ≠ นับจริง 2299 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#24 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1970 ≠ นับจริง 1994 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#25 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2046 ≠ นับจริง 2070 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#26 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1967 ≠ นับจริง 1991 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#27 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 3041 ≠ นับจริง 3068 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#13 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2607 ≠ นับจริง 2634 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#14 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1739 ≠ นับจริง 1763 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#15 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1681 ≠ นับจริง 1705 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#16 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2698 ≠ นับจริง 2725 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#17 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1684 ≠ นับจริง 1708 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#18 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1715 ≠ นับจริง 1739 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#19 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1713 ≠ นับจริง 1737 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#20 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2657 ≠ นับจริง 2684 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#21 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1735 ≠ นับจริง 1759 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#29 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2176 ≠ นับจริง 2200 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#30 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2166 ≠ นับจริง 2190 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#31 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2060 ≠ นับจริง 2084 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#32 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2007 ≠ นับจริง 2031 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#33 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1886 ≠ นับจริง 1910 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#34 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2075 ≠ นับจริง 2099 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#35 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2006 ≠ นับจริง 2030 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#36 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2038 ≠ นับจริง 2062 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#37 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2081 ≠ นับจริง 2105 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#38 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2040 ≠ นับจริง 2064 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#39 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1985 ≠ นับจริง 2009 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#40 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1981 ≠ นับจริง 2005 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#41 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1990 ≠ นับจริง 2014 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#42 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1970 ≠ นับจริง 1994 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#43 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1900 ≠ นับจริง 1924 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#44 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1989 ≠ นับจริง 2013 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#45 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1922 ≠ นับจริง 1946 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#46 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 2245 ≠ นับจริง 2269 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#47 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1868 ≠ นับจริง 1892 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#48 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1842 ≠ นับจริง 1866 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#49 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1951 ≠ นับจริง 1975 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#50 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1869 ≠ นับจริง 1893 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#51 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1924 ≠ นับจริง 1948 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#52 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1855 ≠ นับจริง 1879 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#53 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1882 ≠ นับจริง 1906 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#54 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1894 ≠ นับจริง 1918 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#55 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1881 ≠ นับจริง 1905 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#56 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1838 ≠ นับจริง 1862 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#57 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1983 ≠ นับจริง 2007 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#58 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1974 ≠ นับจริง 1998 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#59 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1854 ≠ นับจริง 1878 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#60 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1976 ≠ นับจริง 2000 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#61 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1983 ≠ นับจริง 2007 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#62 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1870 ≠ นับจริง 1894 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#63 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1892 ≠ นับจริง 1916 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#64 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1892 ≠ นับจริง 1916 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#65 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1892 ≠ นับจริง 1916 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#66 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1955 ≠ นับจริง 1979 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#67 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1936 ≠ นับจริง 1960 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#11 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1662 ≠ นับจริง 1686 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "low",
+      "area": "Counters",
+      "msg": "#12 instructions: ตัวเลขที่พิมพ์ในต้นฉบับ 1674 ≠ นับจริง 1698 (แอปจะนับใหม่แบบ live)"
+    },
+    {
+      "sev": "high",
+      "area": "Prompt Lab",
+      "msg": "ต้นฉบับ MD มี Prompt Lab เพียงหมวดแรก (Analyze) จาก 12 หมวด — อีก 11 หมวด (22 Prompt) มีเฉพาะใน data/guides.json"
+    },
+    {
+      "sev": "high",
+      "area": "Prompt Builder",
+      "msg": "หน้า Prompt Builder (หน้า 9) ใน MD มีเพียงชื่อช่องและหัวข้อผลลัพธ์ ไม่มีค่าตัวอย่างและข้อความ Prompt — แอปสร้างจากแม่แบบ Prompt Mode (หน้า 8 ขั้น 2–4) + ค่าตัวอย่างจากเวอร์ชันเดิม"
+    },
+    {
+      "sev": "medium",
+      "area": "Map",
+      "msg": "หน้า 7 \"Agent ตามกลุ่มงานทั่วไป\": MD มีเพียงหัวข้อกลุ่ม ไม่มีรายชื่อ Agent (ปุ่มหายตอนแปลง) — แอปเติมจาก data/chapters.json + data/agents.json"
+    },
+    {
+      "sev": "medium",
+      "area": "Map",
+      "msg": "หน้า 94 \"แผนที่ Agent จาก Workflow งานจริง\": MD มีเพียงหัวข้อกลุ่ม ไม่มีรายชื่อ Agent (ปุ่มหายตอนแปลง) — แอปเติมจาก data/chapters.json + data/agents.json"
+    },
+    {
+      "sev": "medium",
+      "area": "Calculator",
+      "msg": "หน้า 70: MD ไม่มีค่าตัวเลขในฟอร์ม — ใช้สูตรและค่าเริ่มต้นจากส่วนที่ 1"
+    },
+    {
+      "sev": "high",
+      "area": "Spec",
+      "msg": "ส่วนที่ 1 ระบุ \"หน้า Agent (67 หน้า)\" แต่พบหน้า page-type: agent 66 หน้า (Agent #28 ไม่มีหน้า)"
+    },
+    {
+      "sev": "info",
+      "area": "Spec",
+      "msg": "\"17 กลุ่มงาน\" = รหัสกลุ่ม 17 กลุ่ม (ไม่นับ gen) · มี Agent จริง 17 กลุ่ม"
+    },
+    {
+      "sev": "medium",
+      "area": "Spec",
+      "msg": "การ์ดบทเรียนหน้าแรก 3 กลุ่มในสเปกครอบคลุม 26 บท ไม่มี: intro (บทที่ 1) — แอปจัดไว้ในกลุ่ม \"พื้นฐาน\""
+    },
+    {
+      "sev": "high",
+      "area": "Spec",
+      "msg": "ส่วนที่ 1 และ CLAUDE.md ห้ามใช้โลโก้ Microsoft/Copilot แต่คำสั่งงานรอบนี้ขอ \"โลโก้ Copilot ทางการ\" — ข้อกำหนดขัดกัน ต้องให้เจ้าของงานตัดสิน"
+    },
+    {
+      "sev": "info",
+      "area": "Spec",
+      "msg": "ส่วนที่ 1 ระบุ SheetJS จาก cdnjs — แอปใช้ไฟล์ SheetJS 0.18.5 ที่แนบในโปรเจกต์ (vendor) เพื่อทำงานออฟไลน์และไม่พึ่ง CDN ภายนอก"
+    }
+  ]
+}

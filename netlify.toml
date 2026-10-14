@@ -1,0 +1,17 @@
+# Netlify: build from the Markdown source on every deploy
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # tests use Playwright locally only; never download browsers on Netlify
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+
+# Security headers (incl. a CSP with per-build script hashes) are generated into dist/_headers by scripts/build.mjs.
+
+[[redirects]]
+  # single-page app with hash routing: unknown paths fall back to the app
+  from = "/*"
+  to = "/index.html"
+  status = 200

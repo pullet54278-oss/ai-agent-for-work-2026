@@ -1,0 +1,1595 @@
+[
+  {
+    "n": 1,
+    "key": "intro",
+    "title": "เริ่มต้น: AI Agent และภาพรวมคอร์ส",
+    "group": "gen",
+    "goals": [
+      "เข้าใจความต่างระหว่าง Chatbot กับ AI Agent",
+      "รู้จักองค์ประกอบ 5 ส่วนของ Agent",
+      "เห็นภาพ Agent ทั้งหมดตามกลุ่มงาน"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 1,
+        "type": "home",
+        "title": "หน้าแรก: Copilot AI Agents for Work 2026",
+        "agent": null
+      },
+      {
+        "n": 2,
+        "type": "objectives",
+        "title": "สิ่งที่ผู้เรียนจะได้รับ",
+        "agent": null
+      },
+      {
+        "n": 3,
+        "type": "chat2agent",
+        "title": "จาก Chatbot สู่ AI Agent",
+        "agent": null
+      },
+      {
+        "n": 4,
+        "type": "anatomy",
+        "title": "องค์ประกอบ 5 ส่วนของ Agent",
+        "agent": null
+      },
+      {
+        "n": 5,
+        "type": "outline",
+        "title": "แผนที่ Copilot Ecosystem",
+        "agent": null
+      },
+      {
+        "n": 6,
+        "type": "readiness",
+        "title": "ระดับความพร้อม 3 สถานะ",
+        "agent": null
+      },
+      {
+        "n": 7,
+        "type": "map",
+        "title": "Agent ตามกลุ่มงานทั่วไป",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 2,
+    "key": "pmode",
+    "title": "Prompt Mode: จากไฟล์สู่ Agent",
+    "group": "gen",
+    "goals": [
+      "แนบไฟล์และพิมพ์ความต้องการให้ได้ผลที่ตรวจสอบได้",
+      "ให้ AI ร่างการตั้งค่า Agent ให้ครบ",
+      "ให้ AI ช่วยหาแหล่งอ้างอิงจากเว็บไซต์ที่น่าเชื่อถือ"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 8,
+        "type": "pmode",
+        "title": "Prompt Mode: 4 ขั้นจากไฟล์สู่ Agent",
+        "agent": null
+      },
+      {
+        "n": 9,
+        "type": "pbuild",
+        "title": "Prompt Builder: กรอกงานของคุณ แล้วคัดลอก Prompt",
+        "agent": null
+      },
+      {
+        "n": 10,
+        "type": "webref",
+        "title": "ให้ AI ช่วยหาแหล่งอ้างอิงจากเว็บไซต์",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 3,
+    "key": "acct",
+    "title": "บัญชี Personal vs Business และข้อจำกัด Copilot Standard",
+    "group": "gen",
+    "goals": [
+      "แยกได้ว่าบัญชีแต่ละแบบเข้าถึงข้อมูลใดได้",
+      "รู้ข้อจำกัดของ Copilot แบบ Standard กับ SharePoint"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 11,
+        "type": "outline",
+        "title": "ภาพรวมบัญชี 3 แบบ",
+        "agent": null
+      },
+      {
+        "n": 12,
+        "type": "outline",
+        "title": "บัญชี Personal ทำอะไรได้",
+        "agent": null
+      },
+      {
+        "n": 13,
+        "type": "outline",
+        "title": "บัญชี Business และ Copilot Business",
+        "agent": null
+      },
+      {
+        "n": 14,
+        "type": "accounts",
+        "title": "เปรียบเทียบสิทธิ์บัญชี",
+        "agent": null
+      },
+      {
+        "n": 15,
+        "type": "sp",
+        "title": "Copilot แบบ Standard กับ SharePoint",
+        "agent": null
+      },
+      {
+        "n": 16,
+        "type": "outline",
+        "title": "ขอบเขตข้อมูลและสิทธิ์",
+        "agent": null
+      },
+      {
+        "n": 17,
+        "type": "outline",
+        "title": "เลือกบัญชีให้เหมาะกับเคส",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 4,
+    "key": "build",
+    "title": "สร้างและตั้งค่า Copilot Agent, Agent Store และ Prompt Lab",
+    "group": "gen",
+    "goals": [
+      "สร้าง Agent ด้วย Agent Builder ได้ครบขั้นตอน",
+      "ตั้งค่า Knowledge และ Capabilities ให้ตรงกับสิทธิ์บัญชี",
+      "เลือกใช้ Agent จาก Agent Store และ Prompt จาก Prompt Lab"
+    ],
+    "intro": [
+      "บทนี้พาสร้าง Agent ตัวแรกตั้งแต่เปิด Agent Builder จนแชร์ให้ทีม พร้อมเรียนรู้การตั้งค่า Knowledge และ Capabilities ให้ตรงกับสิทธิ์บัญชี การเลือกใช้ Agent สำเร็จรูปจาก Agent Store และการหา Prompt จาก Prompt Lab",
+      "บัญชีองค์กรที่ลงชื่อเข้า Copilot ได้",
+      "Prompt ที่ทดลองแล้วได้ผลจากบท Prompt Mode",
+      "รายการเว็บไซต์ที่เกี่ยวกับงานของคุณ"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 18,
+        "type": "module",
+        "title": "สร้างและตั้งค่า Copilot Agent",
+        "agent": null
+      },
+      {
+        "n": 19,
+        "type": "build",
+        "title": "ขั้นตอนการสร้าง Copilot Agent สำหรับบัญชีธุรกิจ",
+        "agent": null
+      },
+      {
+        "n": 20,
+        "type": "instr",
+        "title": "โครงสร้าง Instructions 8 ส่วน",
+        "agent": null
+      },
+      {
+        "n": 21,
+        "type": "caps",
+        "title": "การตั้งค่าความสามารถของ Copilot Agent",
+        "agent": null
+      },
+      {
+        "n": 22,
+        "type": "store",
+        "title": "Agent Store ตามบัญชี 2 แผน",
+        "agent": null
+      },
+      {
+        "n": 23,
+        "type": "plab",
+        "title": "Prompt Lab: หมวด Prompt และ Agent prompts",
+        "agent": null
+      },
+      {
+        "n": 24,
+        "type": "websrc",
+        "title": "แหล่งความรู้: เว็บไซต์ 4 แหล่งต่อ Agent",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 5,
+    "key": "personal",
+    "title": "Microsoft 365 Personal กับ Copilot",
+    "group": "gen",
+    "goals": [
+      "ค้นหาข้อมูลพร้อมแหล่งอ้างอิง",
+      "สร้างไฟล์ Word, Excel, PowerPoint",
+      "วิเคราะห์ข้อมูลใน Excel",
+      "สร้าง Interactive Presentation เป็นไฟล์ HTML"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 25,
+        "type": "pers",
+        "title": "Microsoft 365 Personal: ใช้ Copilot ทำอะไรได้",
+        "agent": null
+      },
+      {
+        "n": 26,
+        "type": "pers",
+        "title": "ค้นหาข้อมูลพร้อมแหล่งอ้างอิง",
+        "agent": null
+      },
+      {
+        "n": 27,
+        "type": "pers",
+        "title": "สร้างไฟล์ Word, Excel และ PowerPoint",
+        "agent": null
+      },
+      {
+        "n": 28,
+        "type": "pers",
+        "title": "วิเคราะห์ข้อมูลใน Excel",
+        "agent": null
+      },
+      {
+        "n": 29,
+        "type": "pers",
+        "title": "สร้าง Interactive Presentation เป็นไฟล์ HTML",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 6,
+    "key": "handoff",
+    "title": "ส่งต่องานจาก Copilot ในเบราว์เซอร์และอีเมลให้ Agent",
+    "group": "gen",
+    "goals": [
+      "สรุปงานจากหน้าเว็บหรืออีเมลเป็น Handoff Brief",
+      "เลือก Agent ที่ทำงานต่อได้ถูกตัว",
+      "แยกการส่งต่อด้วยมือกับแบบอัตโนมัติ"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 30,
+        "type": "handoff",
+        "title": "จากเบราว์เซอร์และอีเมล ส่งต่อให้ Agent",
+        "agent": null
+      },
+      {
+        "n": 31,
+        "type": "route",
+        "title": "ตารางเลือก Agent ตามประเภทงานที่เข้ามา",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 7,
+    "key": "data",
+    "title": "Data Consolidation, Excel & Dashboard",
+    "group": "data",
+    "goals": [
+      "รวมข้อมูลหลายฟาร์มให้ตรวจสอบได้",
+      "วิเคราะห์ Excel อย่างมีหลักฐาน",
+      "ออกแบบ Dashboard จาก KPI ที่นิยามชัด"
+    ],
+    "intro": [
+      "งานวิเคราะห์ข้อมูลเป็นจุดเริ่มที่ได้ผลเร็วที่สุด เพราะมีไฟล์ Excel อยู่แล้ว บทนี้สอนให้รวมข้อมูลหลายแหล่งอย่างตรวจสอบได้ วิเคราะห์อย่างมีหลักฐาน และสร้าง Dashboard ที่ตอบคำถามผู้บริหาร",
+      "ไฟล์ Excel ข้อมูลการผลิตหรือการขายที่ใช้ประจำ 1–3 ไฟล์",
+      "รายการ KPI ที่ทีมใช้อยู่"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 32,
+        "type": "module",
+        "title": "Data Analytics Agents",
+        "agent": null
+      },
+      {
+        "n": 33,
+        "type": "agent",
+        "title": "Multi-Farm Data Consolidation Agent",
+        "agent": 1
+      },
+      {
+        "n": 34,
+        "type": "agentflow",
+        "title": "Consolidation: ขั้นตอนและ Prompt",
+        "agent": 1
+      },
+      {
+        "n": 35,
+        "type": "agent",
+        "title": "Data Quality Checker Agent",
+        "agent": 4
+      },
+      {
+        "n": 36,
+        "type": "agent",
+        "title": "Excel Analysis Agent",
+        "agent": 2
+      },
+      {
+        "n": 37,
+        "type": "agentflow",
+        "title": "Excel Analysis: ขั้นตอนและ Prompt",
+        "agent": 2
+      },
+      {
+        "n": 38,
+        "type": "agent",
+        "title": "Dashboard Builder Agent",
+        "agent": 3
+      },
+      {
+        "n": 39,
+        "type": "outline",
+        "title": "ตัวอย่าง Dashboard ผลลัพธ์",
+        "agent": null
+      },
+      {
+        "n": 40,
+        "type": "outline",
+        "title": "Checklist ตรวจผลวิเคราะห์จาก AI",
+        "agent": null
+      },
+      {
+        "n": 41,
+        "type": "outline",
+        "title": "สรุปโมดูล Data Analytics",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 8,
+    "key": "doc",
+    "title": "Document Extraction & Data Entry",
+    "group": "farm",
+    "goals": [
+      "ดึงข้อมูลจากเอกสารและภาพถ่ายเป็นตาราง",
+      "ลดการคีย์ข้อมูลประจำวันซ้ำซ้อน"
+    ],
+    "intro": [
+      "งานคีย์ข้อมูลจากเอกสารและบันทึกประจำวันใช้เวลามากและผิดพลาดง่าย บทนี้สอนให้ AI ดึงข้อมูลจากเอกสารเป็นตาราง และวางเส้นทางพัฒนาไปสู่การบันทึกแบบอัตโนมัติ",
+      "ภาพถ่ายหรือ PDF เอกสารที่คีย์ซ้ำบ่อย",
+      "รายการฟิลด์ที่ต้องดึง"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 42,
+        "type": "module",
+        "title": "Document & Daily Record Agents",
+        "agent": null
+      },
+      {
+        "n": 43,
+        "type": "agent",
+        "title": "Document Extraction Agent",
+        "agent": 5
+      },
+      {
+        "n": 44,
+        "type": "agentflow",
+        "title": "Extraction: ขั้นตอนและ Prompt",
+        "agent": 5
+      },
+      {
+        "n": 45,
+        "type": "agent",
+        "title": "Daily Farm Record Agent",
+        "agent": 6
+      },
+      {
+        "n": 46,
+        "type": "agentflow",
+        "title": "Daily Record: ขั้นตอนและ Prompt",
+        "agent": 6
+      },
+      {
+        "n": 47,
+        "type": "outline",
+        "title": "เส้นทางสู่ Automation",
+        "agent": null
+      },
+      {
+        "n": 48,
+        "type": "outline",
+        "title": "สรุปโมดูล Document",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "key": "inv",
+    "title": "Inventory, Vaccine, Medicine & Cost",
+    "group": "inv",
+    "goals": [
+      "ติดตามคงคลังและวันหมดอายุแบบ FEFO",
+      "คำนวณต้นทุนต่อหน่วยที่อธิบายที่มาได้"
+    ],
+    "intro": [
+      "คงคลังวัคซีนและยา และต้นทุนการผลิต เป็นข้อมูลที่กระทบทั้งความปลอดภัยของสัตว์และผลกำไร บทนี้สอนการใช้ Agent ติดตามวันหมดอายุแบบ FEFO และคำนวณต้นทุนต่อหน่วยที่อธิบายที่มาได้",
+      "รายงานคงคลังที่ส่งออกจากระบบ",
+      "ข้อมูลอาหารที่ใช้ ราคา และผลผลิต"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 49,
+        "type": "module",
+        "title": "Inventory & Cost Agents",
+        "agent": null
+      },
+      {
+        "n": 50,
+        "type": "agent",
+        "title": "Vaccine & Medicine Inventory Agent",
+        "agent": 7
+      },
+      {
+        "n": 51,
+        "type": "agentflow",
+        "title": "FEFO & Reorder: ขั้นตอนและ Prompt",
+        "agent": 7
+      },
+      {
+        "n": 52,
+        "type": "agent",
+        "title": "Feed & Production Cost Agent",
+        "agent": 8
+      },
+      {
+        "n": 53,
+        "type": "agentflow",
+        "title": "Cost per kg: ขั้นตอนและ Prompt",
+        "agent": 8
+      },
+      {
+        "n": 54,
+        "type": "outline",
+        "title": "ข้อควบคุมข้อมูลต้นทุน",
+        "agent": null
+      },
+      {
+        "n": 55,
+        "type": "outline",
+        "title": "สรุปโมดูล Inventory & Cost",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 10,
+    "key": "plan",
+    "title": "Farm Planning & Technical Knowledge",
+    "group": "farm",
+    "goals": [
+      "วางแผนการผลิตตามข้อจำกัดโรงเรือน",
+      "ค้นคำตอบจาก SOP พร้อมอ้างอิง"
+    ],
+    "intro": [
+      "การวางแผนการผลิตต้องคำนึงถึงข้อจำกัดหลายอย่างพร้อมกัน และคำถามด้านเทคนิคต้องตอบให้ถูกต้องตามมาตรฐาน บทนี้สอนการใช้ Agent เสนอแผนหลายทางเลือก และสร้าง Agent ด้านความรู้ที่อ้างอิงแหล่งได้",
+      "แผนการผลิตปัจจุบันและข้อจำกัด",
+      "คำถามด้านเทคนิคที่พบบ่อย 10 ข้อ"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 56,
+        "type": "module",
+        "title": "Farm Planning & Knowledge Agents",
+        "agent": null
+      },
+      {
+        "n": 57,
+        "type": "agent",
+        "title": "Farm Production Planning Agent",
+        "agent": 9
+      },
+      {
+        "n": 58,
+        "type": "agentflow",
+        "title": "Planning: ขั้นตอนและ Prompt",
+        "agent": 9
+      },
+      {
+        "n": 59,
+        "type": "agent",
+        "title": "Technical Knowledge Agent",
+        "agent": 10
+      },
+      {
+        "n": 60,
+        "type": "agentflow",
+        "title": "Knowledge: ขั้นตอนและ Prompt",
+        "agent": 10
+      },
+      {
+        "n": 61,
+        "type": "outline",
+        "title": "การอ้างอิงและความถูกต้อง",
+        "agent": null
+      },
+      {
+        "n": 62,
+        "type": "outline",
+        "title": "สรุปโมดูล Planning & Knowledge",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "key": "fin",
+    "title": "Finance & Accounting Agents",
+    "group": "fin",
+    "goals": [
+      "ตรวจรายการบัญชีและเอกสารอย่างเป็นระบบ",
+      "วิเคราะห์ต้นทุนไก่ครบวงจรถึงต้นทุนต่อกิโลกรัม",
+      "เชื่อมปัญหาคุณภาพกับผลกระทบทางการเงิน (COPQ)"
+    ],
+    "intro": [
+      "งานบัญชีและการเงินต้องการความถูกต้องสูงและมีเอกสารประกอบมาก บทนี้สอนการใช้ Agent ตรวจรายการและเอกสาร วิเคราะห์ต้นทุนไก่ครบวงจร จำลองสถานการณ์ และเชื่อมปัญหาคุณภาพกับผลกระทบทางการเงิน",
+      "รายงานที่ส่งออกจากระบบบัญชีหรือ ERP",
+      "สมมติฐานต้นทุนที่ใช้อยู่"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 63,
+        "type": "module",
+        "title": "Finance & Accounting Agents",
+        "agent": null
+      },
+      {
+        "n": 64,
+        "type": "agent",
+        "title": "Accounting Audit Agent",
+        "agent": 22
+      },
+      {
+        "n": 65,
+        "type": "agent",
+        "title": "Integrated Broiler Cost Analysis Agent",
+        "agent": 23
+      },
+      {
+        "n": 66,
+        "type": "agentflow",
+        "title": "ต้นทุนไก่ครบวงจร: ขั้นตอนและ Prompt",
+        "agent": 23
+      },
+      {
+        "n": 67,
+        "type": "agent",
+        "title": "Executive Finance Report Agent",
+        "agent": 24
+      },
+      {
+        "n": 68,
+        "type": "agent",
+        "title": "Invoice & Document Check Agent",
+        "agent": 25
+      },
+      {
+        "n": 69,
+        "type": "agent",
+        "title": "Budget & Scenario Agent",
+        "agent": 26
+      },
+      {
+        "n": 70,
+        "type": "calc",
+        "title": "ราคาอาหารสัตว์ +1 บาท/กก. กระทบเท่าไร",
+        "agent": null
+      },
+      {
+        "n": 71,
+        "type": "agent",
+        "title": "Standard and Regulatory Agent",
+        "agent": 27
+      },
+      {
+        "n": 72,
+        "type": "agentflow",
+        "title": "Standard & Regulatory → COPQ: ขั้นตอนและ Prompt",
+        "agent": 27
+      },
+      {
+        "n": 73,
+        "type": "agentflow",
+        "title": "Accounting & Financial Analysis Agent: 7 ขั้นตอน",
+        "agent": 28
+      },
+      {
+        "n": 74,
+        "type": "outline",
+        "title": "สรุปโมดูล Finance & Accounting",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 12,
+    "key": "sales",
+    "title": "Sales & Marketing Agents",
+    "group": "sales",
+    "goals": [
+      "วิเคราะห์ Actual vs Target",
+      "สรุปข้อมูลตลาดจากแหล่งที่ได้รับอนุญาต",
+      "วางแผนและวัดผลแคมเปญ"
+    ],
+    "intro": [
+      "บทนี้สอนการใช้ Agent วิเคราะห์ผลการขายเทียบเป้า สรุปข้อมูลตลาดจากแหล่งที่น่าเชื่อถือ และวางแผนแคมเปญที่วัดผลได้ โดยแยกข้อเท็จจริงจากการตีความให้ชัด",
+      "ไฟล์ยอดขายและเป้าหมาย",
+      "แหล่งข้อมูลตลาดที่ทีมใช้"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 75,
+        "type": "module",
+        "title": "Sales & Marketing Agents",
+        "agent": null
+      },
+      {
+        "n": 76,
+        "type": "agent",
+        "title": "Sales Performance Agent",
+        "agent": 13
+      },
+      {
+        "n": 77,
+        "type": "agentflow",
+        "title": "Sales Performance: ขั้นตอนและ Prompt",
+        "agent": 13
+      },
+      {
+        "n": 78,
+        "type": "agent",
+        "title": "Customer & Market Intelligence Agent",
+        "agent": 14
+      },
+      {
+        "n": 79,
+        "type": "agent",
+        "title": "Marketing Campaign Agent",
+        "agent": 15
+      },
+      {
+        "n": 80,
+        "type": "outline",
+        "title": "สรุปโมดูล Sales & Marketing",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 13,
+    "key": "eng",
+    "title": "Engineering & Maintenance Agents",
+    "group": "eng",
+    "goals": [
+      "จัดอันดับอุปกรณ์เสี่ยงจากประวัติซ่อม",
+      "หาจุดสูญเสียพลังงานต่อหน่วยผลผลิต",
+      "ใช้คู่มือเครื่องจักรช่วยแก้ปัญหา"
+    ],
+    "intro": [
+      "งานซ่อมบำรุงและพลังงานมีข้อมูลประวัติจำนวนมาก แต่ไม่ค่อยถูกนำมาวิเคราะห์ บทนี้สอนการใช้ Agent จัดอันดับอุปกรณ์เสี่ยง หาจุดสูญเสียพลังงาน และค้นวิธีแก้ปัญหาจากคู่มือ โดยยึดความปลอดภัยเป็นหลัก",
+      "ประวัติซ่อมและการหยุดเครื่อง",
+      "ข้อมูลมิเตอร์ไฟฟ้าและน้ำ"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 81,
+        "type": "module",
+        "title": "Engineering & Maintenance Agents",
+        "agent": null
+      },
+      {
+        "n": 82,
+        "type": "agent",
+        "title": "Predictive Maintenance Support Agent",
+        "agent": 16
+      },
+      {
+        "n": 83,
+        "type": "agentflow",
+        "title": "Maintenance: ขั้นตอนและ Prompt",
+        "agent": 16
+      },
+      {
+        "n": 84,
+        "type": "agent",
+        "title": "Energy Efficiency Agent",
+        "agent": 17
+      },
+      {
+        "n": 85,
+        "type": "agent",
+        "title": "Engineering Troubleshooting Agent",
+        "agent": 18
+      },
+      {
+        "n": 86,
+        "type": "outline",
+        "title": "สรุปโมดูล Engineering",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 14,
+    "key": "ci",
+    "title": "Continuous Improvement, RCA & CAPA",
+    "group": "ci",
+    "goals": [
+      "หา Bottleneck และความสูญเปล่า",
+      "ทำ RCA จากหลักฐาน ไม่ใช่ความเห็น",
+      "ติดตาม CAPA และผลประหยัดที่ตรวจสอบแล้ว"
+    ],
+    "intro": [
+      "บทนี้สอนการใช้ Agent สนับสนุนการปรับปรุงงานอย่างต่อเนื่อง ตั้งแต่หาคอขวดและความสูญเปล่า ทำ RCA จากหลักฐาน ติดตาม CAPA จนถึงยืนยันผลประหยัด",
+      "รายงานปัญหาที่เกิดซ้ำ",
+      "ทะเบียนโครงการปรับปรุงหรือ CAPA"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 87,
+        "type": "module",
+        "title": "Continuous Improvement Agents",
+        "agent": null
+      },
+      {
+        "n": 88,
+        "type": "agent",
+        "title": "Process Improvement Agent",
+        "agent": 19
+      },
+      {
+        "n": 89,
+        "type": "agent",
+        "title": "Root Cause Analysis & CAPA Agent",
+        "agent": 20
+      },
+      {
+        "n": 90,
+        "type": "agentflow",
+        "title": "RCA: 5 Why, Fishbone และ CAPA",
+        "agent": 20
+      },
+      {
+        "n": 91,
+        "type": "agent",
+        "title": "CI Project Tracker Agent",
+        "agent": 21
+      },
+      {
+        "n": 92,
+        "type": "outline",
+        "title": "PDCA กับ Agent",
+        "agent": null
+      },
+      {
+        "n": 93,
+        "type": "outline",
+        "title": "สรุปโมดูล CI",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 15,
+    "key": "wf",
+    "title": "Agent จาก Workflow งานจริง",
+    "group": "gen",
+    "goals": [
+      "เห็นว่าแต่ละขั้นของกระบวนการสร้าง Agent อะไรได้",
+      "เลือก Agent ที่เริ่มทำได้ทันทีในงานของตนเอง"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 94,
+        "type": "map",
+        "title": "แผนที่ Agent จาก Workflow งานจริง",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 16,
+    "key": "pb",
+    "title": "Workflow: เลี้ยงไก่รุ่นและไก่พ่อแม่พันธุ์",
+    "group": "pb",
+    "goals": [
+      "ติดตามน้ำหนักและความสม่ำเสมอของฝูง",
+      "ตรวจความพร้อมโรงเรือนและโปรแกรมวัคซีน",
+      "วิเคราะห์ผลผลิตไข่ฟัก"
+    ],
+    "intro": [
+      "กระบวนการเลี้ยงไก่รุ่นและไก่พ่อแม่พันธุ์ เริ่มจากเตรียมโรงเรือน รับลูกไก่ ทำวัคซีน ชั่งน้ำหนักและคัดขนาด จนถึงช่วงให้ผลผลิตและเก็บไข่ฟัก Agent ในบทนี้ช่วยติดตามตัวชี้วัดสำคัญของแต่ละช่วง",
+      "ข้อมูลชั่งน้ำหนักรายสัปดาห์",
+      "โปรแกรมวัคซีนและบันทึกการทำวัคซีน",
+      "บันทึกไข่รายวัน"
+    ],
+    "workflow": [
+      [
+        "เตรียมโรงเรือน",
+        30
+      ],
+      [
+        "รับลูกไก่และกก",
+        0
+      ],
+      [
+        "วัคซีน ยา วิตามิน",
+        31
+      ],
+      [
+        "ชั่งน้ำหนักและคัดขนาด",
+        29
+      ],
+      [
+        "ช่วงให้ผลผลิต",
+        0
+      ],
+      [
+        "เก็บและคัดไข่ฟัก",
+        32
+      ]
+    ],
+    "pages": [
+      {
+        "n": 95,
+        "type": "module",
+        "title": "Workflow: เลี้ยงไก่รุ่นและไก่พ่อแม่พันธุ์",
+        "agent": null
+      },
+      {
+        "n": 96,
+        "type": "agent",
+        "title": "Flock Weight & Uniformity Agent",
+        "agent": 29
+      },
+      {
+        "n": 97,
+        "type": "agent",
+        "title": "House Prep & Biosecurity Agent",
+        "agent": 30
+      },
+      {
+        "n": 98,
+        "type": "agent",
+        "title": "Vaccination Program Agent",
+        "agent": 31
+      },
+      {
+        "n": 99,
+        "type": "agent",
+        "title": "Hatching Egg Production Agent",
+        "agent": 32
+      }
+    ]
+  },
+  {
+    "n": 17,
+    "key": "hat",
+    "title": "Workflow: โรงฟักไข่",
+    "group": "hat",
+    "goals": [
+      "กระทบยอดรับไข่และส่งลูกไก่",
+      "วิเคราะห์ผลฟักและไข่ไม่ฟัก",
+      "สืบย้อนเพื่อเรียกคืนสินค้าได้เร็ว"
+    ],
+    "intro": [
+      "โรงฟักไข่รับไข่ฟักจากฟาร์ม เข้าตู้ฟัก ส่องไข่ ย้ายตู้เกิด คัดลูกไก่ และส่งให้ลูกค้า Agent ในบทนี้ช่วยกระทบยอด วิเคราะห์ผลฟัก และเตรียมการสืบย้อนเมื่อต้องเรียกคืนสินค้า",
+      "บันทึกรับไข่และผลส่องไข่",
+      "ข้อมูลผ่าไข่และลูกไก่คัด",
+      "บันทึกการส่งลูกไก่"
+    ],
+    "workflow": [
+      [
+        "รับและคัดไข่ฟัก",
+        33
+      ],
+      [
+        "เก็บรักษาไข่",
+        0
+      ],
+      [
+        "เข้าตู้ฟัก ส่องไข่ ย้ายตู้เกิด",
+        34
+      ],
+      [
+        "คัดและทำวัคซีนลูกไก่",
+        0
+      ],
+      [
+        "ส่งลูกไก่",
+        35
+      ],
+      [
+        "เรียกคืนสินค้า",
+        36
+      ]
+    ],
+    "pages": [
+      {
+        "n": 100,
+        "type": "module",
+        "title": "Workflow: โรงฟักไข่",
+        "agent": null
+      },
+      {
+        "n": 101,
+        "type": "agent",
+        "title": "Egg Receiving Agent",
+        "agent": 33
+      },
+      {
+        "n": 102,
+        "type": "agent",
+        "title": "Hatch Performance Agent",
+        "agent": 34
+      },
+      {
+        "n": 103,
+        "type": "agent",
+        "title": "Chick Dispatch Agent",
+        "agent": 35
+      },
+      {
+        "n": 104,
+        "type": "agent",
+        "title": "Recall & Traceability Agent",
+        "agent": 36
+      }
+    ]
+  },
+  {
+    "n": 18,
+    "key": "brl",
+    "title": "Workflow: เลี้ยงไก่เนื้อและสุขภาพสัตว์",
+    "group": "brl",
+    "goals": [
+      "ตรวจฟาร์มก่อนลงไก่และก่อนเชือด",
+      "ติดตามผลการเลี้ยงรายวัน",
+      "สนับสนุนการสอบสวนไก่ป่วยและลดการใช้ยา"
+    ],
+    "intro": [
+      "การเลี้ยงไก่เนื้อเริ่มจากตรวจฟาร์มก่อนลงไก่ เลี้ยงและบันทึกรายวัน ติดตามสุขภาพ จนถึงตรวจก่อนเชือด Agent ในบทนี้ช่วยให้เห็นความผิดปกติเร็วขึ้น และสนับสนุนการตัดสินใจของผู้เชี่ยวชาญด้านสุขภาพสัตว์",
+      "บันทึกการเลี้ยงรายวัน",
+      "ผลตรวจทางห้องปฏิบัติการ",
+      "บันทึกการใช้ยา"
+    ],
+    "workflow": [
+      [
+        "ตรวจฟาร์มก่อนลงไก่",
+        38
+      ],
+      [
+        "เลี้ยงและบันทึกรายวัน",
+        37
+      ],
+      [
+        "ตรวจเมื่อได้รับแจ้งไก่ป่วย",
+        40
+      ],
+      [
+        "Salmonella และการใช้ยา",
+        41
+      ],
+      [
+        "ตรวจก่อนเชือด 72 ชั่วโมง",
+        39
+      ]
+    ],
+    "pages": [
+      {
+        "n": 105,
+        "type": "module",
+        "title": "Workflow: เลี้ยงไก่เนื้อและสุขภาพสัตว์",
+        "agent": null
+      },
+      {
+        "n": 106,
+        "type": "agent",
+        "title": "Broiler Performance Agent",
+        "agent": 37
+      },
+      {
+        "n": 107,
+        "type": "agent",
+        "title": "Farm Inspection Agent",
+        "agent": 38
+      },
+      {
+        "n": 108,
+        "type": "agent",
+        "title": "Pre-slaughter Health Agent",
+        "agent": 39
+      },
+      {
+        "n": 109,
+        "type": "agent",
+        "title": "Farm Investigation Agent",
+        "agent": 40
+      },
+      {
+        "n": 110,
+        "type": "agent",
+        "title": "Salmonella & AMU Agent",
+        "agent": 41
+      }
+    ]
+  },
+  {
+    "n": 19,
+    "key": "lp",
+    "title": "Workflow: วางแผนการผลิตและขนส่ง",
+    "group": "lp",
+    "goals": [
+      "ประมาณการไข่ฟักและวางแผนเข้าฟัก",
+      "วางแผนลงลูกไก่และพื้นที่เลี้ยง",
+      "จัดคิวไก่เข้าเชือดตามกฎที่กำหนด"
+    ],
+    "intro": [
+      "การวางแผนเชื่อมทุกช่วงของห่วงโซ่ ตั้งแต่ประมาณการไข่ฟัก เข้าฟัก ลงลูกไก่ จนถึงจัดคิวไก่เข้าเชือด Agent ในบทนี้ช่วยคำนวณ ตรวจข้อจำกัด และจัดลำดับตามกฎที่กำหนด",
+      "แผนฝูงพ่อแม่พันธุ์และแผนลงลูกไก่",
+      "ความต้องการของโรงงาน",
+      "ผลตรวจ Salmonella และสถานะฝูง"
+    ],
+    "workflow": [
+      [
+        "ประมาณการไข่ฟัก",
+        42
+      ],
+      [
+        "แผนเข้าฟัก",
+        43
+      ],
+      [
+        "แผนลงลูกไก่และพื้นที่",
+        44
+      ],
+      [
+        "ส่งลูกไก่ไปฟาร์ม",
+        45
+      ],
+      [
+        "จัดคิวเข้าเชือด",
+        46
+      ],
+      [
+        "ประเมินผู้ส่งไก่เป็น",
+        47
+      ],
+      [
+        "ซื้อขายไข่ฟักและลูกไก่",
+        48
+      ]
+    ],
+    "pages": [
+      {
+        "n": 111,
+        "type": "module",
+        "title": "Workflow: วางแผนการผลิตและขนส่ง",
+        "agent": null
+      },
+      {
+        "n": 112,
+        "type": "agent",
+        "title": "Egg Forecast Agent",
+        "agent": 42
+      },
+      {
+        "n": 113,
+        "type": "agent",
+        "title": "Egg Set Planning Agent",
+        "agent": 43
+      },
+      {
+        "n": 114,
+        "type": "agent",
+        "title": "Placement & Capacity Agent",
+        "agent": 44
+      },
+      {
+        "n": 115,
+        "type": "calc2",
+        "title": "คำนวณพื้นที่เลี้ยงที่ต้องใช้",
+        "agent": null
+      },
+      {
+        "n": 116,
+        "type": "agent",
+        "title": "Chick Delivery Planning Agent",
+        "agent": 45
+      },
+      {
+        "n": 117,
+        "type": "agent",
+        "title": "Bird Queue to Plant Agent",
+        "agent": 46
+      },
+      {
+        "n": 118,
+        "type": "agent",
+        "title": "Supplier Evaluation Agent",
+        "agent": 47
+      },
+      {
+        "n": 119,
+        "type": "agent",
+        "title": "Egg & Chick Trading Agent",
+        "agent": 48
+      }
+    ]
+  },
+  {
+    "n": 20,
+    "key": "erp",
+    "title": "Workflow: ระบบ ERP และงานขาย",
+    "group": "erp",
+    "goals": [
+      "ตรวจข้อมูลก่อนสร้างใบสั่งขาย",
+      "กระทบยอดใบส่งของและใบแจ้งหนี้",
+      "ปิดรุ่นและทบทวน Process Flow"
+    ],
+    "intro": [
+      "งานในระบบ ERP ต้องถูกต้องตั้งแต่ข้อมูลหลัก ใบสั่งขาย ใบส่งของ ใบแจ้งหนี้ จนถึงการปิดรุ่น Agent ในบทนี้ช่วยตรวจก่อนบันทึกและกระทบยอดหลังบันทึก โดยไม่บันทึกในระบบแทนผู้ใช้",
+      "รายงานที่ส่งออกจากระบบ ERP",
+      "รายการประเภทเอกสารที่ใช้"
+    ],
+    "workflow": [
+      [
+        "ข้อมูลหลัก",
+        52
+      ],
+      [
+        "ใบสั่งขาย",
+        49
+      ],
+      [
+        "ใบส่งของและใบแจ้งหนี้",
+        50
+      ],
+      [
+        "ปิดรุ่น",
+        51
+      ],
+      [
+        "ทบทวน Process Flow",
+        53
+      ]
+    ],
+    "pages": [
+      {
+        "n": 120,
+        "type": "module",
+        "title": "Workflow: ระบบ ERP และงานขาย",
+        "agent": null
+      },
+      {
+        "n": 121,
+        "type": "agent",
+        "title": "Sales Order Check Agent",
+        "agent": 49
+      },
+      {
+        "n": 122,
+        "type": "agent",
+        "title": "Delivery & Invoice Recon Agent",
+        "agent": 50
+      },
+      {
+        "n": 123,
+        "type": "agent",
+        "title": "Flock Settlement Agent",
+        "agent": 51
+      },
+      {
+        "n": 124,
+        "type": "agent",
+        "title": "Master Data Request Agent",
+        "agent": 52
+      },
+      {
+        "n": 125,
+        "type": "agent",
+        "title": "Process Flow Agent",
+        "agent": 53
+      }
+    ]
+  },
+  {
+    "n": 21,
+    "key": "feed",
+    "title": "Workflow: โรงงานอาหารสัตว์",
+    "group": "feed",
+    "goals": [
+      "ตรวจวัตถุดิบเทียบสเปก",
+      "ทบทวนบันทึกการผลิตรายแบตช์",
+      "วางแผนส่งอาหารให้ฟาร์ม"
+    ],
+    "intro": [
+      "โรงงานอาหารสัตว์เริ่มจากรับและสุ่มวัตถุดิบ บด ผสม อัดเม็ด จนถึงโหลดและขนส่ง Agent ในบทนี้ช่วยตรวจวัตถุดิบเทียบสเปก ทบทวนบันทึกการผลิต และวางแผนส่งอาหารให้ฟาร์ม",
+      "ผลสุ่มตรวจวัตถุดิบและสเปก",
+      "บันทึกการผลิตรายแบตช์",
+      "คำสั่งอาหารรายฟาร์ม"
+    ],
+    "workflow": [
+      [
+        "สุ่มและรับวัตถุดิบ",
+        54
+      ],
+      [
+        "บด ผสม อัดเม็ด",
+        55
+      ],
+      [
+        "โหลดและขนส่ง",
+        56
+      ]
+    ],
+    "pages": [
+      {
+        "n": 126,
+        "type": "module",
+        "title": "Workflow: โรงงานอาหารสัตว์",
+        "agent": null
+      },
+      {
+        "n": 127,
+        "type": "agent",
+        "title": "Ingredient Receiving Agent",
+        "agent": 54
+      },
+      {
+        "n": 128,
+        "type": "agent",
+        "title": "Feed Batch Review Agent",
+        "agent": 55
+      },
+      {
+        "n": 129,
+        "type": "agent",
+        "title": "Feed Delivery Planning Agent",
+        "agent": 56
+      }
+    ]
+  },
+  {
+    "n": 22,
+    "key": "lab",
+    "title": "Workflow: ห้องปฏิบัติการ",
+    "group": "lab",
+    "goals": [
+      "ควบคุมคุณภาพอาหารเลี้ยงเชื้อ",
+      "สรุปผล ELISA และ PCR",
+      "เตรียมความพร้อมตามมาตรฐาน ISO/IEC 17025"
+    ],
+    "intro": [
+      "ห้องปฏิบัติการต้องให้ผลที่ถูกต้องและทันเวลา บทนี้สอนการใช้ Agent ควบคุมคุณภาพอาหารเลี้ยงเชื้อ สรุปผล ELISA และ PCR และเตรียมความพร้อมตามมาตรฐาน ISO/IEC 17025",
+      "บันทึกการเตรียมอาหารเลี้ยงเชื้อ",
+      "ผล ELISA และ PCR",
+      "รายการข้อกำหนดที่ต้องปฏิบัติ"
+    ],
+    "workflow": [
+      [
+        "เตรียมอาหารเลี้ยงเชื้อ",
+        57
+      ],
+      [
+        "ตรวจซีรั่ม ELISA",
+        58
+      ],
+      [
+        "ตรวจ PCR",
+        59
+      ],
+      [
+        "ระบบคุณภาพห้องปฏิบัติการ",
+        60
+      ]
+    ],
+    "pages": [
+      {
+        "n": 130,
+        "type": "module",
+        "title": "Workflow: ห้องปฏิบัติการ",
+        "agent": null
+      },
+      {
+        "n": 131,
+        "type": "agent",
+        "title": "Media Prep QC Agent",
+        "agent": 57
+      },
+      {
+        "n": 132,
+        "type": "agent",
+        "title": "Serology Interpretation Agent",
+        "agent": 58
+      },
+      {
+        "n": 133,
+        "type": "agent",
+        "title": "PCR Result Tracking Agent",
+        "agent": 59
+      },
+      {
+        "n": 134,
+        "type": "agent",
+        "title": "ISO 17025 Readiness Agent",
+        "agent": 60
+      }
+    ]
+  },
+  {
+    "n": 23,
+    "key": "qms",
+    "title": "Workflow: ระบบคุณภาพและการควบคุมเอกสาร",
+    "group": "qms",
+    "goals": [
+      "ร่างวิธีปฏิบัติงานตามโครงสร้างมาตรฐาน",
+      "สรุปจุดแก้ไขเอกสาร",
+      "ควบคุมระยะเวลาจัดเก็บบันทึก"
+    ],
+    "intro": [
+      "ระบบเอกสารคุณภาพทำให้ทุกคนทำงานเป็นมาตรฐานเดียวกัน บทนี้สอนการใช้ Agent ร่างวิธีปฏิบัติงานตามโครงสร้างมาตรฐาน สรุปจุดแก้ไขเอกสาร และควบคุมระยะเวลาจัดเก็บบันทึก",
+      "บันทึกขั้นตอนงานที่ต้องการเขียนเป็นเอกสาร",
+      "แม่แบบเอกสารขององค์กร"
+    ],
+    "workflow": [
+      [
+        "เขียนเอกสาร",
+        61
+      ],
+      [
+        "ขอแก้ไขและขึ้นทะเบียน",
+        62
+      ],
+      [
+        "ควบคุมบันทึก",
+        63
+      ]
+    ],
+    "pages": [
+      {
+        "n": 135,
+        "type": "module",
+        "title": "Workflow: ระบบคุณภาพและการควบคุมเอกสาร",
+        "agent": null
+      },
+      {
+        "n": 136,
+        "type": "agent",
+        "title": "Work Instruction Draft Agent",
+        "agent": 61
+      },
+      {
+        "n": 137,
+        "type": "agent",
+        "title": "Document Change Agent",
+        "agent": 62
+      },
+      {
+        "n": 138,
+        "type": "agent",
+        "title": "Records Retention Agent",
+        "agent": 63
+      }
+    ]
+  },
+  {
+    "n": 24,
+    "key": "cis",
+    "title": "Workflow: พัฒนาอย่างต่อเนื่องและความยั่งยืน",
+    "group": "cis",
+    "goals": [
+      "หาความสูญเปล่าและเขียน Kaizen",
+      "บริหารโครงการและการเปลี่ยนแปลง",
+      "รวบรวมข้อมูลก๊าซเรือนกระจก"
+    ],
+    "intro": [
+      "การพัฒนาอย่างต่อเนื่องและความยั่งยืนต้องอาศัยข้อมูลและการมีส่วนร่วม บทนี้สอนการใช้ Agent หาความสูญเปล่า บริหารโครงการ บริหารการเปลี่ยนแปลง และรวบรวมข้อมูลก๊าซเรือนกระจก",
+      "ภาพถ่ายและข้อมูลหน้างาน",
+      "รายการโครงการปรับปรุง",
+      "ข้อมูลพลังงานรายเดือน"
+    ],
+    "workflow": [
+      [
+        "Kaizen",
+        64
+      ],
+      [
+        "บริหารโครงการ",
+        65
+      ],
+      [
+        "บริหารการเปลี่ยนแปลง",
+        66
+      ],
+      [
+        "ความยั่งยืน",
+        67
+      ]
+    ],
+    "pages": [
+      {
+        "n": 139,
+        "type": "module",
+        "title": "Workflow: พัฒนาอย่างต่อเนื่องและความยั่งยืน",
+        "agent": null
+      },
+      {
+        "n": 140,
+        "type": "agent",
+        "title": "Kaizen Idea Agent",
+        "agent": 64
+      },
+      {
+        "n": 141,
+        "type": "agent",
+        "title": "Project Management Agent",
+        "agent": 65
+      },
+      {
+        "n": 142,
+        "type": "agent",
+        "title": "Change Management Agent",
+        "agent": 66
+      },
+      {
+        "n": 143,
+        "type": "agent",
+        "title": "GHG Data Agent",
+        "agent": 67
+      }
+    ]
+  },
+  {
+    "n": 25,
+    "key": "office",
+    "title": "Copilot ใน Excel, Word & PowerPoint",
+    "group": "gen",
+    "goals": [
+      "รู้ว่าแต่ละโปรแกรมช่วยงานระดับใดได้",
+      "ใช้ข้อมูลชุดเดียวสร้าง Excel, Word และ PowerPoint"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 144,
+        "type": "office",
+        "title": "Copilot ใน Excel, Word และ PowerPoint",
+        "agent": null
+      },
+      {
+        "n": 145,
+        "type": "office",
+        "title": "Excel: ตั้งแต่สูตรถึง Dashboard",
+        "agent": null
+      },
+      {
+        "n": 146,
+        "type": "office",
+        "title": "Word: เอกสารธุรกิจและมาตรฐาน",
+        "agent": null
+      },
+      {
+        "n": 147,
+        "type": "office",
+        "title": "PowerPoint: Storyline ถึงสไลด์ครบชุด",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 26,
+    "key": "rep",
+    "title": "Reporting, Presentation & Communication",
+    "group": "rep",
+    "goals": [
+      "สรุปรายงานผู้บริหารจากข้อมูลหลายแหล่ง",
+      "ปรับสารให้เหมาะกับผู้ฟัง"
+    ],
+    "intro": [
+      "บทสุดท้ายของกลุ่มงานสอนการใช้ Agent สรุปรายงานผู้บริหารและปรับสารให้เหมาะกับผู้ฟัง ซึ่งเป็นขั้นที่นำผลจาก Agent ทุกตัวไปสื่อสารต่อ",
+      "ข้อมูลหรือรายงานที่ต้องสรุปประจำ",
+      "รายชื่อกลุ่มผู้ฟัง"
+    ],
+    "workflow": null,
+    "pages": [
+      {
+        "n": 148,
+        "type": "module",
+        "title": "Reporting & Knowledge Agents",
+        "agent": null
+      },
+      {
+        "n": 149,
+        "type": "agent",
+        "title": "Executive Report Agent",
+        "agent": 11
+      },
+      {
+        "n": 150,
+        "type": "agent",
+        "title": "Presentation & Communication Agent",
+        "agent": 12
+      },
+      {
+        "n": 151,
+        "type": "outline",
+        "title": "สรุปโมดูล Reporting",
+        "agent": null
+      }
+    ]
+  },
+  {
+    "n": 27,
+    "key": "arch",
+    "title": "Agent Architecture, Governance & Next Steps",
+    "group": "gen",
+    "goals": [
+      "เลือกเครื่องมือให้ตรงระดับความพร้อม",
+      "วางกติกาความเสี่ยงและการอนุมัติ"
+    ],
+    "intro": null,
+    "workflow": null,
+    "pages": [
+      {
+        "n": 152,
+        "type": "anatomy",
+        "title": "Agent Architecture Blueprint",
+        "agent": null
+      },
+      {
+        "n": 153,
+        "type": "matrix",
+        "title": "Agent Selection Matrix",
+        "agent": null
+      },
+      {
+        "n": 154,
+        "type": "outline",
+        "title": "Governance และการควบคุมความเสี่ยง",
+        "agent": null
+      },
+      {
+        "n": 155,
+        "type": "outline",
+        "title": "Next Steps หลังการอบรม",
+        "agent": null
+      }
+    ]
+  }
+]

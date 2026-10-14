@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-10-14T00:13:50.883Z",
+  "pass": 171,
+  "fail": 0,
+  "bySuite": {
+    "T4 Navigation: every page renders with correct title": {
+      "pass": 15,
+      "fail": 0
+    },
+    "T5 Search (Ctrl+K)": {
+      "pass": 10,
+      "fail": 0
+    },
+    "T6 Agent Directory + finder": {
+      "pass": 11,
+      "fail": 0
+    },
+    "T7 Agent Builder panel: copy, counters, attachments": {
+      "pass": 21,
+      "fail": 0
+    },
+    "T7b Agent Builder Studio": {
+      "pass": 12,
+      "fail": 0
+    },
+    "T8 Prompt Builder": {
+      "pass": 8,
+      "fail": 0
+    },
+    "T9 Calculators": {
+      "pass": 16,
+      "fail": 0
+    },
+    "Agent Flow player": {
+      "pass": 5,
+      "fail": 0
+    },
+    "Prompt Lab tabs + supplements": {
+      "pass": 8,
+      "fail": 0
+    },
+    "T10 Learning progress": {
+      "pass": 9,
+      "fail": 0
+    },
+    "TOC filter + theme": {
+      "pass": 7,
+      "fail": 0
+    },
+    "Storage unavailable": {
+      "pass": 1,
+      "fail": 0
+    },
+    "T11 Responsive (no horizontal scroll, drawer, bottom bar)": {
+      "pass": 38,
+      "fail": 0
+    },
+    "T12 Accessibility": {
+      "pass": 8,
+      "fail": 0
+    },
+    "Offline file:// mode": {
+      "pass": 2,
+      "fail": 0
+    }
+  },
+  "failures": []
+}

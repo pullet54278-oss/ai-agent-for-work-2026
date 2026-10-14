@@ -1,0 +1,7 @@
+source-docs/*
+!source-docs/README.md
+.DS_Store
+node_modules/
+dist/
+test-results/
+playwright-report/
