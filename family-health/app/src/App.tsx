@@ -8,7 +8,8 @@ import Home from './screens/Home'
 import Health from './screens/Health'
 import Emergency from './screens/Emergency'
 import More from './screens/More'
-import Soon from './screens/Soon'
+import School from './screens/School'
+import Expenses from './screens/Expenses'
 
 export type Tab = 'home' | 'health' | 'school' | 'money' | 'more'
 
@@ -81,8 +82,8 @@ export default function App() {
       <main>
         {tab === 'home' && <Home person={person} data={data} go={go} openSos={() => setSos(true)} />}
         {tab === 'health' && <Health person={person} data={data} sub={healthSub} setSub={setHealthSub} />}
-        {tab === 'school' && <Soon title="การเรียน" phase={5} items={['ผลการเรียนรายเทอม แยกโปรแกรม EIS / IEP / จินตคณิต', 'กราฟเทียบรายเทอม', 'ระหว่างนี้ดู/แก้ได้ในแท็บ school ของ Google Sheet']} />}
-        {tab === 'money' && <Soon title="ค่าใช้จ่าย" phase={5} items={['ค่ารักษาและค่าเรียน รายเทอม รายปี', 'ค่าใช้จ่ายรายเดือน เช่น เรียนพิเศษ', 'ระหว่างนี้ดู/แก้ได้ในแท็บ expenses ของ Google Sheet']} />}
+        {tab === 'school' && <School person={person} data={data} />}
+        {tab === 'money' && <Expenses key={person?.id} person={person} data={data} />}
         {tab === 'more' && <More user={user} people={people} />}
       </main>
 

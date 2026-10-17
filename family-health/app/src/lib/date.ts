@@ -32,10 +32,12 @@ export function todayIso(): string {
   return isoDate(new Date())
 }
 
+/** บวกเดือน โดยวันที่เกินสิ้นเดือนจะปัดเป็นวันสุดท้ายของเดือน (31 ม.ค. + 1 เดือน = 28/29 ก.พ.) */
 export function addMonths(iso: string, months: number): string {
-  const d = new Date(iso + 'T00:00:00')
-  d.setMonth(d.getMonth() + months)
-  return isoDate(d)
+  const [y, m, d] = iso.split('-').map(Number)
+  const first = new Date(y, m - 1 + months, 1)
+  const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate()
+  return isoDate(new Date(first.getFullYear(), first.getMonth(), Math.min(d, last)))
 }
 
 export function ageInMonths(birthIso: string, at: Date = new Date()): number {

@@ -69,3 +69,13 @@ a { color: var(--pri); }
 .count small { display: block; font-weight: 400; font-size: 11px; }
 .count.late { background: var(--bad-soft); color: var(--bad); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.tl { position: relative; padding-left: 18px; }
+.tl::before { content: ""; position: absolute; left: 5px; top: 4px; bottom: 4px; width: 2px; background: var(--line); }
+.tl .ev { position: relative; margin-bottom: 14px; }
+.tl .ev::before { content: ""; position: absolute; left: -17px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--pri); }
+.tl .ev.adm::before { background: var(--bad); }
+textarea.in { resize: vertical; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 8px; }
+.tbl th, .tbl td { padding: 7px 4px; border-bottom: 1px solid var(--line); text-align: left; }
+.tbl th { color: var(--mute); font-weight: 600; font-size: 13px; }
+.tbl .num { text-align: right; }

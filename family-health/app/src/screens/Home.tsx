@@ -4,6 +4,7 @@ import type { Tab } from '../App'
 import { ageText, thaiDate } from '../lib/date'
 import { AppointmentForm, AppointmentList, overdue, upcoming } from './Appointments'
 import { epiFor, epiStatus } from './Vaccines'
+import { recentRepeat } from './Illnesses'
 
 interface Props { person?: Person; data: Data; go: (t: Tab, sub?: string) => void; openSos: () => void }
 
@@ -24,6 +25,7 @@ export default function Home({ person, data, go, openSos }: Props) {
   const missing = epiFor(person).filter((e) => epiStatus(person, recs, e).kind === 'missing')
   const late = overdue(data, person.id)
   const latest = data.measurements.filter((m) => m.personId === person.id && m.weightKg).sort((a, b) => b.date.localeCompare(a.date))[0]
+  const repeat = recentRepeat(data.illnesses.filter((i) => i.personId === person.id))
   const parentsMissingPhone = data.people.filter((p) => (p.relation === 'father' || p.relation === 'mother') && !p.phone)
 
   return (
@@ -42,6 +44,13 @@ export default function Home({ person, data, go, openSos }: Props) {
           <AppointmentList items={[...late, ...upcoming(data, person.id)].slice(0, 5)} people={data.people} />
         </div>
       </div>
+
+      {repeat && (
+        <div className="card alert" onClick={() => go('health', 'ill')} style={{ cursor: 'pointer' }}>
+          <b>⚠️ ป่วยซ้ำ {repeat.length} ครั้งในช่วงสั้น ๆ</b>
+          <div className="mute">{repeat.map((i) => i.diagnosis).join(' → ')} · ควรติดตามอาการใกล้ชิดหรือปรึกษาแพทย์</div>
+        </div>
+      )}
 
       {missing.length > 0 && (
         <div className="card alert" onClick={() => go('health', 'vax')} style={{ cursor: 'pointer' }}>

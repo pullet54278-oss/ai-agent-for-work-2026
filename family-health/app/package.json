@@ -10,7 +10,10 @@
     "icons": "node scripts/make-icons.mjs",
     "build:e2e": "VITE_API_URL=mock vite build --outDir dist-e2e",
     "test:e2e": "npm run build:e2e && (vite preview --port 4173 --strictPort --outDir dist-e2e >/dev/null 2>&1 &) && sleep 3 && node tests/e2e.mjs; pkill -f \"vite preview --port 4173\" || true",
-    "test:api": "node ../apps-script/test.mjs"
+    "test:api": "node ../apps-script/test.mjs",
+    "test:growth": "node tests/growth.test.mjs",
+    "test:logic": "node tests/logic.test.mjs",
+    "test": "npm run test:api && npm run test:growth && npm run test:logic"
   },
   "dependencies": {
     "react": "^19.3.1",

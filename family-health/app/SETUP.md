@@ -74,5 +74,9 @@
 | คำสั่ง (ในโฟลเดอร์ `family-health/app`) | ทำอะไร |
 |---|---|
 | `npm run dev` | รันในเครื่อง (ค่าจาก `.env.local`) · `VITE_API_URL=mock npm run dev` ใช้หลังบ้านจำลอง |
+| `npm test` | รันชุดทดสอบทั้งหมด: `test:api` + `test:growth` + `test:logic` |
 | `npm run test:api` | ทดสอบ `Code.gs` ด้วยบริการ Google จำลอง (ตรวจ token, สิทธิ์อีเมล, บันทึก, Calendar) |
+| `npm run test:growth` | ตรวจ z-score กับค่าที่ WHO ตีพิมพ์ |
+| `npm run test:logic` | ตรวจยา G-6-PD, ป่วยซ้ำ, เทอม/ปีของค่าใช้จ่าย, นัดวัคซีนเข็มถัดไป |
+| `scripts/make-who-lms.sh` | ดาวน์โหลดตาราง LMS ของ WHO และสร้าง `src/data/who-lms.ts` ใหม่ |
 | `npm run test:e2e` | ทดสอบทั้งแอปกับหลังบ้านจำลอง (ต้องมี `npm i -D playwright`) |
