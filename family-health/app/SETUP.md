@@ -44,6 +44,20 @@ npm run deploy                  # build + deploy เว็บ + กฎ Firestore
 ```
 เสร็จแล้วจะได้ลิงก์ `https://<project-id>.web.app`
 
+### 6 (ทางเลือก). เผยแพร่บน Netlify แทน Firebase Hosting
+Netlify ทำหน้าที่แค่เก็บหน้าเว็บ — การล็อกอินและฐานข้อมูลยังเป็น Firebase เหมือนเดิม
+1. https://app.netlify.com → **Add new site → Import an existing project → GitHub** → เลือก repo นี้
+2. **Base directory:** `family-health/app` (คำสั่ง build และโฟลเดอร์ publish อ่านจาก `netlify.toml` ให้เอง)
+3. **Environment variables:** ใส่ `VITE_FB_*` ทั้ง 6 ตัว ค่าเดียวกับขั้นที่ 5 → **Deploy**
+4. ตั้งชื่อเว็บที่ **Site configuration → Change site name** เช่น `family-health-xxxx` → ได้ลิงก์ `https://family-health-xxxx.netlify.app`
+5. Firebase Console → **Authentication → Settings → Authorized domains → Add domain** → ใส่ `family-health-xxxx.netlify.app`
+   (ถ้าไม่เพิ่ม ปุ่มเข้าสู่ระบบด้วย Google จะขึ้น error `auth/unauthorized-domain`)
+6. กฎความปลอดภัย Firestore ยังต้อง deploy จากคอมพิวเตอร์ครั้งแรก และทุกครั้งที่กฎเปลี่ยน:
+   ```bash
+   npx firebase deploy --only firestore
+   ```
+หลังจากนั้น ทุกครั้งที่ push ขึ้น GitHub Netlify จะ build และเผยแพร่ให้อัตโนมัติ
+
 ## 7. ติดตั้งบนมือถือ Android
 1. เปิดลิงก์ด้วย **Chrome** → เข้าสู่ระบบด้วย Google → **สร้างครอบครัว**
 2. เมนู ⋮ → **ติดตั้งแอป / Add to Home screen** → จะได้ไอคอนบนหน้าจอ
