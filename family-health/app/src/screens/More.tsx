@@ -3,6 +3,7 @@ import { signOut, type User } from '../lib/auth'
 import { clearCache, newId, save, useStore } from '../lib/store'
 import { emptyPerson, type Person } from '../lib/types'
 import { ageText, formatPhone, parseContacts } from '../lib/date'
+import { photoToDataUrl } from '../lib/photo'
 
 const SHEET_URL = import.meta.env.VITE_SHEET_URL as string | undefined
 
@@ -18,6 +19,7 @@ export default function More({ user, person }: { user: User; person?: Person }) 
         <h3>ข้อมูลลูก</h3>
         {person ? (
           <div className="list-item" onClick={() => setEditing(person)}>
+            <span className="photo">{person.photo ? <img src={person.photo} alt="" /> : person.sex === 'female' ? '👧' : '👦'}</span>
             <span className="grow">
               <b>{person.nickname || person.fullName}</b>
               <br /><span className="mute">{person.fullName} {ageText(person.birthDate) && `· ${ageText(person.birthDate)}`}</span>
@@ -62,6 +64,13 @@ function PersonForm({ initial, onDone }: { initial: Partial<Person>; onDone: () 
     </label>
   )
 
+  const [photoErr, setPhotoErr] = useState('')
+  async function pickPhoto(file?: File) {
+    if (!file) return
+    setPhotoErr('')
+    try { set('photo', await photoToDataUrl(file)) } catch (e) { setPhotoErr((e as Error).message) }
+  }
+
   async function submit() {
     setBusy(true)
     const ok = await save('people', { ...p, relation: 'child', id: p.id ?? newId() })
@@ -72,6 +81,17 @@ function PersonForm({ initial, onDone }: { initial: Partial<Person>; onDone: () 
   return (
     <div className="card">
       <h3>{p.id ? 'แก้ไขข้อมูลลูก' : 'ใส่ข้อมูลลูก'}</h3>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <span className="photo lg">{p.photo ? <img src={p.photo} alt="รูปโปรไฟล์" /> : p.sex === 'female' ? '👧' : '👦'}</span>
+        <span className="grow">
+          <label className="btn ghost" style={{ display: 'inline-block' }}>
+            {p.photo ? 'เปลี่ยนรูป' : '📷 ใส่รูปโปรไฟล์'}
+            <input type="file" accept="image/*" hidden aria-label="รูปโปรไฟล์" onChange={(e) => pickPhoto(e.target.files?.[0])} />
+          </label>
+          {p.photo && <button className="btn ghost" style={{ marginLeft: 6 }} onClick={() => set('photo', '')}>ลบรูป</button>}
+          {photoErr && <div className="mute" style={{ color: 'var(--bad)' }}>{photoErr}</div>}
+        </span>
+      </div>
       {text('nickname', 'ชื่อเล่น', { placeholder: 'เช่น น้องมะลิ' })}
       {text('fullName', 'ชื่อ-นามสกุล')}
       <label className="f"><span>เพศ</span>

@@ -21,6 +21,7 @@ export interface Person extends Base {
   g6pd: boolean
   allergies: string
   notes: string
+  photo: string // รูปโปรไฟล์ย่อขนาดแล้ว (data:image/jpeg;base64,...)
 }
 
 export interface Vaccine extends Base {
@@ -129,5 +130,5 @@ export const BOOL_FIELDS: Partial<Record<Table, string[]>> = {
 
 export const emptyPerson: Omit<Person, 'id'> = {
   nickname: '', fullName: '', relation: 'child', sex: '', birthDate: '', phone: '',
-  bloodGroup: '', hospital: '', hn: '', g6pd: false, allergies: '', notes: '',
+  bloodGroup: '', hospital: '', hn: '', g6pd: false, allergies: '', notes: '', photo: '',
 }

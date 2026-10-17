@@ -104,7 +104,7 @@ HN ของ รพ. · เบอร์โทรพ่อ/แม่ — ออ�
 
 | แท็บ | คอลัมน์ |
 |---|---|
-| people | id, nickname, fullName, relation, sex, birthDate, phone, bloodGroup, hospital, hn, g6pd, allergies, notes |
+| people | id, nickname, fullName, relation, sex, birthDate, phone, bloodGroup, hospital, hn, g6pd, allergies, notes, photo (JPEG ย่อขนาด ≤45k ตัวอักษร เก็บใน Sheet ไม่อยู่ใน repo) |
 | vaccines | id, personId, code, name, dose, date, lot, place, price, priceEstimate, notes |
 | appointments | id, personId, type, title, date, time, place, status, notes, calendarEventId |
 | measurements | id, personId, date, weightKg, heightCm, headCm, source, notes |

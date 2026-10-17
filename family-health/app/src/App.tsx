@@ -46,7 +46,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="top">
-        <div className="avatar">{person?.sex === 'female' ? '👧' : '👦'}</div>
+        <div className="avatar">{person?.photo ? <img src={person.photo} alt="" /> : person?.sex === 'female' ? '👧' : '👦'}</div>
         <div className="who">
           <b>{person ? person.nickname || person.fullName : 'สมุดสุขภาพ'}</b>
           <br />

@@ -11,13 +11,16 @@ export default function Emergency({ person, onClose }: { person: Person; onClose
         <button className="close" onClick={onClose} aria-label="ปิด">×</button>
         <div className="emg">
           {person.g6pd && <h2>⚠️ ภาวะพร่องเอนไซม์ G-6-PD</h2>}
-          <p style={{ margin: '6px 0 10px' }}>
+          <p style={{ margin: '6px 0 10px', display: 'flex', gap: 10, alignItems: 'center' }}>
+            {person.photo && <span className="photo"><img src={person.photo} alt="" /></span>}
+            <span>
             <b>{person.fullName || person.nickname}</b>{person.nickname && person.fullName && ` (${person.nickname})`}
             <br />
             <span className="mute">
               {ageText(person.birthDate)}
               {person.bloodGroup && ` · กรุ๊ปเลือด ${person.bloodGroup}`}
               {person.hn && ` · HN ${person.hn}${person.hospital ? ` (${person.hospital})` : ''}`}
+            </span>
             </span>
           </p>
           {person.allergies && <p><b>แพ้ยา/อาหาร:</b> {person.allergies}</p>}
