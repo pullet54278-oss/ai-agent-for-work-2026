@@ -1,81 +1,78 @@
-# ติดตั้งสมุดสุขภาพครอบครัว (ทำครั้งเดียว ประมาณ 20–30 นาที)
+# ติดตั้งสมุดสุขภาพครอบครัว (ทำครั้งเดียว ประมาณ 30 นาที)
 
-ทำบนคอมพิวเตอร์ (Windows/Mac) ด้วยบัญชี Google ของผู้ดูแลหลัก
+ทำบนคอมพิวเตอร์ ด้วยบัญชี Google ที่เป็นเจ้าของ Google Sheet ข้อมูล
 
-## 1. สร้างโปรเจกต์ Firebase
-1. เปิด https://console.firebase.google.com → **Create a project**
-2. ตั้งชื่อ เช่น `family-health-app` → ปิด Google Analytics ได้ → Create
-
-## 2. เปิดการเข้าสู่ระบบด้วย Google
-1. เมนูซ้าย **Build → Authentication → Get started**
-2. แท็บ **Sign-in method → Google → Enable** → เลือกอีเมลติดต่อ → Save
-
-## 3. สร้างฐานข้อมูล Firestore
-1. **Build → Firestore Database → Create database**
-2. Location: **asia-southeast1 (Singapore)** — ใกล้ไทยที่สุด (เปลี่ยนภายหลังไม่ได้)
-3. เลือก **Start in production mode** (กฎความปลอดภัยจริงจะ deploy ในขั้นที่ 6)
-
-## 4. ผูกบัตร (แผน Blaze)
-**⚙️ → Usage and billing → Modify plan → Blaze** แล้วตั้ง **Budget alert** เช่น 50 บาท/เดือน
-ใช้ตอนระยะที่ 2 (แจ้งเตือน) และไฟล์แนบ — การใช้ของครอบครัวเดียวอยู่ในโควตาฟรี
-
-## 5. ลงทะเบียนเว็บแอปและเอาค่าตั้งค่า
-1. **⚙️ Project settings → General → Your apps → ไอคอน `</>` (Web)** → ตั้งชื่อ → Register
-2. คัดลอกค่าใน `firebaseConfig`
-3. ในโฟลเดอร์ `family-health/app` คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ค่า:
-   ```
-   VITE_FB_API_KEY=...            ← apiKey
-   VITE_FB_AUTH_DOMAIN=...        ← authDomain
-   VITE_FB_PROJECT_ID=...         ← projectId
-   VITE_FB_STORAGE_BUCKET=...     ← storageBucket
-   VITE_FB_MESSAGING_SENDER_ID=...← messagingSenderId
-   VITE_FB_APP_ID=...             ← appId
-   ```
-   ค่าเหล่านี้ไม่ใช่รหัสลับ (อยู่ในเว็บอยู่แล้ว) ความปลอดภัยมาจากกฎ Firestore แต่ `.env.local` ไม่ถูก commit อยู่แล้ว
-
-## 6. ติดตั้งเครื่องมือและเผยแพร่แอป
-ต้องมี [Node.js 20+](https://nodejs.org) ก่อน แล้วเปิด Terminal:
-```bash
-cd family-health/app
-npm install
-npx firebase login
-npx firebase use --add          # เลือกโปรเจกต์จากขั้นที่ 1 ตั้งชื่อ alias ว่า default
-npm run deploy                  # build + deploy เว็บ + กฎ Firestore
 ```
-เสร็จแล้วจะได้ลิงก์ `https://<project-id>.web.app`
+มือถือพ่อ/แม่ (แอปบน Netlify) ──Google ID token──▶ Apps Script Web App ──▶ Google Sheet
+                                                     └─ ทุกเช้า 06:00 ──▶ Google Calendar (เตือนนัด)
+```
 
-### 6 (ทางเลือก). เผยแพร่บน Netlify แทน Firebase Hosting
-Netlify ทำหน้าที่แค่เก็บหน้าเว็บ — การล็อกอินและฐานข้อมูลยังเป็น Firebase เหมือนเดิม
+## 1. เปิด Google Sheet ข้อมูล
+ใช้ Sheet ที่มีแท็บ `people, vaccines, appointments, measurements, illnesses, expenses, school`
+(ถ้ายังไม่มี ให้สร้าง Google Sheet เปล่า — ขั้นที่ 4 จะสร้างแท็บให้เอง)
+
+## 2. ใส่สคริปต์หลังบ้าน
+1. ใน Sheet: **ส่วนขยาย (Extensions) → Apps Script**
+2. ลบโค้ดเดิมในไฟล์ `Code.gs` ทั้งหมด แล้ววางโค้ดจาก [`family-health/apps-script/Code.gs`](../apps-script/Code.gs) → กด 💾 บันทึก
+3. ตั้งชื่อโปรเจกต์ เช่น `สมุดสุขภาพ API`
+
+## 3. สร้าง OAuth Client ID (ให้ปุ่ม "Sign in with Google" ทำงาน)
+1. เปิด https://console.cloud.google.com → แถบบน **เลือกโปรเจกต์ → New project** ตั้งชื่อ `family-health` → Create
+2. **APIs & Services → OAuth consent screen** (หรือ **Google Auth Platform → Branding**)
+   - User type: **External** · App name: `สมุดสุขภาพครอบครัว` · ใส่อีเมลติดต่อ → Save
+   - **Audience → Test users → Add users**: ใส่อีเมล Google ของพ่อและแม่
+3. **Credentials (Clients) → Create credentials → OAuth client ID**
+   - Application type: **Web application**
+   - **Authorized JavaScript origins**: `https://<ชื่อเว็บ>.netlify.app` (จากขั้นที่ 6 — เพิ่มทีหลังได้) และ `http://localhost:5173`
+   - Create → คัดลอก **Client ID** (ลงท้ายด้วย `.apps.googleusercontent.com`)
+
+## 4. ตั้งค่าสคริปต์และรันครั้งแรก
+1. ใน Apps Script: **⚙️ Project Settings → Script properties → Add script property**
+   - `CLIENT_ID` = Client ID จากขั้นที่ 3
+   - `ALLOWED_EMAILS` = อีเมลพ่อ,อีเมลแม่ (คั่นด้วยจุลภาค เช่น `a@gmail.com,b@gmail.com`)
+2. กลับไปหน้าโค้ด เลือกฟังก์ชัน **`setup`** ที่แถบบน → **Run**
+3. Google จะขอสิทธิ์ → เลือกบัญชี → ถ้าขึ้น "Google hasn't verified this app" กด **Advanced → Go to … (unsafe)** → **Allow**
+   (เป็นสคริปต์ของคุณเอง สิทธิ์ที่ขอคือ Sheet นี้, สร้างนัดใน Calendar และตรวจ token กับ Google)
+4. รันเสร็จจะได้: แท็บและหัวตารางครบ · ปฏิทินชื่อ **สมุดสุขภาพครอบครัว** ใน Google Calendar · ตั้งเวลาซิงก์ทุกเช้า 06:00
+
+## 5. เผยแพร่เป็น Web App
+1. **Deploy → New deployment → ⚙️ → Web app**
+2. Execute as: **Me** · Who has access: **Anyone**
+   ("Anyone" แค่ทำให้แอปเรียกได้ — ทุกคำขอต้องมี Google token ของอีเมลใน `ALLOWED_EMAILS` เท่านั้น คนอื่นจะได้ `forbidden`)
+3. Deploy → คัดลอก **Web app URL** (ลงท้ายด้วย `/exec`)
+4. ทดสอบ: เปิด URL ในเบราว์เซอร์ ต้องเห็น `{"ok":true,"app":"family-health"}`
+
+**แก้สคริปต์ภายหลัง:** Deploy → **Manage deployments → ✏️ → Version: New version → Deploy** (URL เดิม ไม่ต้องแก้แอป)
+
+## 6. เผยแพร่แอปบน Netlify
 1. https://app.netlify.com → **Add new site → Import an existing project → GitHub** → เลือก repo นี้
-2. **Base directory:** `family-health/app` (คำสั่ง build และโฟลเดอร์ publish อ่านจาก `netlify.toml` ให้เอง)
-3. **Environment variables:** ใส่ `VITE_FB_*` ทั้ง 6 ตัว ค่าเดียวกับขั้นที่ 5 → **Deploy**
-4. ตั้งชื่อเว็บที่ **Site configuration → Change site name** เช่น `family-health-xxxx` → ได้ลิงก์ `https://family-health-xxxx.netlify.app`
-5. Firebase Console → **Authentication → Settings → Authorized domains → Add domain** → ใส่ `family-health-xxxx.netlify.app`
-   (ถ้าไม่เพิ่ม ปุ่มเข้าสู่ระบบด้วย Google จะขึ้น error `auth/unauthorized-domain`)
-6. กฎความปลอดภัย Firestore ยังต้อง deploy จากคอมพิวเตอร์ครั้งแรก และทุกครั้งที่กฎเปลี่ยน:
-   ```bash
-   npx firebase deploy --only firestore
-   ```
-หลังจากนั้น ทุกครั้งที่ push ขึ้น GitHub Netlify จะ build และเผยแพร่ให้อัตโนมัติ
+2. **Base directory:** `family-health/app` (คำสั่ง build อ่านจาก `netlify.toml`)
+3. **Environment variables:**
+   | ชื่อ | ค่า |
+   |---|---|
+   | `VITE_GOOGLE_CLIENT_ID` | Client ID จากขั้นที่ 3 |
+   | `VITE_API_URL` | Web app URL จากขั้นที่ 5 |
+   | `VITE_SHEET_URL` | ลิงก์ Google Sheet (ไม่บังคับ — ใช้กับปุ่ม "เปิด Google Sheet") |
+4. **Deploy** → ตั้งชื่อเว็บที่ Site configuration → Change site name
+5. กลับไปเพิ่ม `https://<ชื่อเว็บ>.netlify.app` ใน **Authorized JavaScript origins** (ขั้นที่ 3)
 
-## 7. ติดตั้งบนมือถือ Android
-1. เปิดลิงก์ด้วย **Chrome** → เข้าสู่ระบบด้วย Google → **สร้างครอบครัว**
-2. เมนู ⋮ → **ติดตั้งแอป / Add to Home screen** → จะได้ไอคอนบนหน้าจอ
-3. **เพิ่มเติม → + เพิ่มโปรไฟล์**: ลูก (ติ๊ก G-6-PD ถ้ามี), พ่อ, แม่ (ใส่เบอร์โทรเพื่อแสดงในบัตรฉุกเฉิน)
-
-## 8. เชิญคู่สมรส
-**เพิ่มเติม → ส่งลิงก์เชิญ** → ส่งทาง LINE → อีกฝ่ายเปิดลิงก์ด้วย Chrome → เข้าสู่ระบบด้วย Google ของตัวเอง → **เข้าร่วม**
-แล้วติดตั้งลงหน้าจอเหมือนขั้นที่ 7 — ข้อมูลจะตรงกันทั้งสองเครื่อง
+## 7. ติดตั้งบนมือถือ Android (ทั้งพ่อและแม่)
+1. เปิดลิงก์ Netlify ด้วย **Chrome** → **Sign in with Google**
+2. เมนู ⋮ → **ติดตั้งแอป / Add to Home screen**
+3. **การแจ้งเตือน:** เปิดแอป Google Calendar → ตรวจว่าปฏิทิน **สมุดสุขภาพครอบครัว** (ของผู้ติดตั้ง) หรือคำเชิญนัด (ของอีกฝ่าย) เปิดการแจ้งเตือนไว้
+   - ผู้ติดตั้งสคริปต์: นัดอยู่ในปฏิทิน "สมุดสุขภาพครอบครัว"
+   - อีกฝ่าย: ได้รับนัดเป็นคำเชิญ (guest) ในปฏิทินของตัวเองอัตโนมัติ
 
 ---
 
-### สำหรับนักพัฒนา
-| คำสั่ง | ทำอะไร |
-|---|---|
-| `npm run dev` | รันในเครื่อง (ใช้ค่าจาก `.env.local`) |
-| `npm run test:rules` | ทดสอบกฎความปลอดภัย Firestore กับ emulator (ต้องมี Java) |
-| `npm run test:e2e` | ทดสอบทั้งระบบ: ล็อกอิน สร้างครอบครัว เพิ่มโปรไฟล์ บัตรฉุกเฉิน ตรวจชื่อยา เชิญสมาชิก (ต้องมี Java + `npm i -D playwright`) |
-| `npm run deploy` | build และเผยแพร่ |
+### ใช้งานประจำวัน
+- **ดึงข้อมูลล่าสุด:** กด 🔄 มุมบน (ข้อมูลที่อีกฝ่ายเพิ่งบันทึกจะมาหลังกด)
+- **แก้ข้อมูลใน Sheet ตรง ๆ ได้** แต่ห้ามเปลี่ยนชื่อแท็บหรือหัวคอลัมน์ · คอลัมน์ `id` ต้องไม่ซ้ำ
+- **ปิดเครื่อง/ไม่มีเน็ต:** แอปเปิดดูข้อมูลล่าสุดที่เก็บในเครื่องได้ แต่บันทึกใหม่ต้องมีเน็ต
 
-**ข้อจำกัดที่รู้อยู่:** ตอนนี้ข้อมูลยังต้องใช้อินเทอร์เน็ตตอนเปิดดู (ตัวแอปเปิดได้แม้ออฟไลน์)
-เพราะแคชถาวรของ Firestore ค้างหลังรีโหลดในการทดสอบอัตโนมัติ — จะเปิดใช้หลังทดสอบบนมือถือจริง
+### สำหรับนักพัฒนา
+| คำสั่ง (ในโฟลเดอร์ `family-health/app`) | ทำอะไร |
+|---|---|
+| `npm run dev` | รันในเครื่อง (ค่าจาก `.env.local`) · `VITE_API_URL=mock npm run dev` ใช้หลังบ้านจำลอง |
+| `npm run test:api` | ทดสอบ `Code.gs` ด้วยบริการ Google จำลอง (ตรวจ token, สิทธิ์อีเมล, บันทึก, Calendar) |
+| `npm run test:e2e` | ทดสอบทั้งแอปกับหลังบ้านจำลอง (ต้องมี `npm i -D playwright`) |

@@ -1,27 +1,16 @@
 import { useState } from 'react'
-import { signOut, type User } from 'firebase/auth'
-import { auth } from '../lib/firebase'
-import { inviteLink, savePerson } from '../lib/family'
-import { emptyPerson, relationLabel, type Family, type Person, type Relation } from '../lib/types'
+import { signOut, type User } from '../lib/auth'
+import { clearCache, newId, save, useStore } from '../lib/store'
+import { emptyPerson, relationLabel, type Person, type Relation } from '../lib/types'
 import { ageText } from '../lib/date'
 
-interface Props { user: User; family: Family; people: Person[] }
+const SHEET_URL = import.meta.env.VITE_SHEET_URL as string | undefined
 
-export default function More({ user, family, people }: Props) {
+export default function More({ user, people }: { user: User; people: Person[] }) {
   const [editing, setEditing] = useState<Partial<Person> | null>(null)
-  const [copied, setCopied] = useState(false)
-  const link = inviteLink(family)
+  const { syncedAt } = useStore()
 
-  async function share() {
-    if (navigator.share) {
-      await navigator.share({ title: 'เข้าร่วมสมุดสุขภาพครอบครัว', url: link }).catch(() => {})
-    } else {
-      await navigator.clipboard.writeText(link)
-      setCopied(true)
-    }
-  }
-
-  if (editing) return <PersonForm fid={family.id} initial={editing} onDone={() => setEditing(null)} />
+  if (editing) return <PersonForm initial={editing} onDone={() => setEditing(null)} />
 
   return (
     <>
@@ -43,26 +32,25 @@ export default function More({ user, family, people }: Props) {
       </div>
 
       <div className="card">
-        <h3>ผู้ใช้แอป ({family.members.length} คน)</h3>
-        {family.members.map((uid) => (
-          <div key={uid} className="list-item" style={{ cursor: 'default' }}>
-            <span className="grow">{family.memberNames?.[uid] ?? uid}</span>
-            {uid === user.uid && <span className="pill info">คุณ</span>}
-          </div>
-        ))}
-        <p className="mute">ส่งลิงก์เชิญให้อีกฝ่ายเปิดบนมือถือ แล้วเข้าสู่ระบบด้วย Google ของตัวเอง</p>
-        <button className="btn block" onClick={share}>{copied ? 'คัดลอกลิงก์แล้ว ✓' : 'ส่งลิงก์เชิญ'}</button>
+        <h3>ข้อมูลเก็บใน Google Sheet</h3>
+        <p className="mute" style={{ marginTop: 0 }}>
+          {syncedAt ? `ดึงข้อมูลล่าสุดเมื่อ ${new Date(syncedAt).toLocaleTimeString('th-TH')} น.` : 'ยังไม่ได้ดึงข้อมูล'}
+          {' · '}ข้อมูลที่อีกฝ่ายบันทึกจะเห็นเมื่อกด 🔄 ด้านบน
+        </p>
+        {SHEET_URL && <a className="btn ghost block" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }} href={SHEET_URL} target="_blank" rel="noreferrer">เปิด Google Sheet</a>}
       </div>
 
       <div className="card">
-        <div className="row"><span className="grow">เข้าสู่ระบบเป็น {user.email}</span></div>
-        <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => signOut(auth!)}>ออกจากระบบ</button>
+        <div className="row"><span className="grow">เข้าสู่ระบบเป็น <b>{user.name}</b><br /><span className="mute">{user.email}</span></span></div>
+        <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => { clearCache(); signOut() }}>
+          ออกจากระบบ (ลบข้อมูลที่เก็บในเครื่องนี้)
+        </button>
       </div>
     </>
   )
 }
 
-function PersonForm({ fid, initial, onDone }: { fid: string; initial: Partial<Person>; onDone: () => void }) {
+function PersonForm({ initial, onDone }: { initial: Partial<Person>; onDone: () => void }) {
   const [p, setP] = useState<Partial<Person>>(initial)
   const [busy, setBusy] = useState(false)
   const set = <K extends keyof Person>(k: K, v: Person[K]) => setP((o) => ({ ...o, [k]: v }))
@@ -72,14 +60,11 @@ function PersonForm({ fid, initial, onDone }: { fid: string; initial: Partial<Pe
     </label>
   )
 
-  async function save() {
+  async function submit() {
     setBusy(true)
-    try {
-      await savePerson(fid, p)
-      onDone()
-    } finally {
-      setBusy(false)
-    }
+    const ok = await save('people', { ...p, id: p.id ?? newId() })
+    setBusy(false)
+    if (ok) onDone()
   }
 
   return (
@@ -109,8 +94,10 @@ function PersonForm({ fid, initial, onDone }: { fid: string; initial: Partial<Pe
       {text('allergies', 'แพ้ยา / แพ้อาหาร')}
       {text('notes', 'หมายเหตุ')}
       <div className="row">
-        <button className="btn ghost grow" onClick={() => onDone()}>ยกเลิก</button>
-        <button className="btn grow" disabled={busy || !(p.nickname || p.fullName)} onClick={save}>บันทึก</button>
+        <button className="btn ghost grow" onClick={onDone}>ยกเลิก</button>
+        <button className="btn grow" disabled={busy || !(p.nickname || p.fullName)} onClick={submit}>
+          {busy ? 'กำลังบันทึก…' : 'บันทึก'}
+        </button>
       </div>
     </div>
   )

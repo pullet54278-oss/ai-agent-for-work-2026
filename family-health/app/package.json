@@ -8,22 +8,18 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "icons": "node scripts/make-icons.mjs",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-fh \"node tests/firestore.rules.test.mjs\"",
-    "deploy": "npm run build && firebase deploy --only hosting,firestore",
-    "build:e2e": "VITE_FB_API_KEY=fake VITE_FB_AUTH_DOMAIN=demo-fh.firebaseapp.com VITE_FB_PROJECT_ID=demo-fh VITE_FB_APP_ID=1:1:web:1 VITE_USE_EMULATOR=1 vite build --outDir dist-e2e",
-    "test:e2e": "npm run build:e2e && firebase emulators:exec --only auth,firestore --project demo-fh \"(vite preview --port 4173 --strictPort --outDir dist-e2e >/dev/null 2>&1 &) && sleep 3 && node tests/e2e.mjs\""
+    "build:e2e": "VITE_API_URL=mock vite build --outDir dist-e2e",
+    "test:e2e": "npm run build:e2e && (vite preview --port 4173 --strictPort --outDir dist-e2e >/dev/null 2>&1 &) && sleep 3 && node tests/e2e.mjs; pkill -f \"vite preview --port 4173\" || true",
+    "test:api": "node ../apps-script/test.mjs"
   },
   "dependencies": {
-    "firebase": "^12.19.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
-    "firebase-tools": "^14.27.0",
     "typescript": "5.9",
     "vite": "^7.3.7",
     "vite-plugin-pwa": "^1.3.0"

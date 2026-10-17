@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import type { Person } from '../lib/types'
+import type { Data, Person } from '../lib/types'
 import { G6PD_RULES, searchG6pd, type G6pdItem } from '../data/g6pd'
 import Soon from './Soon'
+import Vaccines from './Vaccines'
 
 const SUBS: [string, string][] = [
-  ['g6pd', 'G-6-PD'], ['vax', 'วัคซีน'], ['growth', 'การเจริญเติบโต'], ['ill', 'การเจ็บป่วย'], ['dspm', 'พัฒนาการ'],
+  ['vax', 'วัคซีน'], ['g6pd', 'G-6-PD'], ['growth', 'การเจริญเติบโต'], ['ill', 'การเจ็บป่วย'], ['dspm', 'พัฒนาการ'],
 ]
 
-export default function Health({ person, sub, setSub }: { person?: Person; sub: string; setSub: (s: string) => void }) {
+interface Props { person?: Person; data: Data; sub: string; setSub: (s: string) => void }
+
+export default function Health({ person, data, sub, setSub }: Props) {
   return (
     <>
       <div className="tabs">
@@ -16,9 +19,9 @@ export default function Health({ person, sub, setSub }: { person?: Person; sub: 
         ))}
       </div>
       {sub === 'g6pd' && <G6pdChecker person={person} />}
-      {sub === 'vax' && <Soon title="วัคซีน" phase={2} items={['ตาราง EPI ประเทศไทย + วัคซีนเสริม', 'บันทึกวันที่ เลข Lot สถานที่', 'นัดเข็มถัดไป + แจ้งเตือนพ่อและแม่']} />}
-      {sub === 'growth' && <Soon title="การเจริญเติบโต" phase={3} items={['กราฟน้ำหนัก/ส่วนสูง/รูปร่าง ตามเกณฑ์ WHO และกรมอนามัย', 'แปลผล 5–6 ระดับอัตโนมัติ', 'ข้อมูลแรกเกิดและการตรวจคัดกรอง']} />}
-      {sub === 'ill' && <Soon title="การเจ็บป่วย" phase={4} items={['ไทม์ไลน์การเจ็บป่วยและการนอนโรงพยาบาล', 'บันทึกยา + ตรวจ G-6-PD อัตโนมัติ', 'แนบใบรับรองแพทย์และรูปซองยา']} />}
+      {sub === 'vax' && (person ? <Vaccines person={person} data={data} /> : <p className="mute">เพิ่มโปรไฟล์ก่อน</p>)}
+      {sub === 'growth' && <Soon title="การเจริญเติบโต" phase={3} items={['กราฟน้ำหนัก/ส่วนสูง/รูปร่าง ตามเกณฑ์ WHO และกรมอนามัย', 'แปลผล 5–6 ระดับอัตโนมัติ', 'ระหว่างนี้ดู/แก้ได้ในแท็บ measurements ของ Google Sheet']} />}
+      {sub === 'ill' && <Soon title="การเจ็บป่วย" phase={4} items={['ไทม์ไลน์การเจ็บป่วยและการนอนโรงพยาบาล', 'บันทึกยา + ตรวจ G-6-PD อัตโนมัติ', 'ระหว่างนี้ดู/แก้ได้ในแท็บ illnesses ของ Google Sheet']} />}
       {sub === 'dspm' && <Soon title="พัฒนาการ" phase={6} items={['รายการประเมินตามคู่มือ DSPM ของกรมอนามัย', 'ติ๊กผ่าน/ไม่ผ่าน ตามช่วงอายุ']} />}
     </>
   )

@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { onAuthStateChanged, type User } from 'firebase/auth'
-import { auth, configured } from './lib/firebase'
-import { useFamily, useFamilyId, usePeople } from './lib/family'
+import { authConfigured, useUser } from './lib/auth'
+import { refresh, useStore } from './lib/store'
 import { ageText } from './lib/date'
 import { relationLabel } from './lib/types'
 import Login from './screens/Login'
-import Setup from './screens/Setup'
 import Home from './screens/Home'
 import Health from './screens/Health'
 import Emergency from './screens/Emergency'
@@ -20,27 +18,28 @@ const TABS: [Tab, string, string][] = [
 ]
 
 export default function App() {
-  const [user, setUser] = useState<User | null | undefined>(undefined)
-  useEffect(() => (auth ? onAuthStateChanged(auth, setUser) : undefined), [])
-  const fid = useFamilyId(user ?? null)
-  const family = useFamily(fid)
-  const people = usePeople(fid)
-  const [personId, setPersonId] = useState<string>('')
+  const user = useUser()
+  const { data, loading, saving, error } = useStore()
+  const people = data.people
+  const [personId, setPersonId] = useState('')
   const [tab, setTab] = useState<Tab>('home')
-  const [healthSub, setHealthSub] = useState('g6pd')
+  const [healthSub, setHealthSub] = useState('vax')
   const [sos, setSos] = useState(false)
+
+  // เปลี่ยนบัญชี: กลับหน้าแรกและดึงข้อมูลใหม่
+  useEffect(() => {
+    setTab('home')
+    setPersonId('')
+    if (user) void refresh()
+  }, [user?.email])
 
   const person = useMemo(
     () => people.find((p) => p.id === personId) ?? people.find((p) => p.relation === 'child') ?? people[0],
     [people, personId],
   )
 
-  if (!configured) return <NotConfigured />
-  if (user === undefined || (user && (fid === undefined || (fid && family === undefined)))) {
-    return <div className="center mute">กำลังโหลด…</div>
-  }
+  if (!authConfigured) return <NotConfigured />
   if (!user) return <Login />
-  if (!fid || !family) return <Setup user={user} />
 
   const go = (t: Tab, sub?: string) => {
     setTab(t)
@@ -62,11 +61,14 @@ export default function App() {
               ))}
             </select>
           ) : (
-            <b>{family.name}</b>
+            <b>สมุดสุขภาพครอบครัว</b>
           )}
           <br />
-          <small>{person ? ageText(person.birthDate) : 'ยังไม่มีโปรไฟล์'}</small>
+          <small>{person ? ageText(person.birthDate) : loading ? 'กำลังโหลด…' : 'ยังไม่มีโปรไฟล์'}</small>
         </div>
+        <button className="sync" onClick={() => refresh()} aria-label="ดึงข้อมูลล่าสุด" disabled={loading}>
+          {loading || saving ? '⏳' : '🔄'}
+        </button>
         {person?.g6pd && (
           <button className="sos" onClick={() => setSos(true)}>
             🆘 G6PD
@@ -74,12 +76,14 @@ export default function App() {
         )}
       </header>
 
+      {error && <div className="banner">{error}</div>}
+
       <main>
-        {tab === 'home' && <Home person={person} people={people} go={go} openSos={() => setSos(true)} />}
-        {tab === 'health' && <Health person={person} sub={healthSub} setSub={setHealthSub} />}
-        {tab === 'school' && <Soon title="การเรียน" phase={5} items={['ผลการเรียนรายเทอม แยกโปรแกรม EIS / IEP / จินตคณิต', 'กราฟเทียบรายเทอม', 'แนบรูปใบประกาศ']} />}
-        {tab === 'money' && <Soon title="ค่าใช้จ่าย" phase={5} items={['ค่ารักษาและค่าเรียน รายเทอม รายปี', 'ค่าใช้จ่ายรายเดือน เช่น เรียนพิเศษ', 'แนบใบเสร็จ + สลิป และสถานะการเบิก']} />}
-        {tab === 'more' && <More user={user} family={family} people={people} />}
+        {tab === 'home' && <Home person={person} data={data} go={go} openSos={() => setSos(true)} />}
+        {tab === 'health' && <Health person={person} data={data} sub={healthSub} setSub={setHealthSub} />}
+        {tab === 'school' && <Soon title="การเรียน" phase={5} items={['ผลการเรียนรายเทอม แยกโปรแกรม EIS / IEP / จินตคณิต', 'กราฟเทียบรายเทอม', 'ระหว่างนี้ดู/แก้ได้ในแท็บ school ของ Google Sheet']} />}
+        {tab === 'money' && <Soon title="ค่าใช้จ่าย" phase={5} items={['ค่ารักษาและค่าเรียน รายเทอม รายปี', 'ค่าใช้จ่ายรายเดือน เช่น เรียนพิเศษ', 'ระหว่างนี้ดู/แก้ได้ในแท็บ expenses ของ Google Sheet']} />}
+        {tab === 'more' && <More user={user} people={people} />}
       </main>
 
       <nav className="bottom">
@@ -100,9 +104,9 @@ function NotConfigured() {
   return (
     <div className="center">
       <div className="card" style={{ maxWidth: 420, textAlign: 'left' }}>
-        <h3>ยังไม่ได้เชื่อมต่อ Firebase</h3>
+        <h3>ยังไม่ได้ตั้งค่าการเชื่อมต่อ</h3>
         <p className="mute">
-          สร้างไฟล์ <code>.env.local</code> จาก <code>.env.example</code> แล้วใส่ค่าการตั้งค่าเว็บแอปจาก Firebase Console
+          ต้องตั้งตัวแปร <code>VITE_GOOGLE_CLIENT_ID</code> และ <code>VITE_API_URL</code> (URL ของ Apps Script Web App)
           ตามขั้นตอนใน <code>SETUP.md</code>
         </p>
       </div>

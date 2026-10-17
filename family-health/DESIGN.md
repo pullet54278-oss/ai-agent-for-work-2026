@@ -1,7 +1,6 @@
-# สมุดสุขภาพครอบครัว (Family Health PWA) — เอกสารออกแบบ v0.2
+# สมุดสุขภาพครอบครัว (Family Health PWA) — เอกสารออกแบบ v0.3
 
-> เอกสารนี้ไม่มีข้อมูลส่วนบุคคลจริง ข้อมูลจริง (ชื่อ เลขบัตรประชาชน ที่อยู่ ประวัติการรักษา)
-> เก็บใน Firebase ของครอบครัวเท่านั้น และไม่ commit ลง repo นี้
+> เอกสารนี้ไม่มีข้อมูลส่วนบุคคลจริง ข้อมูลจริงเก็บใน Google Sheet ของครอบครัวเท่านั้น และไม่ commit ลง repo นี้
 
 ## 1. เป้าหมาย
 
@@ -26,27 +25,25 @@
 ## 3. สถาปัตยกรรม
 
 ```
- มือถือพ่อ (PWA)  ─┐                        ┌─ Firestore (ข้อมูล, offline cache)
-                  ├── Firebase Auth ────────┼─ Cloud Storage (รูปเอกสาร ใบเสร็จ ซองยา)
- มือถือแม่ (PWA)  ─┘   (Google Sign-In)       ├─ Cloud Functions (ตั้งเวลาส่งแจ้งเตือนทุกเช้า)
-                                            └─ FCM (Web Push → Android)
+ มือถือพ่อ (PWA บน Netlify) ─┐   Google ID token     ┌─ Google Sheet: 1 แท็บต่อ 1 ตาราง
+                            ├──────────────────▶ Apps Script ─┤
+ มือถือแม่ (PWA บน Netlify) ─┘  (Sign in with Google) Web App  └─ Google Calendar "สมุดสุขภาพครอบครัว"
 ```
 
 | ส่วน | เลือกใช้ | เหตุผล |
 |---|---|---|
-| Frontend | Vite + React + TypeScript, `vite-plugin-pwa` | ติดตั้งลงหน้าจอ Android ได้ ใช้งานออฟไลน์ |
-| Auth | Firebase Auth (Google Sign-In) | ทั้งคู่มีบัญชี Google บน Android อยู่แล้ว |
-| ฐานข้อมูล | Cloud Firestore | sync อัตโนมัติ · แคชถาวรสำหรับดูข้อมูลออฟไลน์ยังปิดไว้ (ค้างหลังรีโหลดในการทดสอบอัตโนมัติ) รอทดสอบบนมือถือจริง |
-| ไฟล์ | Cloud Storage | รูปใบเสร็จ ใบรับรองแพทย์ ใบประกาศ สลิป |
-| แจ้งเตือน | Cloud Functions (scheduled, 07:00 น.) + FCM | PWA ตั้งเวลาแจ้งเตือนเองไม่ได้ ต้องมีฝั่งเซิร์ฟเวอร์ส่ง |
-| Hosting | Firebase Hosting | อยู่ในโปรเจกต์เดียวกัน |
-| ค่าใช้จ่าย | แผน Blaze (จ่ายตามใช้) | ปริมาณใช้ของครอบครัวเดียวอยู่ในโควตาฟรี ≈ 0 บาท/เดือน แต่ต้องผูกบัตรเพื่อใช้ Cloud Functions |
+| Frontend | Vite + React + TypeScript, `vite-plugin-pwa`, โฮสต์บน Netlify | ติดตั้งลงหน้าจอ Android ได้ |
+| ล็อกอิน | Google Identity Services (ปุ่ม Sign in with Google) | ได้ ID token ไปให้สคริปต์ตรวจ |
+| หลังบ้าน | Apps Script Web App (`apps-script/Code.gs`) ผูกกับ Sheet | ฟรี ไม่ต้องผูกบัตร |
+| ฐานข้อมูล | Google Sheet ของครอบครัว | เปิดดู แก้ พิมพ์ ส่งหมอได้โดยตรง |
+| แจ้งเตือน | Google Calendar: สร้างนัดทันทีที่บันทึก + trigger ทุกเช้า 06:00 | มือถือเตือนเอง อีกฝ่ายได้รับเป็นคำเชิญ |
+| ออฟไลน์ | สำเนาข้อมูลล่าสุดใน localStorage | เปิดดูได้แม้ไม่มีเน็ต (บันทึกใหม่ต้องมีเน็ต) |
 
 **ความปลอดภัย**
-- Firestore Security Rules: อ่าน/เขียนได้เฉพาะ uid ที่อยู่ใน `families/{id}.members`
-- ล็อกแอปด้วยลายนิ้วมือ/PIN ของเครื่อง (WebAuthn) เมื่อเปิดแอปหลังพักเกิน 5 นาที
-- เลขบัตรประชาชนแสดงแบบปิดบัง `1-xxxx-xxxxx-22-9` กดค้างเพื่อดูเต็ม
-- ส่งออกข้อมูลทั้งหมดเป็นไฟล์ JSON + รูป (สำรอง/ย้ายระบบ) ได้ทุกเมื่อ
+- Web app ตั้งเป็น "Anyone" เพื่อให้แอปเรียกได้ แต่ทุกคำขอต้องแนบ Google ID token ที่ `aud` = CLIENT_ID ของแอป,
+  อีเมลยืนยันแล้ว, ยังไม่หมดอายุ และอยู่ใน `ALLOWED_EMAILS` (ตรวจผ่าน tokeninfo ของ Google, แคชผล 10 นาที)
+- เขียนได้เฉพาะแท็บและคอลัมน์ที่กำหนด · ข้อความขึ้นต้น `=` ถูกเก็บเป็นข้อความ (กันสูตรแทรก) · ใช้ LockService กันเขียนชนกัน
+- ออกจากระบบ = ลบสำเนาข้อมูลในเครื่อง · ไม่เก็บเลขบัตรประชาชนในแอป
 
 ## 4. โครงหน้าจอ
 
@@ -101,51 +98,32 @@
 ชื่อ อายุ กรุ๊ปเลือด น้ำหนักล่าสุด · **⚠️ ภาวะพร่องเอนไซม์ G-6-PD** · ยาที่ห้ามใช้ (สรุป) · โรคประจำตัว/แพ้ยา ·
 HN ของ รพ. · เบอร์โทรพ่อ/แม่ — ออกแบบให้ยื่นมือถือให้แพทย์/เภสัชกรดูได้ทันที
 
-## 5. โครงสร้างข้อมูล (Firestore)
+## 5. โครงสร้างข้อมูล (แท็บใน Google Sheet)
 
-```
-families/{familyId}
-  name, members: [uid...], createdAt
-  people/{personId}
-    displayName, nickname, sex, birthDate, birthTime, bloodGroup,
-    nationalIdMasked, nationalIdEnc,          // เข้ารหัสฝั่ง client
-    conditions: [{code:'G6PD', note, cardIssuedAt, issuer}],
-    allergies: [], hospitalNumbers: [{facilityId, hn}]
-    birth/{once}        gestWeeks, method, deliveredBy, weightG, lengthCm, headCm, apgar1, apgar5, complications
-    measurements/{id}   date, weightKg, heightCm, headCm, source('สมุดสีชมพู'|'บ้าน'|'รพ.'), z{waz,haz,whz}
-    vaccinations/{id}   vaccineCode, dose, date, lot, facilityId, attachments[], scheduled(bool)
-    screenings/{id}     type('TSH_PKU'|'HEARING'|'VISION'|'HCT'|'DENTAL'), date, result, value, note
-    milestones/{id}     ageBand, domain, itemCode, passed, date
-    illnesses/{id}      startDate, endDate, facilityId, doctor, diagnosis, symptoms[],
-                        admitted, admissionNo, restDays, advice, nextVisit,
-                        medications: [{name, dose, days, g6pdLevel('avoid'|'caution'|'unknown')}],
-                        attachments[], expenseIds[]
-    school/{yearTerm}   academicYear, term, school, classRoom, studentNo, studentId
-      results/{id}      program, subject, score, maxScore, grade, teacherComment, attachments[]
-  appointments/{id}     personId, type, title, dueDate, facilityId, status, source(auto|manual)
-  expenses/{id}         personId, category, sub, amount, date, period{type, start, end},
-                        status('evidence'|'estimate'|'pending'), claim('none'|'todo'|'filed'|'paid'),
-                        receiptAtt, slipAtt, relatedId
-  facilities/{id}       name, phone, address, serviceHours
-  notifTokens/{uid}     fcmTokens[]
-reference/ (อ่านอย่างเดียว ฝังในแอป)
-  epiSchedule, optionalVaccines, whoGrowthLMS(0–5 ปี) + กรมอนามัย(5–19 ปี),
-  g6pdDrugs{avoid[], caution[], foods[], chemicals[]}, dspmItems
-```
+ทุกแท็บมีคอลัมน์ท้าย `createdAt, updatedAt, updatedBy` · ทุกเซลล์เป็นข้อความ (เลข 0 นำหน้าไม่หาย) แอปแปลงชนิดเอง
 
-## 6. กฎการแจ้งเตือน (Cloud Function ทุกวัน 07:00 น. เวลาไทย)
-
-| เหตุการณ์ | เตือนเมื่อ |
+| แท็บ | คอลัมน์ |
 |---|---|
-| นัดวัคซีน/นัดหมอ | 7 วัน, 1 วัน, เช้าวันนัด |
-| วัคซีนตามตาราง EPI ที่ยังไม่บันทึก | เมื่อถึงอายุที่ควรได้รับ แล้วซ้ำทุก 7 วันถ้ายังไม่บันทึก |
-| วัคซีนไข้หวัดใหญ่ | ปีละครั้ง ก่อนฤดูฝน (พ.ค.) |
-| ค่าเทอม/ค่าเรียนพิเศษรายเดือน | 7 วันก่อนกำหนด และวันกำหนด |
-| ชั่งน้ำหนัก/วัดส่วนสูง | ไม่มีข้อมูลเกิน 3 เดือน |
-| ป่วยซ้ำ | มีการเจ็บป่วย ≥ 2 ครั้งใน 14 วัน → แนะนำติดตามใกล้ชิด/พบแพทย์ |
-| ยาที่บันทึกตรงรายการ G-6-PD | ทันทีที่บันทึก (ในแอป ไม่ต้องรอ 07:00) |
+| people | id, nickname, fullName, relation, sex, birthDate, phone, bloodGroup, hospital, hn, g6pd, allergies, notes |
+| vaccines | id, personId, code, name, dose, date, lot, place, price, priceEstimate, notes |
+| appointments | id, personId, type, title, date, time, place, status, notes, calendarEventId |
+| measurements | id, personId, date, weightKg, heightCm, headCm, source, notes |
+| illnesses | id, personId, startDate, endDate, place, doctor, diagnosis, admitted, restDays, medications, advice, cost, notes |
+| expenses | id, personId, date, category, item, amount, status (evidence/estimate/pending), claim, period, notes |
+| school | id, personId, academicYear, term, program, subject, score, maxScore, grade, comment |
 
-ส่งให้ทั้งพ่อและแม่; กด "รับทราบ/เลื่อนนัด" ได้จาก notification
+`vaccines.code` + `dose` จับคู่กับตาราง EPI ใน `app/src/data/vaccines.ts` (เช่น `DTP-HB-Hib` เข็ม 1–3, `DEN`, `HAV`, `EV71`, `FLU`)
+
+## 6. การแจ้งเตือน (Google Calendar)
+
+| เหตุการณ์ | ทำอะไร |
+|---|---|
+| บันทึก/แก้นัดในแท็บ appointments | สร้างนัดในปฏิทินทันที เชิญอีกฝ่ายเป็น guest · นัดทั้งวันเตือน 7 วันก่อนและ 1 วันก่อน (07:00) · นัดมีเวลาเตือน 1 วันและ 2 ชม. ก่อน |
+| กด "ไปตามนัดแล้ว" / ลบนัด | ลบนัดออกจากปฏิทิน |
+| บันทึกวัคซีนเสริม | เสนอสร้างนัดเข็มถัดไปให้ (เช่น Qdenga +3 เดือน, ตับอักเสบเอ +6 เดือน, ไข้หวัดใหญ่ +12 เดือน) |
+| ทุกเช้า 06:00 (`dailySync`) | สร้างนัดที่หายจากปฏิทินหรือเพิ่มใน Sheet ตรง ๆ ให้ครบ |
+| ยาที่ตรงรายการ G-6-PD | เตือนในแอปทันที (ระยะที่ 4) |
+| ป่วย ≥ 2 ครั้งใน 14 วัน | การ์ดเตือนในหน้าแรก (ระยะที่ 4) |
 
 ## 7. ข้อมูลอ้างอิงที่ฝังในแอป
 
@@ -157,19 +135,19 @@ reference/ (อ่านอย่างเดียว ฝังในแอป)
 
 ## 8. การนำเข้าข้อมูลครั้งแรก
 
-ข้อมูลจากเอกสารที่ส่งมา (สมุดสีชมพู สูติบัตร บัตร G-6-PD ใบรับรองแพทย์ ใบเสร็จ ใบประกาศ) จะเตรียมเป็นไฟล์
-`seed.json` **นอก repo** แล้วนำเข้าผ่านหน้า "นำเข้าข้อมูล" ครั้งเดียว ยอดที่ไม่มีหลักฐานติดป้าย 🟡 ประมาณการ
+ข้อมูลจากเอกสาร (สมุดสีชมพู สูติบัตร บัตร G-6-PD ใบรับรองแพทย์ ใบเสร็จ ใบประกาศ) ถูกเขียนลง Google Sheet ของครอบครัวโดยตรง
+(ไม่อยู่ใน repo) · รายการที่อ่านจากลายมือไม่ชัดมีหมายเหตุ "รอยืนยัน" · ยอดที่ไม่มีใบเสร็จติดสถานะ estimate
 
 ## 9. แผนการพัฒนา
 
 | ระยะ | เนื้อหา |
 |---|---|
-| 1 ✅ | โครงแอป PWA, ล็อกอิน Google, ครอบครัว 2 คน + ลิงก์เชิญ, โปรไฟล์, บัตรฉุกเฉิน G-6-PD, ตัวตรวจชื่อยา (โค้ดอยู่ที่ `app/`) |
-| 2 | วัคซีน + นัดหมาย + แจ้งเตือน (FCM) |
-| 3 | การเจริญเติบโต (กราฟ z-score), ข้อมูลแรกเกิด, คัดกรอง |
-| 4 | การเจ็บป่วย + ไทม์ไลน์ + แนบรูป |
-| 5 | การเรียน + ค่าใช้จ่าย + สรุป |
-| 6 | พัฒนาการ DSPM, ส่งออก/สำรองข้อมูล, นำเข้า seed |
+| 1 ✅ | โครงแอป PWA, ล็อกอิน Google, โปรไฟล์, บัตรฉุกเฉิน G-6-PD, ตัวตรวจชื่อยา |
+| 2 ✅ | ย้ายหลังบ้านเป็น Google Sheet + Apps Script, ตารางวัคซีน EPI + วัคซีนเสริม, นัดหมาย + Google Calendar |
+| 3 | การเจริญเติบโต (กราฟ z-score WHO/กรมอนามัย) |
+| 4 | การเจ็บป่วย + ไทม์ไลน์ + ตรวจยา G-6-PD อัตโนมัติ + แนบรูป (Google Drive) |
+| 5 | การเรียน + ค่าใช้จ่าย + สรุปรายเทอม/รายปี |
+| 6 | พัฒนาการ DSPM |
 
 ## 10. เรื่องที่ยังต้องยืนยัน
 
