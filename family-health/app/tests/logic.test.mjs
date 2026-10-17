@@ -8,7 +8,7 @@ import { join } from 'node:path'
 const dir = mkdtempSync(join(tmpdir(), 'logic-'))
 const src = new URL('../src/', import.meta.url).pathname
 writeFileSync(join(dir, 'entry.ts'), `
-export { g6pdHits, medList, repeatEpisodes } from '${src}screens/Illnesses'
+export { g6pdHits, medList, repeatEpisodes, schoolYear, leaveByYear } from '${src}screens/Illnesses'
 export { yearOf, nextPeriod } from '${src}screens/Expenses'
 export { nextDoseDate } from '${src}data/vaccines'
 export { addMonths, isoDate, parseContacts } from '${src}lib/date'
@@ -69,5 +69,12 @@ t('parent contacts parsed from the child phone field', () => {
     [{ label: 'พ่อป๊อป', phone: '0806688730' }, { label: 'แม่อ๋อม', phone: '0861215202' }])
   assert.deepEqual(m.parseContacts('081 234 5678'), [{ label: '', phone: '0812345678' }])
   assert.deepEqual(m.parseContacts(''), [])
+})
+t('sick leave is summed per Thai school year (May–April)', () => {
+  assert.equal(m.schoolYear('2026-05-01'), 2569)
+  assert.equal(m.schoolYear('2026-03-02'), 2568)
+  const ill = (startDate, restDays) => ({ startDate, restDays })
+  assert.deepEqual(m.leaveByYear([ill('2025-07-14', 2), ill('2026-02-16', 2), ill('2026-06-15', 5), ill('2026-03-05', null)]),
+    [{ year: 2569, days: 5, times: 1 }, { year: 2568, days: 4, times: 2 }])
 })
 console.log(`${n} passed`)

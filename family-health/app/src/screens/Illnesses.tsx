@@ -36,6 +36,24 @@ export function repeatEpisodes(list: Illness[]): Illness[][] {
   return groups
 }
 
+/** ปีการศึกษา (พ.ศ.) ของวันที่: เริ่ม พ.ค. ถึง เม.ย. ปีถัดไป */
+export function schoolYear(date: string): number {
+  const y = Number(date.slice(0, 4)) + 543
+  return Number(date.slice(5, 7)) >= 5 ? y : y - 1
+}
+
+/** วันลาเรียนรวมต่อปีการศึกษา ใหม่สุดก่อน */
+export function leaveByYear(list: Illness[]): { year: number; days: number; times: number }[] {
+  const m = new Map<number, { days: number; times: number }>()
+  for (const i of list) {
+    if (!i.restDays || !i.startDate) continue
+    const y = schoolYear(i.startDate)
+    const cur = m.get(y) ?? { days: 0, times: 0 }
+    m.set(y, { days: cur.days + i.restDays, times: cur.times + 1 })
+  }
+  return [...m].map(([year, v]) => ({ year, ...v })).sort((a, b) => b.year - a.year)
+}
+
 function daysBetween(a: string, b: string) {
   return Math.round((new Date(b + 'T00:00:00').getTime() - new Date(a + 'T00:00:00').getTime()) / 86_400_000)
 }
@@ -49,6 +67,7 @@ export default function Illnesses({ person, data }: { person: Person; data: Data
   const lastYear = list.filter((i) => i.startDate >= yearAgo)
   const cost = lastYear.reduce((s, i) => s + (i.cost ?? 0), 0)
   const groups = repeatEpisodes(list)
+  const leave = leaveByYear(list).slice(0, 2)
 
   return (
     <>
@@ -60,6 +79,11 @@ export default function Illnesses({ person, data }: { person: Person; data: Data
           {lastYear.some((i) => i.admitted) && ` · นอนโรงพยาบาล ${lastYear.filter((i) => i.admitted).length} ครั้ง`}
           {cost > 0 && ` · ค่ารักษา ${baht(cost)} บาท`}
         </p>
+        {leave.map((l) => (
+          <p key={l.year} className="mute" style={{ margin: '2px 0 0' }}>
+            🏫 ปีการศึกษา {l.year}: ลาเรียน {l.days} วัน ({l.times} ครั้ง)
+          </p>
+        ))}
       </div>
 
       {groups.slice(-2).reverse().map((g) => (
@@ -82,7 +106,7 @@ export default function Illnesses({ person, data }: { person: Person; data: Data
                     {i.admitted && <span className="pill bad" style={{ marginLeft: 6 }}>นอน รพ.</span>}
                     <div className="mute">
                       {thaiDate(i.startDate)}{i.endDate && i.endDate !== i.startDate && ` – ${thaiDate(i.endDate)}`}
-                      {i.place && ` · ${i.place}`}{i.restDays ? ` · พัก ${i.restDays} วัน` : ''}
+                      {i.place && ` · ${i.place}`}{i.restDays ? ` · ลาเรียน ${i.restDays} วัน` : ''}
                     </div>
                     {i.medications && <div className="mute">💊 {medList(i.medications).join(', ')}</div>}
                     {hits.map((h) => (
@@ -136,7 +160,7 @@ function IllnessForm({ person, initial, onDone }: { person: Person; initial: Par
       {text('diagnosis', 'การวินิจฉัย / อาการ', { placeholder: 'เช่น ไข้หวัด, ทอนซิลอักเสบ' })}
       <div className="grid2">
         {text('startDate', 'วันที่เริ่ม', { type: 'date' })}
-        {text('endDate', 'ถึงวันที่ (ถ้านอน รพ.)', { type: 'date' })}
+        {text('endDate', 'ถึงวันที่', { type: 'date' })}
       </div>
       {text('place', 'สถานพยาบาล')}
       {text('doctor', 'แพทย์')}
@@ -155,7 +179,7 @@ function IllnessForm({ person, initial, onDone }: { person: Person; initial: Par
         <p className="mute" style={{ marginTop: -6 }}>ไม่พบในรายการ G-6-PD (ไม่ได้แปลว่าปลอดภัย ควรแจ้งแพทย์ทุกครั้ง)</p>
       )}
       <div className="grid2">
-        <label className="f"><span>พัก (วัน)</span>
+        <label className="f"><span>ลาเรียน (วัน)</span>
           <input className="in" type="number" inputMode="numeric" value={v.restDays ?? ''}
             onChange={(e) => set('restDays', e.target.value === '' ? null : Number(e.target.value))} /></label>
         <label className="f"><span>ค่ารักษา (บาท)</span>
