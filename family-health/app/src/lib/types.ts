@@ -131,7 +131,3 @@ export const emptyPerson: Omit<Person, 'id'> = {
   nickname: '', fullName: '', relation: 'child', sex: '', birthDate: '', phone: '',
   bloodGroup: '', hospital: '', hn: '', g6pd: false, allergies: '', notes: '',
 }
-
-export const relationLabel: Record<Relation, string> = {
-  child: 'ลูก', father: 'พ่อ', mother: 'แม่', other: 'อื่น ๆ',
-}

@@ -17,6 +17,14 @@ export function ageText(birthIso: string, at: Date = new Date()): string {
   return m ? `${y} ปี ${m} เดือน` : `${y} ปี`
 }
 
+/** แยกรายชื่อติดต่อจากข้อความ เช่น "พ่อป๊อป 0806688730, แม่อ๋อม 0861215202" */
+export function parseContacts(text: string): { label: string; phone: string }[] {
+  return text.split(/[,\n/]+/).map((part) => {
+    const phone = (part.match(/[\d\s-]{9,}/)?.[0] ?? '').replace(/\D/g, '')
+    return { label: part.replace(/[\d\s-]{9,}/, '').trim(), phone }
+  }).filter((c) => c.phone)
+}
+
 export function formatPhone(p: string): string {
   const d = p.replace(/\D/g, '')
   return d.length === 10 ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}` : p

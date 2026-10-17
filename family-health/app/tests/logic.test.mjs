@@ -11,7 +11,7 @@ writeFileSync(join(dir, 'entry.ts'), `
 export { g6pdHits, medList, repeatEpisodes } from '${src}screens/Illnesses'
 export { yearOf, nextPeriod } from '${src}screens/Expenses'
 export { nextDoseDate } from '${src}data/vaccines'
-export { addMonths, isoDate } from '${src}lib/date'
+export { addMonths, isoDate, parseContacts } from '${src}lib/date'
 `)
 buildSync({ entryPoints: [join(dir, 'entry.ts')], bundle: true, format: 'esm', outfile: join(dir, 'out.mjs'), jsx: 'automatic',
   define: { 'import.meta.env': '{"VITE_API_URL":"mock"}' }, logLevel: 'error' })
@@ -63,5 +63,11 @@ t('dates stay local (no UTC shift)', () => {
   assert.equal(m.addMonths('2028-01-31', 1), '2028-02-29', 'leap year')
   assert.equal(m.addMonths('2026-11-15', 3), '2027-02-15', 'crosses year')
   assert.equal(m.addMonths('2026-03-15', -12), '2025-03-15', 'negative')
+})
+t('parent contacts parsed from the child phone field', () => {
+  assert.deepEqual(m.parseContacts('พ่อป๊อป 0806688730, แม่อ๋อม 086-121-5202'),
+    [{ label: 'พ่อป๊อป', phone: '0806688730' }, { label: 'แม่อ๋อม', phone: '0861215202' }])
+  assert.deepEqual(m.parseContacts('081 234 5678'), [{ label: '', phone: '0812345678' }])
+  assert.deepEqual(m.parseContacts(''), [])
 })
 console.log(`${n} passed`)

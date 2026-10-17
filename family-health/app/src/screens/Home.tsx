@@ -14,8 +14,8 @@ export default function Home({ person, data, go, openSos }: Props) {
     return (
       <div className="card">
         <h3>เริ่มต้นใช้งาน</h3>
-        <p className="mute">เพิ่มโปรไฟล์ลูกและพ่อแม่ก่อน เพื่อเริ่มบันทึกข้อมูลสุขภาพ</p>
-        <button className="btn" onClick={() => go('more')}>เพิ่มโปรไฟล์</button>
+        <p className="mute">ใส่ข้อมูลลูกก่อน เพื่อเริ่มบันทึกข้อมูลสุขภาพ</p>
+        <button className="btn" onClick={() => go('more')}>ใส่ข้อมูลลูก</button>
       </div>
     )
   }
@@ -26,7 +26,6 @@ export default function Home({ person, data, go, openSos }: Props) {
   const late = overdue(data, person.id)
   const latest = data.measurements.filter((m) => m.personId === person.id && m.weightKg).sort((a, b) => b.date.localeCompare(a.date))[0]
   const repeat = recentRepeat(data.illnesses.filter((i) => i.personId === person.id))
-  const parentsMissingPhone = data.people.filter((p) => (p.relation === 'father' || p.relation === 'mother') && !p.phone)
 
   return (
     <>
@@ -80,9 +79,9 @@ export default function Home({ person, data, go, openSos }: Props) {
         <button onClick={() => go('health', 'ill')}><span>🤒</span>เจ็บป่วย</button>
       </div>
 
-      {parentsMissingPhone.length > 0 && (
-        <div className="card alert">
-          <b>ยังไม่มีเบอร์โทรของ{parentsMissingPhone.map((p) => p.nickname || p.fullName).join(', ')}</b>
+      {!person.phone && (
+        <div className="card alert" onClick={() => go('more')} style={{ cursor: 'pointer' }}>
+          <b>ยังไม่มีเบอร์โทรพ่อแม่</b>
           <div className="mute">เบอร์โทรจะแสดงในบัตรฉุกเฉิน · เพิ่มได้ที่เมนู เพิ่มเติม</div>
         </div>
       )}

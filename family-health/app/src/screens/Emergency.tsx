@@ -1,11 +1,10 @@
 import type { Person } from '../lib/types'
 import { G6PD_ITEMS } from '../data/g6pd'
-import { ageText, formatPhone } from '../lib/date'
-import { relationLabel } from '../lib/types'
+import { ageText, formatPhone, parseContacts } from '../lib/date'
 
-export default function Emergency({ person, people, onClose }: { person: Person; people: Person[]; onClose: () => void }) {
+export default function Emergency({ person, onClose }: { person: Person; onClose: () => void }) {
   const names = (level: string) => G6PD_ITEMS.filter((i) => i.level === level).map((i) => i.name).join(' · ')
-  const contacts = people.filter((p) => p.id !== person.id && p.phone && p.relation !== 'child')
+  const contacts = parseContacts(person.phone)
   return (
     <div className="modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="sheet">
@@ -35,9 +34,9 @@ export default function Emergency({ person, people, onClose }: { person: Person;
               </div>
             </>
           )}
-          {contacts.map((p) => (
-            <p key={p.id} style={{ margin: '10px 0 0' }}>
-              📞 {relationLabel[p.relation]} {p.nickname || p.fullName} <a href={`tel:${p.phone}`}>{formatPhone(p.phone)}</a>
+          {contacts.map((c) => (
+            <p key={c.phone} style={{ margin: '10px 0 0' }}>
+              📞 {c.label || 'ผู้ปกครอง'} <a href={`tel:${c.phone}`}>{formatPhone(c.phone)}</a>
             </p>
           ))}
         </div>

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { signOut, type User } from '../lib/auth'
 import { clearCache, newId, save, useStore } from '../lib/store'
-import { emptyPerson, relationLabel, type Person, type Relation } from '../lib/types'
-import { ageText } from '../lib/date'
+import { emptyPerson, type Person } from '../lib/types'
+import { ageText, formatPhone, parseContacts } from '../lib/date'
 
 const SHEET_URL = import.meta.env.VITE_SHEET_URL as string | undefined
 
-export default function More({ user, people }: { user: User; people: Person[] }) {
+export default function More({ user, person }: { user: User; person?: Person }) {
   const [editing, setEditing] = useState<Partial<Person> | null>(null)
   const { syncedAt } = useStore()
 
@@ -15,20 +15,22 @@ export default function More({ user, people }: { user: User; people: Person[] })
   return (
     <>
       <div className="card">
-        <h3>โปรไฟล์ในครอบครัว</h3>
-        {people.map((p) => (
-          <div key={p.id} className="list-item" onClick={() => setEditing(p)}>
+        <h3>ข้อมูลลูก</h3>
+        {person ? (
+          <div className="list-item" onClick={() => setEditing(person)}>
             <span className="grow">
-              <b>{p.nickname || p.fullName}</b> <span className="mute">({relationLabel[p.relation]})</span>
-              <br /><span className="mute">{p.fullName} {ageText(p.birthDate) && `· ${ageText(p.birthDate)}`}</span>
+              <b>{person.nickname || person.fullName}</b>
+              <br /><span className="mute">{person.fullName} {ageText(person.birthDate) && `· ${ageText(person.birthDate)}`}</span>
+              {parseContacts(person.phone).map((c) => (
+                <span key={c.phone} className="mute"><br />📞 {c.label} {formatPhone(c.phone)}</span>
+              ))}
             </span>
-            {p.g6pd && <span className="pill bad">G6PD</span>}
+            {person.g6pd && <span className="pill bad">G6PD</span>}
             <span className="mute">แก้ไข ›</span>
           </div>
-        ))}
-        <button className="btn ghost block" style={{ marginTop: 10 }} onClick={() => setEditing({ ...emptyPerson })}>
-          + เพิ่มโปรไฟล์
-        </button>
+        ) : (
+          <button className="btn block" onClick={() => setEditing({ ...emptyPerson })}>+ ใส่ข้อมูลลูก</button>
+        )}
       </div>
 
       <div className="card">
@@ -62,20 +64,15 @@ function PersonForm({ initial, onDone }: { initial: Partial<Person>; onDone: () 
 
   async function submit() {
     setBusy(true)
-    const ok = await save('people', { ...p, id: p.id ?? newId() })
+    const ok = await save('people', { ...p, relation: 'child', id: p.id ?? newId() })
     setBusy(false)
     if (ok) onDone()
   }
 
   return (
     <div className="card">
-      <h3>{p.id ? 'แก้ไขโปรไฟล์' : 'เพิ่มโปรไฟล์'}</h3>
-      <label className="f"><span>ความสัมพันธ์</span>
-        <select className="in" value={p.relation} onChange={(e) => set('relation', e.target.value as Relation)}>
-          {Object.entries(relationLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-      </label>
-      {text('nickname', 'ชื่อเล่น / ชื่อเรียก', { placeholder: 'เช่น น้องมะลิ, พ่อเอ' })}
+      <h3>{p.id ? 'แก้ไขข้อมูลลูก' : 'ใส่ข้อมูลลูก'}</h3>
+      {text('nickname', 'ชื่อเล่น', { placeholder: 'เช่น น้องมะลิ' })}
       {text('fullName', 'ชื่อ-นามสกุล')}
       <label className="f"><span>เพศ</span>
         <select className="in" value={p.sex} onChange={(e) => set('sex', e.target.value as Person['sex'])}>
@@ -83,7 +80,7 @@ function PersonForm({ initial, onDone }: { initial: Partial<Person>; onDone: () 
         </select>
       </label>
       {text('birthDate', 'วันเกิด', { type: 'date' })}
-      {text('phone', 'เบอร์โทร (แสดงในบัตรฉุกเฉิน)', { type: 'tel', inputMode: 'tel' })}
+      {text('phone', 'เบอร์โทรพ่อแม่ (แสดงในบัตรฉุกเฉิน)', { placeholder: 'เช่น พ่อ 0812345678, แม่ 0898765432' })}
       {text('bloodGroup', 'กรุ๊ปเลือด', { placeholder: 'เช่น O, A, B, AB' })}
       {text('hospital', 'โรงพยาบาลประจำ')}
       {text('hn', 'เลข HN')}

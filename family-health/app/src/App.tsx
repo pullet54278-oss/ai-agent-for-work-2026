@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { authConfigured, useUser } from './lib/auth'
 import { refresh, useStore } from './lib/store'
 import { ageText } from './lib/date'
-import { relationLabel } from './lib/types'
 import Login from './screens/Login'
 import Home from './screens/Home'
 import Health from './screens/Health'
@@ -22,7 +21,6 @@ export default function App() {
   const user = useUser()
   const { data, loading, saving, error } = useStore()
   const people = data.people
-  const [personId, setPersonId] = useState('')
   const [tab, setTab] = useState<Tab>('home')
   const [healthSub, setHealthSub] = useState('vax')
   const [sos, setSos] = useState(false)
@@ -30,14 +28,11 @@ export default function App() {
   // เปลี่ยนบัญชี: กลับหน้าแรกและดึงข้อมูลใหม่
   useEffect(() => {
     setTab('home')
-    setPersonId('')
     if (user) void refresh()
   }, [user?.email])
 
-  const person = useMemo(
-    () => people.find((p) => p.id === personId) ?? people.find((p) => p.relation === 'child') ?? people[0],
-    [people, personId],
-  )
+  // แอปนี้เก็บข้อมูลลูกคนเดียว
+  const person = useMemo(() => people.find((p) => p.relation === 'child') ?? people[0], [people])
 
   if (!authConfigured) return <NotConfigured />
   if (!user) return <Login />
@@ -51,21 +46,11 @@ export default function App() {
   return (
     <div className="app">
       <header className="top">
-        <div className="avatar">{person?.relation === 'child' ? '👦' : person?.relation === 'mother' ? '👩' : '👨'}</div>
+        <div className="avatar">{person?.sex === 'female' ? '👧' : '👦'}</div>
         <div className="who">
-          {people.length > 0 ? (
-            <select value={person?.id} onChange={(e) => setPersonId(e.target.value)} aria-label="เลือกคนในครอบครัว">
-              {people.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nickname || p.fullName} ({relationLabel[p.relation]})
-                </option>
-              ))}
-            </select>
-          ) : (
-            <b>สมุดสุขภาพครอบครัว</b>
-          )}
+          <b>{person ? person.nickname || person.fullName : 'สมุดสุขภาพ'}</b>
           <br />
-          <small>{person ? ageText(person.birthDate) : loading ? 'กำลังโหลด…' : 'ยังไม่มีโปรไฟล์'}</small>
+          <small>{person ? ageText(person.birthDate) : loading ? 'กำลังโหลด…' : 'ยังไม่มีข้อมูลลูก'}</small>
         </div>
         <button className="sync" onClick={() => refresh()} aria-label="ดึงข้อมูลล่าสุด" disabled={loading}>
           {loading || saving ? '⏳' : '🔄'}
@@ -84,7 +69,7 @@ export default function App() {
         {tab === 'health' && <Health person={person} data={data} sub={healthSub} setSub={setHealthSub} />}
         {tab === 'school' && <School person={person} data={data} />}
         {tab === 'money' && <Expenses key={person?.id} person={person} data={data} />}
-        {tab === 'more' && <More user={user} people={people} />}
+        {tab === 'more' && <More user={user} person={person} />}
       </main>
 
       <nav className="bottom">
@@ -96,7 +81,7 @@ export default function App() {
         ))}
       </nav>
 
-      {sos && person && <Emergency person={person} people={people} onClose={() => setSos(false)} />}
+      {sos && person && <Emergency person={person} onClose={() => setSos(false)} />}
     </div>
   )
 }

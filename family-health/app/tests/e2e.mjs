@@ -13,29 +13,24 @@ p.on('dialog', (d) => d.accept())
 let step = ''
 const s = (name) => { step = name }
 
-async function addPerson(rel, nick, full, birth, phone, g6pd, sex = 'male') {
-  await p.getByRole('button', { name: '+ เพิ่มโปรไฟล์' }).click()
-  await p.locator('select.in').first().selectOption(rel)
-  await p.getByLabel('ชื่อเล่น / ชื่อเรียก').fill(nick)
-  await p.getByLabel('ชื่อ-นามสกุล').fill(full)
-  await p.getByLabel('เพศ').selectOption(sex)
-  if (birth) await p.getByLabel('วันเกิด').fill(birth)
-  if (phone) await p.getByLabel('เบอร์โทร (แสดงในบัตรฉุกเฉิน)').fill(phone)
-  if (g6pd) await p.getByLabel('มีภาวะพร่องเอนไซม์ G-6-PD').check()
-  await p.getByRole('button', { name: 'บันทึก', exact: true }).click()
-  await p.locator('.list-item b', { hasText: nick }).first().waitFor()
-}
-
 try {
   s('login as dad')
   await p.goto('http://127.0.0.1:4173/')
   await p.getByRole('button', { name: 'ทดสอบ: พ่อ' }).click()
   await p.getByText('เริ่มต้นใช้งาน').waitFor()
 
-  s('add profiles')
-  await p.getByRole('button', { name: 'เพิ่มโปรไฟล์' }).click()
-  await addPerson('child', 'น้องทดสอบ', 'เด็กชายทดสอบ ระบบ', '2022-05-10', '', true)
-  await addPerson('father', 'พ่อทดสอบ', 'นายทดสอบ ระบบ', '', '0811111111', false)
+  s('add child profile')
+  await p.getByRole('button', { name: 'ใส่ข้อมูลลูก' }).click()
+  await p.getByRole('button', { name: '+ ใส่ข้อมูลลูก' }).click()
+  await p.getByLabel('ชื่อเล่น').fill('น้องทดสอบ')
+  await p.getByLabel('ชื่อ-นามสกุล').fill('เด็กชายทดสอบ ระบบ')
+  await p.getByLabel('เพศ').selectOption('male')
+  await p.getByLabel('วันเกิด').fill('2022-05-10')
+  await p.getByLabel('เบอร์โทรพ่อแม่ (แสดงในบัตรฉุกเฉิน)').fill('พ่อทดสอบ 0811111111, แม่ทดสอบ 0822222222')
+  await p.getByLabel('มีภาวะพร่องเอนไซม์ G-6-PD').check()
+  await p.getByRole('button', { name: 'บันทึก', exact: true }).click()
+  await p.locator('.list-item b', { hasText: 'น้องทดสอบ' }).waitFor()
+  if (await p.getByRole('button', { name: '+ ใส่ข้อมูลลูก' }).count()) throw new Error('can still add a second profile')
   await p.getByRole('button', { name: /หน้าหลัก/ }).click()
   await p.getByText('มีภาวะพร่องเอนไซม์ G-6-PD').waitFor()
   await p.getByText(/วัคซีนตามแผนงานที่ยังไม่มีบันทึก/).waitFor()
@@ -71,7 +66,8 @@ try {
 
   s('G6PD checker and emergency card')
   await p.getByRole('button', { name: /G6PD/ }).first().click()
-  await p.getByText('📞 พ่อ พ่อทดสอบ').waitFor()
+  await p.getByText('📞 พ่อทดสอบ 081-111-1111').waitFor()
+  await p.getByText('📞 แม่ทดสอบ 082-222-2222').waitFor()
   await p.getByLabel('ปิด').click()
 
   s('growth: add measurement and see WHO classification')
