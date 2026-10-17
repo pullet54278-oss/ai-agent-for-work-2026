@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สมุดสุขภาพครอบครัว — ต้นแบบ</title>
+<link rel="icon" href="icons/icon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1d2433;--mute:#6b7385;--line:#e4e8f0;--pri:#2f6fed;--pri-soft:#e8efff;
+--ok:#1f9d55;--ok-soft:#e3f6eb;--warn:#c98a00;--warn-soft:#fff4d6;--bad:#d64545;--bad-soft:#fde8e8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif}
+.app{max-width:440px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:84px}
+header{position:sticky;top:0;z-index:5;background:var(--pri);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.avatar{width:40px;height:40px;border-radius:50%;background:#fff3;display:grid;place-items:center;font-size:20px}
+header .who{flex:1;line-height:1.2}header .who b{font-size:16px}header .who small{opacity:.85}
+.sos{background:var(--bad);color:#fff;border:0;border-radius:20px;padding:8px 12px;font:600 14px Sarabun;cursor:pointer}
+main{padding:12px 16px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px #0000000d}
+.card h3{margin:0 0 8px;font-size:16px}
+.row{display:flex;align-items:center;gap:10px}
+.row+.row{margin-top:10px}
+.grow{flex:1}
+.mute{color:var(--mute);font-size:13px}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+.ok{background:var(--ok-soft);color:var(--ok)}.warn{background:var(--warn-soft);color:var(--warn)}
+.bad{background:var(--bad-soft);color:var(--bad)}.info{background:var(--pri-soft);color:var(--pri)}
+.count{min-width:52px;text-align:center;border-radius:10px;padding:4px 0;background:var(--pri-soft);color:var(--pri);font-weight:700;line-height:1.1}
+.count small{display:block;font-weight:400;font-size:11px}
+.alert{border-left:4px solid var(--warn);background:var(--warn-soft)}
+.alert.red{border-color:var(--bad);background:var(--bad-soft)}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.quick button{border:0;background:var(--card);border-radius:12px;padding:10px 4px;font:13px Sarabun;cursor:pointer;box-shadow:0 1px 2px #0000000d}
+.quick button span{display:block;font-size:22px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font:14px Sarabun;cursor:pointer}
+.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mute);font-weight:600;font-size:12px}
+td.num,th.num{text-align:right}
+.tl{position:relative;padding-left:18px}
+.tl:before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.tl .ev{position:relative;margin-bottom:12px}
+.tl .ev:before{content:"";position:absolute;left:-17px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--pri)}
+.tl .ev.adm:before{background:var(--bad)}
+input[type=search]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:15px Sarabun}
+.result{margin-top:10px;padding:12px;border-radius:10px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:var(--card);
+display:flex;border-top:1px solid var(--line);z-index:5}
+nav button{flex:1;border:0;background:none;padding:8px 0 10px;font:12px Sarabun;color:var(--mute);cursor:pointer}
+nav button span{display:block;font-size:20px}
+nav button.on{color:var(--pri);font-weight:600}
+.fab{position:fixed;bottom:76px;right:max(16px,calc(50% - 204px));width:54px;height:54px;border-radius:50%;border:0;
+background:var(--pri);color:#fff;font-size:28px;box-shadow:0 4px 12px #2f6fed66;cursor:pointer;z-index:6}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:10}
+.modal.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:18px 16px 24px;max-height:90vh;overflow:auto}
+.emg{border:3px solid var(--bad);border-radius:14px;padding:14px}
+.emg h2{margin:0;color:var(--bad);font-size:20px}
+.close{float:right;border:0;background:var(--line);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--pri)}
+.proto{text-align:center;font-size:12px;color:var(--mute);padding:4px 0 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="avatar">👦</div>
+    <div class="who"><b>น้องต้นกล้า</b><br><small>4 ปี 5 เดือน · อนุบาล 2 ▾</small></div>
+    <button class="sos" onclick="openModal('emg')">🆘 G6PD</button>
+  </header>
+  <div class="proto">ต้นแบบสำหรับดูหน้าตา · ข้อมูลสมมติ</div>
+  <main id="view"></main>
+</div>
+<button class="fab" onclick="openModal('add')" aria-label="บันทึกด่วน">+</button>
+<nav id="nav"></nav>
+
+<div class="modal" id="emg" onclick="if(event.target===this)closeModal('emg')"><div class="sheet">
+  <button class="close" onclick="closeModal('emg')">×</button>
+  <div class="emg">
+    <h2>⚠️ ภาวะพร่องเอนไซม์ G-6-PD</h2>
+    <p style="margin:6px 0 10px"><b>เด็กชายต้นกล้า</b> · 4 ปี 5 เดือน · น้ำหนัก 16.8 กก.<br><span class="mute">HN รพ.ประจำ: xxxxxx · กรุ๊ปเลือด: ยังไม่ระบุ</span></p>
+    <b style="color:var(--bad)">🔴 ห้ามใช้</b>
+    <p class="mute" style="margin:2px 0 8px">ควิโนโลน (ciprofloxacin, norfloxacin, ofloxacin) · ซัลฟา (co-trimoxazole ฯลฯ) · nitrofurantoin · chloramphenicol · dapsone · primaquine · phenazopyridine · methylene blue</p>
+    <b style="color:var(--warn)">🟡 ใช้ด้วยความระมัดระวัง</b>
+    <p class="mute" style="margin:2px 0 8px">aspirin · dipyrone · diphenhydramine · วิตามินซีขนาดสูง · วิตามินเค 3 ฯลฯ</p>
+    <b>🚫 อาหาร/สารเคมี</b>
+    <p class="mute" style="margin:2px 0 8px">ถั่วปากอ้า · บลูเบอร์รี่ · ไวน์แดง · ลูกเหม็น · การบูร · พิมเสน</p>
+    <div class="card alert red" style="margin:10px 0 0">ถ้าปัสสาวะสีดำ/สีโค้ก ตัวเหลือง ซีด → ไปโรงพยาบาลทันที</div>
+    <p style="margin:10px 0 0">📞 พ่อ 08x-xxx-xxxx · แม่ 09x-xxx-xxxx</p>
+  </div>
+</div></div>
+
+<div class="modal" id="add" onclick="if(event.target===this)closeModal('add')"><div class="sheet">
+  <button class="close" onclick="closeModal('add')">×</button>
+  <h3 style="margin-top:0">บันทึกด่วน</h3>
+  <div class="quick" style="grid-template-columns:repeat(3,1fr)">
+    <button>🤒<br>ป่วย/หาหมอ</button><button>💉<br>วัคซีน</button><button>⚖️<br>น้ำหนัก/ส่วนสูง</button>
+    <button>💊<br>ยา</button><button>🧾<br>ใบเสร็จ</button><button>🎓<br>ผลการเรียน</button>
+  </div>
+  <p class="mute">ในแอปจริง: ถ่ายรูปเอกสารแนบได้ทุกรายการ และข้อมูลจะ sync ไปเครื่องของอีกฝ่ายทันที</p>
+</div></div>
+
+<script>
+const TABS=[['home','🏠','หน้าหลัก'],['health','❤️','สุขภาพ'],['school','🎓','การเรียน'],['money','💰','ค่าใช้จ่าย'],['more','☰','เพิ่มเติม']];
+let tab='home',sub='growth';
+
+const appts=[
+  {d:8,t:'วัคซีนไข้เลือดออก เข็ม 2',p:'รพ.ประจำอำเภอ',k:'💉'},
+  {d:15,t:'ค่าเรียนพิเศษ พ.ย. 600 บาท',p:'โรงเรียน',k:'💰'},
+  {d:40,t:'ชั่งน้ำหนัก/วัดส่วนสูง (ครบ 3 เดือน)',p:'ที่บ้าน',k:'⚖️'},
+];
+// WHO weight-for-age (boys) ค่าโดยประมาณสำหรับต้นแบบ: [เดือน, -2SD, median, +2SD]
+const WFA=[[0,2.5,3.3,4.4],[6,6.4,7.9,9.8],[12,7.7,9.6,12.0],[24,9.7,12.2,15.3],[36,11.3,14.3,18.3],[48,12.7,16.3,21.2],[60,14.1,18.3,24.2]];
+const meas=[[2,5.3],[4,7.0],[6,8.0],[9,8.8],[12,9.6],[18,10.5],[30,13.2],[48,16.8]];
+const vax=[
+  ['แรกเกิด','BCG, HB1','ok'],['2 เดือน','DTP-HB-Hib1, OPV1, Rota1','ok'],['4 เดือน','DTP-HB-Hib2, OPV2, Rota2, IPV','ok'],
+  ['6 เดือน','DTP-HB-Hib3, OPV3, Rota3','ok'],['9 เดือน','MMR1','ok'],['1 ปี','LAJE1','ok'],['1½ ปี','DTP4, OPV4, MMR2','ok'],
+  ['2½ ปี','LAJE2','ok'],['4 ปี','DTP5, OPV5','ok'],['เสริม','ไข้เลือดออก เข็ม 2','warn'],['11 ปี','HPV (เฉพาะเด็กหญิง)','na'],['12 ปี','dT','na']];
+const ill=[
+  ['ก.ค. 68','ไข้หวัด','คลินิก',0],['ก.พ. 69','ทอนซิลอักเสบ','คลินิก',0],['2 มี.ค. 69','หลอดลมอักเสบ','คลินิก',0],
+  ['5–9 มี.ค. 69','ปอดอักเสบ · นอน รพ. 5 วัน','โรงพยาบาล',1],['มิ.ย. 69','ไข้หวัด · พัก 1 วัน','คลินิก',0],
+  ['ก.ค. 69','ไข้หวัด','คลินิก',0],['ก.ย. 69','ไข้หวัด','คลินิก',0]].reverse();
+const G6PD={avoid:['ciprofloxacin','nalidixic acid','norfloxacin','ofloxacin','co-trimoxazole','sulfacetamide','sulfadimidine','sulfamethoxazole','sulfanilamide','sulfapyridine','sulfasalazine','sulfisoxazole','nitrofurantoin','nitrofurazone','chloramphenicol','dapsone','primaquine','doxorubicin','phenazopyridine','methylene blue'],
+caution:['sulfadiazine','sulfaguanidine','sulfamerazine','sulfamethoxypyridazole','furazolidone','isoniazid','para-aminosalicylic acid','streptomycin','aspirin','แอสไพริน','aminopyrine','dipyrone','metamizole','phenacetin','phenazone','phenylbutazone','triaprofenic acid','phenytoin','glibenclamide','dimercaprol','antazoline','diphenhydramine','hydralazine','methyldopa','trihexyphenidyl','dopamine','procainamide','quinidine','colchicine','probenecid','vitamin c','วิตามินซี','vitamin k3','menadione','chloroquine','quinine'],
+food:['ถั่วปากอ้า','fava','บลูเบอร์รี่','blueberry','ไวน์แดง','ลูกเหม็น','naphthalene','การบูร','camphor','พิมเสน']};
+const grades=[['Math',79,85],['Science',91,86],['English',75,83],['ทักษะภาษาอังกฤษ',52,58]];
+const money=[
+  ['EIS + IEP','4,000','4,000','ok'],['ค่าอาหารกลางวัน','3,500','3,500','mix'],['จินตคณิต','1,000','1,000','mix'],
+  ['ค่าธรรมเนียมการศึกษา','2,755','2,755','mix'],['เรียนพิเศษ (600/เดือน)','2,400','2,400','pend']];
+
+function h(s){return s}
+function nav(){document.getElementById('nav').innerHTML=TABS.map(([k,i,l])=>`<button class="${k===tab?'on':''}" onclick="go('${k}')"><span>${i}</span>${l}</button>`).join('')}
+function go(k,s){tab=k;if(s)sub=s;nav();render();scrollTo(0,0)}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+function home(){return `
+ <div class="card alert"><b>⚠️ ป่วย 7 ครั้งใน 14 เดือน</b><div class="mute">รวมนอนโรงพยาบาลด้วยปอดอักเสบ 1 ครั้ง · แนะนำฉีดวัคซีนไข้หวัดใหญ่ตามนัดทุกปี</div></div>
+ <div class="card"><h3>นัดถัดไป</h3>${appts.map(a=>`<div class="row"><div class="count">${a.d}<small>วัน</small></div><div class="grow"><b>${a.k} ${a.t}</b><div class="mute">${a.p}</div></div></div>`).join('')}</div>
+ <div class="card"><h3>การเจริญเติบโตล่าสุด</h3><div class="mute">วัดเมื่ออายุ 4 ปี · 16.8 กก. · 103 ซม.</div>
+   <div class="row"><span class="pill ok">น้ำหนักตามเกณฑ์</span><span class="pill ok">สูงตามเกณฑ์</span><span class="pill ok">สมส่วน</span></div></div>
+ <div class="quick"><button onclick="openModal('add')"><span>🤒</span>บันทึกป่วย</button><button onclick="openModal('add')"><span>⚖️</span>ชั่งน้ำหนัก</button>
+ <button onclick="go('health','g6pd')"><span>💊</span>ตรวจชื่อยา</button><button onclick="openModal('add')"><span>🧾</span>แนบใบเสร็จ</button></div>`}
+
+function chart(){
+ const W=360,H=220,P=30,x=m=>P+m/60*(W-P-8),y=v=>H-P-(v/26)*(H-P-10);
+ const band=(i,j)=>WFA.map(r=>`${x(r[0])},${y(r[i])}`).join(' ')+' '+WFA.slice().reverse().map(r=>`${x(r[0])},${y(r[j])}`).join(' ');
+ const line=i=>WFA.map(r=>`${x(r[0])},${y(r[i])}`).join(' ');
+ let ax='';for(let m=0;m<=60;m+=12)ax+=`<text x="${x(m)}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6b7385">${m/12} ปี</text>`;
+ for(let v=0;v<=25;v+=5)ax+=`<text x="${P-4}" y="${y(v)+3}" font-size="10" text-anchor="end" fill="#6b7385">${v}</text><line x1="${P}" x2="${W-8}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e8f0"/>`;
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="กราฟน้ำหนักตามอายุ">${ax}
+  <polygon points="${band(1,3)}" fill="#1f9d5522"/><polyline points="${line(2)}" fill="none" stroke="#1f9d55" stroke-dasharray="4 3"/>
+  <polyline points="${meas.map(([m,v])=>`${x(m)},${y(v)}`).join(' ')}" fill="none" stroke="#2f6fed" stroke-width="2"/>
+  ${meas.map(([m,v])=>`<circle cx="${x(m)}" cy="${y(v)}" r="3.5" fill="#2f6fed"/>`).join('')}</svg>
+  <div class="mute">แถบเขียว = ช่วง −2SD ถึง +2SD · เส้นประ = ค่ากลาง (เกณฑ์ WHO โดยประมาณสำหรับต้นแบบ)</div>`}
+
+function health(){
+ const subs=[['growth','การเจริญเติบโต'],['vax','วัคซีน'],['ill','การเจ็บป่วย'],['g6pd','G-6-PD'],['dspm','พัฒนาการ']];
+ let body='';
+ if(sub==='growth')body=`<div class="card"><h3>น้ำหนักตามเกณฑ์อายุ</h3>${chart()}</div>
+  <div class="card"><h3>ผลการวัด</h3><table><tr><th>อายุ</th><th class="num">น้ำหนัก</th><th>ภาวะ</th></tr>
+  ${meas.slice().reverse().map(([m,v])=>`<tr><td>${m<24?m+' เดือน':(m/12)+' ปี'}</td><td class="num">${v} กก.</td><td><span class="pill ok">ตามเกณฑ์</span></td></tr>`).join('')}</table></div>`;
+ if(sub==='vax')body=`<div class="card"><h3>วัคซีนตามแผนงาน (EPI) + เสริม</h3><table>
+  ${vax.map(([a,v,s])=>`<tr><td style="width:70px">${a}</td><td>${v}</td><td class="num">${s==='ok'?'<span class="pill ok">✅ ได้รับแล้ว</span>':s==='warn'?'<span class="pill warn">⏰ อีก 8 วัน</span>':'<span class="pill info">ยังไม่ถึง</span>'}</td></tr>`).join('')}</table></div>`;
+ if(sub==='ill')body=`<div class="card"><h3>ไทม์ไลน์การเจ็บป่วย</h3><div class="tl">
+  ${ill.map(([d,t,p,a])=>`<div class="ev ${a?'adm':''}"><b>${t}</b><div class="mute">${d} · ${p}</div></div>`).join('')}</div>
+  <div class="card alert" style="margin:0"><b>ช่วง ก.พ.–มี.ค. 69</b><div class="mute">ทอนซิล → หลอดลม → ปอด ภายใน 3 สัปดาห์ · ระบบจะเตือนเมื่อป่วยซ้ำภายใน 14 วัน</div></div></div>`;
+ if(sub==='g6pd')body=`<div class="card"><h3>💊 ตรวจชื่อยา / อาหาร</h3>
+  <input type="search" id="q" placeholder="พิมพ์ชื่อยา เช่น co-trimoxazole, diphenhydramine" oninput="check()"><div id="res"></div>
+  <p class="mute">รายการจากสมุดประจำตัวผู้มีภาวะพร่องเอนไซม์ G-6-PD เป็นเพียงตัวอย่าง ไม่ครอบคลุมยาทุกตัว</p></div>`;
+ if(sub==='dspm')body=`<div class="card"><h3>พัฒนาการช่วงอายุ 4–5 ปี (ตัวอย่าง)</h3>
+  ${[['การเคลื่อนไหว',80],['กล้ามเนื้อมัดเล็กและสติปัญญา',60],['ความเข้าใจภาษา',100],['การใช้ภาษา',75],['การช่วยเหลือตนเองและสังคม',50]]
+   .map(([n,p])=>`<div style="margin-bottom:10px"><div class="row"><span class="grow">${n}</span><span class="mute">${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}
+  <p class="mute">ในแอปจริงจะเป็นรายการทักษะตามคู่มือ DSPM ให้ติ๊กผ่าน/ไม่ผ่าน</p></div>`;
+ return `<div class="tabs">${subs.map(([k,l])=>`<button class="${k===sub?'on':''}" onclick="go('health','${k}')">${l}</button>`).join('')}</div>${body}`}
+
+function check(){
+ const q=document.getElementById('q').value.trim().toLowerCase(),r=document.getElementById('res');
+ if(q.length<3){r.innerHTML='';return}
+ const hit=(arr)=>arr.find(n=>n.toLowerCase().includes(q)||q.includes(n.toLowerCase()));
+ let a;
+ if(a=hit(G6PD.avoid))r.innerHTML=`<div class="result bad"><b>🔴 ห้ามใช้: ${a}</b><br>อยู่ในรายการยาที่ควรหลีกเลี่ยง แจ้งแพทย์/เภสัชกรว่ามีภาวะ G-6-PD</div>`;
+ else if(a=hit(G6PD.caution))r.innerHTML=`<div class="result warn"><b>🟡 ใช้ด้วยความระมัดระวัง: ${a}</b><br>ใช้ได้เมื่อจำเป็นตามขนาดที่แพทย์สั่ง และสังเกตอาการหลังใช้</div>`;
+ else if(a=hit(G6PD.food))r.innerHTML=`<div class="result bad"><b>🚫 ควรหลีกเลี่ยง: ${a}</b></div>`;
+ else r.innerHTML=`<div class="result info"><b>ไม่พบในรายการ</b><br>ไม่ได้แปลว่าปลอดภัย ให้ถามแพทย์/เภสัชกรก่อนใช้</div>`}
+
+function school(){return `
+ <div class="card"><div class="row"><div class="grow"><h3 style="margin:0">อนุบาล 1 · ปีการศึกษา 2568</h3><div class="mute">โปรแกรม EIS</div></div><span class="pill info">เกรด IEP: C+</span></div>
+ <table style="margin-top:8px"><tr><th>วิชา</th><th class="num">เทอม 1</th><th class="num">เทอม 2</th><th></th></tr>
+ ${grades.map(([s,a,b])=>`<tr><td>${s}</td><td class="num">${a}</td><td class="num">${b}</td><td class="num">${b>a?'<span class="pill ok">▲</span>':'<span class="pill warn">▼</span>'}</td></tr>`).join('')}</table>
+ <p class="mute">ความเห็นครู: Good performance in the class.</p></div>
+ <div class="card"><h3>อนุบาล 2 · ปีการศึกษา 2569</h3><div class="mute">EIS + IEP · จินตคณิต · เรียนพิเศษ — รอผลการเรียน</div></div>`}
+
+function money_(){return `
+ <div class="card"><div class="row"><div class="grow"><h3 style="margin:0">ปีการศึกษา 2569</h3><div class="mute">ค่าเรียนรวมชุดนักเรียน</div></div><b style="font-size:22px">28,310</b></div></div>
+ <div class="card"><table><tr><th>รายการ</th><th class="num">เทอม 1</th><th class="num">เทอม 2</th></tr>
+ ${money.map(([n,a,b,s])=>`<tr><td>${n}</td><td class="num">${a} ${s==='mix'?'🟡':'🟢'}</td><td class="num">${b} ${s==='pend'?'⚪':'🟢'}</td></tr>`).join('')}
+ <tr><td>ชุดนักเรียน (รายปี)</td><td class="num">1,000 🟡</td><td></td></tr></table>
+ <p class="mute">🟢 มีหลักฐาน · 🟡 ประมาณการ · ⚪ รอชำระ</p></div>
+ <div class="card"><h3>ค่ารักษาพยาบาล 2569</h3>
+ <div class="row"><span class="grow">คลินิก 5 ครั้ง</span><b>1,620</b></div>
+ <div class="row"><span class="grow">นอนโรงพยาบาล (ค่าห้อง)</span><b>4,800</b><span class="pill warn">ยังไม่เบิก</span></div></div>`}
+
+function more(){return `<div class="card">${['👨‍👩‍👦 สมาชิกครอบครัว: พ่อ, แม่','🏥 สถานพยาบาลประจำ','🔔 ตั้งค่าการแจ้งเตือน','🔒 ล็อกแอปด้วยลายนิ้วมือ','📤 ส่งออก/สำรองข้อมูล','📥 นำเข้าข้อมูลครั้งแรก']
+ .map(t=>`<div class="row" style="padding:6px 0"><span class="grow">${t}</span><span class="mute">›</span></div>`).join('')}</div>`}
+
+function render(){document.getElementById('view').innerHTML={home,health,school,money:money_,more}[tab]()}
+nav();render();
+</script>
+</body>
+</html>
