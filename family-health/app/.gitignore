@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env.local
+.firebase/
+*.log
+dist-e2e/
+test-results/
+tsconfig.tsbuildinfo

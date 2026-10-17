@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6fed"/>
+      <stop offset="0.55" stop-color="#22b8e6"/>
+      <stop offset="1" stop-color="#1fd39a"/>
+    </linearGradient>
+    <radialGradient id="floret" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#9be15d"/>
+      <stop offset="1" stop-color="#4fa82a"/>
+    </radialGradient>
+    <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9f7d6"/>
+      <stop offset="1" stop-color="#c8e8a6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g stroke="#fff" stroke-width="16" stroke-linecap="round" opacity="0.9">
+    <path d="M92 150l34 28"/><path d="M78 226h40"/><path d="M420 150l-34 28"/><path d="M434 226h-40"/>
+  </g>
+  <!-- stem with arms and feet -->
+  <ellipse cx="190" cy="350" rx="34" ry="22" fill="#8a5a3b" transform="rotate(-30 190 350)"/>
+  <ellipse cx="322" cy="350" rx="34" ry="22" fill="#8a5a3b" transform="rotate(30 322 350)"/>
+  <path d="M190 250h132l14 150q2 22-20 22H196q-22 0-20-22z" fill="url(#stem)"/>
+  <ellipse cx="220" cy="428" rx="38" ry="24" fill="#7a4c30"/>
+  <ellipse cx="292" cy="428" rx="38" ry="24" fill="#7a4c30"/>
+  <!-- florets -->
+  <g fill="url(#floret)">
+    <circle cx="256" cy="150" r="78"/>
+    <circle cx="176" cy="196" r="62"/>
+    <circle cx="336" cy="196" r="62"/>
+    <circle cx="206" cy="122" r="52"/>
+    <circle cx="306" cy="122" r="52"/>
+    <circle cx="256" cy="230" r="60"/>
+    <circle cx="150" cy="250" r="40"/>
+    <circle cx="362" cy="250" r="40"/>
+  </g>
+  <g fill="#ffffff" opacity="0.25">
+    <circle cx="226" cy="106" r="14"/><circle cx="178" cy="176" r="10"/><circle cx="300" cy="140" r="9"/>
+  </g>
+  <!-- face -->
+  <circle cx="226" cy="318" r="13" fill="#1d2433"/>
+  <circle cx="286" cy="318" r="13" fill="#1d2433"/>
+  <circle cx="231" cy="313" r="4.5" fill="#fff"/>
+  <circle cx="291" cy="313" r="4.5" fill="#fff"/>
+  <ellipse cx="206" cy="344" rx="13" ry="8" fill="#f6a3b5" opacity="0.8"/>
+  <ellipse cx="306" cy="344" rx="13" ry="8" fill="#f6a3b5" opacity="0.8"/>
+  <path d="M240 344q16 16 32 0" fill="none" stroke="#1d2433" stroke-width="6" stroke-linecap="round"/>
+  <!-- small heart badge (health) -->
+  <g transform="translate(372 352)">
+    <circle r="44" fill="#fff"/>
+    <path d="M0 22l-24-24a14 14 0 0 1 24-16 14 14 0 0 1 24 16z" fill="#e5484d"/>
+  </g>
+</svg>
