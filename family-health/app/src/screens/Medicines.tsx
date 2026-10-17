@@ -31,9 +31,10 @@ export default function Medicines({ person, data }: { person: Person; data: Data
     <>
       <div className="card">
         <div className="row"><h3 className="grow" style={{ margin: 0 }}>💊 ตู้ยาประจำตัว</h3>
-          <button className="btn ghost" onClick={() => setForm({ status: 'have' })}>+ เพิ่มยา</button></div>
+          <button className="btn ghost" onClick={() => setForm({ status: 'have', qty: 1 })}>+ เพิ่มยา</button></div>
         <p className="mute" style={{ margin: '6px 0 0' }}>
-          มียา {have.length} รายการ{finished.length > 0 && ` · ใช้หมด/ทิ้งแล้ว ${finished.length} รายการ`}
+          มียา {have.length} รายการ · รวม {have.reduce((s, m) => s + (m.qty ?? 0), 0)} ขวด
+          {finished.length > 0 && ` · ใช้หมด/ทิ้งแล้ว ${finished.length} รายการ`}
         </p>
       </div>
 
@@ -68,6 +69,16 @@ export default function Medicines({ person, data }: { person: Person; data: Data
   )
 }
 
+/** ปรับจำนวนขวด: เหลือ 0 แล้วถามว่าจะย้ายไปยาที่ใช้หมดหรือไม่ */
+function changeQty(m: Medicine, delta: number) {
+  const qty = Math.max(0, (m.qty ?? 0) + delta)
+  if (qty === 0 && confirm(`${m.name} หมดแล้ว ย้ายไป "ใช้หมด/ทิ้งแล้ว"?`)) {
+    void save('medicines', { id: m.id, qty: 0, status: 'finished' })
+  } else {
+    void save('medicines', { id: m.id, qty })
+  }
+}
+
 function MedicineRow({ m, g6pd, onOpen }: { m: Medicine; g6pd: boolean; onOpen: () => void }) {
   const hits = g6pd ? medicineHits(m) : []
   const exp = expiryState(m.expiry)
@@ -87,7 +98,16 @@ function MedicineRow({ m, g6pd, onOpen }: { m: Medicine; g6pd: boolean; onOpen: 
           </div>
         ))}
       </span>
-      {exp && <span className={`pill ${exp === 'expired' ? 'bad' : 'warn'}`}>{exp === 'expired' ? 'หมดอายุ' : 'ใกล้หมดอายุ'}</span>}
+      <span style={{ textAlign: 'right' }}>
+        {m.status !== 'finished' && (
+          <span className="row" style={{ gap: 4, justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
+            <button className="btn ghost" style={{ padding: '4px 10px' }} aria-label={`ลดจำนวน ${m.name}`} onClick={() => changeQty(m, -1)}>−</button>
+            <b style={{ minWidth: 48, textAlign: 'center' }}>{m.qty ?? 0} ขวด</b>
+            <button className="btn ghost" style={{ padding: '4px 10px' }} aria-label={`เพิ่มจำนวน ${m.name}`} onClick={() => changeQty(m, 1)}>+</button>
+          </span>
+        )}
+        {exp && <span className={`pill ${exp === 'expired' ? 'bad' : 'warn'}`} style={{ marginTop: 4 }}>{exp === 'expired' ? 'หมดอายุ' : 'ใกล้หมดอายุ'}</span>}
+      </span>
     </div>
   )
 }
@@ -126,6 +146,9 @@ function MedicineForm({ person, initial, onDone }: { person: Person; initial: Pa
         {text('strength', 'ความแรง', { placeholder: 'เช่น 15 มก./5 มล.' })}
         {text('amount', 'ขนาดบรรจุ', { placeholder: 'เช่น 60 มล.' })}
       </div>
+      <label className="f"><span>จำนวน (ขวด)</span>
+        <input className="in" type="number" inputMode="numeric" min={0} value={v.qty ?? ''}
+          onChange={(e) => set('qty', e.target.value === '' ? null : Number(e.target.value))} /></label>
       {text('purpose', 'ใช้สำหรับ', { placeholder: 'เช่น ละลายเสมหะ' })}
       {text('dose', 'วิธีใช้ (ตามฉลาก/แพทย์สั่ง)', { placeholder: 'เช่น 2.5 ซีซี วันละ 3 ครั้ง หลังอาหาร' })}
       {text('source', 'ได้จาก', { placeholder: 'เช่น รพ.ชัยบาดาล, ร้านยา' })}

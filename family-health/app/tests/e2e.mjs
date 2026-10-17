@@ -108,6 +108,10 @@ try {
   await p.getByText(/🔴 ห้ามใช้: co-trimoxazole/).waitFor()
   await p.getByRole('button', { name: 'บันทึก', exact: true }).click()
   await p.getByText(/มียาที่ตรงรายการ G-6-PD 1 รายการ/).waitFor()
+  await p.getByRole('button', { name: 'เพิ่มจำนวน Bactrim' }).click()
+  await p.getByText('2 ขวด', { exact: true }).waitFor()
+  await p.getByText(/รวม 2 ขวด/).waitFor()
+  await p.screenshot({ path: S + 'v7-meds.png' })
 
   s('school result')
   await p.getByRole('button', { name: /การเรียน/ }).click()

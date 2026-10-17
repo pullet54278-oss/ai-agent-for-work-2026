@@ -110,6 +110,7 @@ export interface Medicine extends Base {
   date: string // วันที่ได้รับยา
   expiry: string
   amount: string // ขนาดบรรจุ เช่น 60 มล.
+  qty: number | null // จำนวนขวดที่มี
   status: 'have' | 'finished'
   notes: string
 }
@@ -138,6 +139,7 @@ export const NUMBER_FIELDS: Partial<Record<Table, string[]>> = {
   illnesses: ['restDays', 'cost'],
   expenses: ['amount'],
   school: ['score', 'maxScore'],
+  medicines: ['qty'],
 }
 export const BOOL_FIELDS: Partial<Record<Table, string[]>> = {
   people: ['g6pd'],

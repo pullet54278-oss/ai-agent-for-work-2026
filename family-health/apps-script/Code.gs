@@ -20,7 +20,7 @@ const TABLES = {
   expenses: ['id', 'personId', 'date', 'category', 'item', 'amount', 'status', 'claim', 'period', 'notes'],
   school: ['id', 'personId', 'academicYear', 'term', 'program', 'subject', 'score', 'maxScore', 'grade', 'comment'],
   medicines: ['id', 'personId', 'name', 'generic', 'strength', 'purpose', 'dose', 'source', 'date', 'expiry', 'amount',
-    'status', 'notes'],
+    'qty', 'status', 'notes'],
 }
 const META = ['createdAt', 'updatedAt', 'updatedBy']
 const CALENDAR_NAME = 'สมุดสุขภาพครอบครัว'
