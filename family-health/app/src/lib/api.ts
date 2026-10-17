@@ -25,12 +25,25 @@ export async function call<T = Record<string, unknown>>(req: ApiRequest): Promis
     json = mock.handle(req, user.email)
   } else {
     // text/plain เพื่อไม่ให้เบราว์เซอร์ส่ง preflight (Apps Script ไม่ตอบ OPTIONS)
-    const res = await fetch(import.meta.env.VITE_API_URL as string, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ ...req, idToken: user.token }),
-    })
-    json = await res.json()
+    const url = import.meta.env.VITE_API_URL as string | undefined
+    if (!url?.endsWith('/exec')) throw new Error('VITE_API_URL ใน Netlify ต้องเป็น Web app URL ที่ลงท้ายด้วย /exec')
+    let res: Response
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ ...req, idToken: user.token }),
+      })
+    } catch {
+      throw new Error(navigator.onLine
+        ? 'เชื่อมต่อ Apps Script ไม่ได้ — ตรวจว่า Deploy แบบ Execute as: Me และ Who has access: Anyone'
+        : 'ไม่มีอินเทอร์เน็ต')
+    }
+    try {
+      json = await res.json()
+    } catch {
+      throw new Error('Apps Script ตอบกลับผิดรูปแบบ — ตรวจว่ารัน setup แล้ว และ Deploy เวอร์ชันล่าสุดของ Code.gs')
+    }
   }
   if (!json.ok) {
     const err = json.error ?? 'unknown error'
