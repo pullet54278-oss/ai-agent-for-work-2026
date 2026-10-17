@@ -92,7 +92,7 @@ const t = (name, fn) => { fn(); n++; console.log('✓', name) }
 
 t('setup creates all tabs with headers', () => {
   assert.equal(api.setup(), 'ok')
-  for (const tab of ['people', 'vaccines', 'appointments', 'measurements', 'illnesses', 'expenses', 'school']) {
+  for (const tab of ['people', 'vaccines', 'appointments', 'measurements', 'illnesses', 'expenses', 'school', 'medicines']) {
     assert.ok(sheets[tab], tab)
     assert.equal(sheets[tab].rows[0][0], 'id')
   }

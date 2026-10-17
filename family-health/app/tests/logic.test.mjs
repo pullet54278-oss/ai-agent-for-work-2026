@@ -10,6 +10,7 @@ const src = new URL('../src/', import.meta.url).pathname
 writeFileSync(join(dir, 'entry.ts'), `
 export { g6pdHits, medList, repeatEpisodes, schoolYear, leaveByYear } from '${src}screens/Illnesses'
 export { yearOf, nextPeriod } from '${src}screens/Expenses'
+export { medicineHits, expiryState } from '${src}screens/Medicines'
 export { nextDoseDate } from '${src}data/vaccines'
 export { addMonths, isoDate, parseContacts } from '${src}lib/date'
 `)
@@ -76,5 +77,13 @@ t('sick leave is summed per Thai school year (May–April)', () => {
   const ill = (startDate, restDays) => ({ startDate, restDays })
   assert.deepEqual(m.leaveByYear([ill('2025-07-14', 2), ill('2026-02-16', 2), ill('2026-06-15', 5), ill('2026-03-05', null)]),
     [{ year: 2569, days: 5, times: 1 }, { year: 2568, days: 4, times: 2 }])
+})
+t('medicine cabinet: G6PD check by generic name, expiry warning', () => {
+  assert.equal(m.medicineHits({ name: 'Bactrim', generic: 'co-trimoxazole' })[0].item.level, 'avoid')
+  assert.equal(m.medicineHits({ name: 'Mucolid Junior', generic: 'ambroxol' }).length, 0)
+  assert.equal(m.expiryState('2000-01-01'), 'expired')
+  assert.equal(m.expiryState(m.addMonths(m.isoDate(new Date()), 1)), 'soon')
+  assert.equal(m.expiryState('2099-01-01'), '')
+  assert.equal(m.expiryState(''), '')
 })
 console.log(`${n} passed`)

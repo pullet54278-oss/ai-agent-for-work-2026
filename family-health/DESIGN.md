@@ -111,6 +111,7 @@ HN ของ รพ. · เบอร์โทรพ่อ/แม่ — ออ�
 | illnesses | id, personId, startDate, endDate, place, doctor, diagnosis, admitted, restDays, medications, advice, cost, notes |
 | expenses | id, personId, date, category, item, amount, status (evidence/estimate/pending), claim, period, notes |
 | school | id, personId, academicYear, term, program, subject, score, maxScore, grade, comment |
+| medicines | id, personId, name, generic, strength, purpose, dose, source, date, expiry, amount, status (have/finished), notes — ตู้ยาประจำตัว ตรวจ G-6-PD จากชื่อสามัญ |
 
 `vaccines.code` + `dose` จับคู่กับตาราง EPI ใน `app/src/data/vaccines.ts` (เช่น `DTP-HB-Hib` เข็ม 1–3, `DEN`, `HAV`, `EV71`, `FLU`)
 

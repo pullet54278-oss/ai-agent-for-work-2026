@@ -100,6 +100,15 @@ try {
   await p.getByRole('button', { name: 'บันทึก', exact: true }).click() // dialog ยืนยันถูกกดตกลงอัตโนมัติ
   await p.locator('.tl .pill.bad', { hasText: 'co-trimoxazole' }).waitFor()
 
+  s('medicine cabinet flags a G6PD-unsafe drug')
+  await p.getByRole('button', { name: 'ตู้ยา' }).click()
+  await p.getByRole('button', { name: '+ เพิ่มยา' }).click()
+  await p.getByLabel('ชื่อยา (ตามฉลาก)').fill('Bactrim')
+  await p.getByLabel('ชื่อสามัญ (ใช้ตรวจ G-6-PD)').fill('co-trimoxazole')
+  await p.getByText(/🔴 ห้ามใช้: co-trimoxazole/).waitFor()
+  await p.getByRole('button', { name: 'บันทึก', exact: true }).click()
+  await p.getByText(/มียาที่ตรงรายการ G-6-PD 1 รายการ/).waitFor()
+
   s('school result')
   await p.getByRole('button', { name: /การเรียน/ }).click()
   await p.getByRole('button', { name: '+ เพิ่มผล' }).click()

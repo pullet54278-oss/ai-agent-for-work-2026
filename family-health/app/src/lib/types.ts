@@ -98,6 +98,22 @@ export interface SchoolResult extends Base {
   comment: string
 }
 
+/** ยาในตู้ยาประจำตัว */
+export interface Medicine extends Base {
+  personId: string
+  name: string // ชื่อการค้า/ชื่อบนฉลาก
+  generic: string // ชื่อสามัญ ใช้ตรวจกับรายการ G-6-PD
+  strength: string
+  purpose: string
+  dose: string // วิธีใช้ตามฉลาก
+  source: string // ได้จากที่ไหน
+  date: string // วันที่ได้รับยา
+  expiry: string
+  amount: string // ขนาดบรรจุ เช่น 60 มล.
+  status: 'have' | 'finished'
+  notes: string
+}
+
 export interface Data {
   people: Person[]
   vaccines: Vaccine[]
@@ -106,12 +122,13 @@ export interface Data {
   illnesses: Illness[]
   expenses: Expense[]
   school: SchoolResult[]
+  medicines: Medicine[]
 }
 export type Table = keyof Data
 export type Row<T extends Table> = Data[T][number]
 
 export const emptyData: Data = {
-  people: [], vaccines: [], appointments: [], measurements: [], illnesses: [], expenses: [], school: [],
+  people: [], vaccines: [], appointments: [], measurements: [], illnesses: [], expenses: [], school: [], medicines: [],
 }
 
 // คอลัมน์ที่ต้องแปลงจากข้อความใน Sheet
