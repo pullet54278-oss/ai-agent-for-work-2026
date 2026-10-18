@@ -41,7 +41,7 @@ function makeEnv({ tokens }) {
     events[id] = ev
     return ev
   }
-  const cal = { getId: () => 'cal-1', getEventById: (id) => events[id] ?? null,
+  const cal = { getId: () => 'cal-1', getName: () => 'สมุดสุขภาพครอบครัว', getEventById: (id) => events[id] ?? null,
     createEvent: (t, s, e, o) => makeEvent(t, s, o, false), createAllDayEvent: (t, d, o) => makeEvent(t, d, o, true) }
   const ctx = {
     console,

@@ -280,11 +280,16 @@ function setup() {
     sh.setFrozenRows(1)
     sh.getRange(1, 1, 1, head.length).setFontWeight('bold')
   })
+  console.log('แท็บและหัวตารางครบ')
   ScriptApp.getProjectTriggers()
     .filter((tr) => tr.getHandlerFunction() === 'dailySync')
     .forEach((tr) => ScriptApp.deleteTrigger(tr))
   ScriptApp.newTrigger('dailySync').timeBased().everyDays(1).atHour(6).inTimezone('Asia/Bangkok').create()
-  calendar_()
+  console.log('ตั้งเวลาซิงก์ทุกเช้า 06:00 แล้ว')
+  const cal = calendar_()
+  console.log('ปฏิทิน "' + cal.getName() + '" พร้อมใช้ (' + cal.getId() + ')')
+  dailySync()
+  console.log('ส่งนัดที่รออยู่เข้าปฏิทินแล้ว · ติดตั้งเสร็จ')
   return 'ok'
 }
 
