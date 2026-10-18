@@ -41,7 +41,8 @@ function makeEnv({ tokens }) {
     events[id] = ev
     return ev
   }
-  const cal = { getId: () => 'cal-1', getName: () => 'สมุดสุขภาพครอบครัว', getEventById: (id) => events[id] ?? null,
+  let calTz = 'UTC'
+  const cal = { getId: () => 'cal-1', getName: () => 'สมุดสุขภาพครอบครัว', getTimeZone: () => calTz, setTimeZone: (z) => { calTz = z }, getEventById: (id) => events[id] ?? null,
     createEvent: (t, s, e, o) => makeEvent(t, s, o, false), createAllDayEvent: (t, d, o) => makeEvent(t, d, o, true) }
   const ctx = {
     console,
@@ -62,6 +63,11 @@ function makeEnv({ tokens }) {
       computeDigest: (_a, s) => [...createHash('sha256').update(s).digest()],
       base64EncodeWebSafe: (b) => Buffer.from(b).toString('base64url'),
       formatDate: (d) => d.toISOString().slice(0, 10),
+      parseDate: (s, tz, fmt) => {
+        assert.equal(tz, 'Asia/Bangkok')
+        const [d, t = '00:00'] = s.split(' ')
+        return new Date(`${d}T${t}:00+07:00`)
+      },
     },
     LockService: { getScriptLock: () => ({ waitLock: () => {}, releaseLock: () => {} }) },
     CalendarApp: { getCalendarById: (id) => (id === 'cal-1' ? cal : null), createCalendar: () => cal, Color: { BLUE: 'blue' } },
@@ -73,7 +79,7 @@ function makeEnv({ tokens }) {
   vm.createContext(ctx)
   vm.runInContext(readFileSync(new URL('./Code.gs', import.meta.url), 'utf8') + '\nthis.__api = { doPost, doGet, setup, dailySync }', ctx)
   const call = (body) => JSON.parse(ctx.__api.doPost({ postData: { contents: JSON.stringify(body) } }).text)
-  return { api: ctx.__api, call, sheets, events, props }
+  return { api: { ...ctx.__api, calTz: () => calTz }, call, sheets, events, props }
 }
 
 const future = Math.floor(Date.now() / 1000) + 3600
@@ -148,7 +154,9 @@ t('appointment creates an all-day calendar event inviting the other parent', () 
 t('timed appointment creates timed event', () => {
   const r = call({ action: 'upsert', table: 'appointments', idToken: 'mom',
     record: { id: 'a2', personId: 'p1', title: 'หาหมอ', date: '2026-11-05', time: '09:30', status: 'pending' } })
-  assert.equal(events[r.record.calendarEventId].allDay, false)
+  const ev = events[r.record.calendarEventId]
+  assert.equal(ev.allDay, false)
+  assert.equal(ev.start.toISOString(), '2026-11-05T02:30:00.000Z', '09:30 Bangkok time')
 })
 t('marking appointment done removes its event', () => {
   const before = sheets.appointments.rows.find((r) => r[0] === 'a1')
@@ -170,5 +178,14 @@ t('dailySync recreates an event deleted from the calendar', () => {
   api.dailySync()
   const newId = sheets.appointments.rows.find((x) => x[0] === 'a3')[9]
   assert.ok(events[newId], 'event recreated')
+})
+t('setup moves the calendar to Bangkok time and re-invites future appointments', () => {
+  const before = sheets.appointments.rows.find((x) => x[0] === 'a3')[9]
+  api.setup()
+  assert.equal(api.calTz(), 'Asia/Bangkok')
+  const after = sheets.appointments.rows.find((x) => x[0] === 'a3')[9]
+  assert.notEqual(after, before, 'event recreated')
+  assert.equal(events[before], undefined, 'old event removed')
+  assert.equal(events[after].opts.guests, 'mom@example.com')
 })
 console.log(`${n} passed`)

@@ -24,6 +24,7 @@ const TABLES = {
 }
 const META = ['createdAt', 'updatedAt', 'updatedBy']
 const CALENDAR_NAME = 'สมุดสุขภาพครอบครัว'
+const TZ = 'Asia/Bangkok'
 
 // ---------- Web app ----------
 
@@ -190,6 +191,8 @@ function calendar_() {
     cal = CalendarApp.createCalendar(CALENDAR_NAME, { color: CalendarApp.Color.BLUE })
     props.setProperty('CALENDAR_ID', cal.getId())
   }
+  // นัดทั้งวันเตือนตามเวลาไทย ไม่ว่าโปรเจกต์ Apps Script จะตั้งเขตเวลาไว้แบบไหน
+  if (cal.getTimeZone() !== TZ) cal.setTimeZone(TZ)
   return cal
 }
 
@@ -213,21 +216,18 @@ function syncEvent_(a) {
   const cal = calendar_()
   const who = personName_(a.personId)
   const title = (who ? who + ': ' : '') + a.title
-  const parts = a.date.split('-').map(Number)
-  const day = new Date(parts[0], parts[1] - 1, parts[2])
   let ev = a.calendarEventId ? cal.getEventById(a.calendarEventId) : null
   if (ev) ev.deleteEvent()
   const opts = { description: [a.place, a.notes].filter(String).join('\n'), location: a.place || '', sendInvites: true,
     guests: guests_().join(',') }
   if (a.time) {
-    const t = a.time.split(':').map(Number)
-    const start = new Date(parts[0], parts[1] - 1, parts[2], t[0], t[1] || 0)
+    const start = Utilities.parseDate(a.date + ' ' + a.time, TZ, 'yyyy-MM-dd HH:mm')
     ev = cal.createEvent(title, start, new Date(start.getTime() + 60 * 60 * 1000), opts)
     ev.removeAllReminders()
     ev.addPopupReminder(24 * 60)
     ev.addPopupReminder(120)
   } else {
-    ev = cal.createAllDayEvent(title, day, opts)
+    ev = cal.createAllDayEvent(title, Utilities.parseDate(a.date, TZ, 'yyyy-MM-dd'), opts)
     ev.removeAllReminders()
     ev.addPopupReminder((6 * 24 + 17) * 60) // 7 วันก่อน 07:00
     ev.addPopupReminder(17 * 60) // 1 วันก่อน 07:00
@@ -247,6 +247,11 @@ function deleteEvent_(eventId) {
 
 /** รันทุกเช้า: ตรวจว่านัดที่ยังไม่ถึงทุกนัดมีอยู่ในปฏิทิน (กรณีถูกลบเองหรือแก้ใน Sheet ตรง ๆ) */
 function dailySync() {
+  syncAll_(false)
+}
+
+/** force = สร้างนัดที่ยังไม่ถึงใหม่ทั้งหมด (เช่น หลังเพิ่มอีเมลใน ALLOWED_EMAILS เพื่อส่งคำเชิญ) */
+function syncAll_(force) {
   withLock_(() => {
     const sh = sheet_('appointments')
     const head = headers_('appointments')
@@ -254,9 +259,9 @@ function dailySync() {
     const cal = calendar_()
     readTable_('appointments').forEach((a) => {
       if (a.date < today || a.status === 'done' || a.status === 'cancelled') return
-      if (a.calendarEventId && cal.getEventById(a.calendarEventId)) return
+      if (!force && a.calendarEventId && cal.getEventById(a.calendarEventId)) return
       const rowNo = findRow_(sh, a.id)
-      a.calendarEventId = ''
+      if (!force) a.calendarEventId = ''
       const id = syncEvent_(a)
       sh.getRange(rowNo, head.indexOf('calendarEventId') + 1).setValue(id)
     })
@@ -288,8 +293,8 @@ function setup() {
   console.log('ตั้งเวลาซิงก์ทุกเช้า 06:00 แล้ว')
   const cal = calendar_()
   console.log('ปฏิทิน "' + cal.getName() + '" พร้อมใช้ (' + cal.getId() + ')')
-  dailySync()
-  console.log('ส่งนัดที่รออยู่เข้าปฏิทินแล้ว · ติดตั้งเสร็จ')
+  syncAll_(true)
+  console.log('ส่งนัดที่รออยู่เข้าปฏิทินแล้ว (เชิญ: ' + (guests_().join(', ') || 'ไม่มี') + ') · ติดตั้งเสร็จ')
   return 'ok'
 }
 
