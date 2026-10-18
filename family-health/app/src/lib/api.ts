@@ -16,7 +16,7 @@ export interface ApiRequest {
 }
 
 /** เรียก Apps Script Web App (หรือหลังบ้านจำลองในโหมดทดสอบ) */
-export async function call<T = Record<string, unknown>>(req: ApiRequest, retried = false): Promise<T> {
+export async function call<T = Record<string, unknown>>(req: ApiRequest, retried = false, attempt = 0): Promise<T> {
   const user = getUser()
   if (!user) throw new AuthError('unauthenticated')
   const token = await freshToken()
@@ -46,12 +46,20 @@ export async function call<T = Record<string, unknown>>(req: ApiRequest, retried
     } catch {
       throw new Error('Apps Script ตอบกลับผิดรูปแบบ — ตรวจว่ารัน setup แล้ว และ Deploy เวอร์ชันล่าสุดของ Code.gs')
     }
+    // ได้คำตอบของ doGet แทน doPost: คำขอถูกเปลี่ยนเป็น GET ระหว่างทาง (เกิดเป็นครั้งคราว) → ส่งใหม่
+    if (json.ok && json.app === 'family-health') {
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)))
+        return call<T>(req, retried, attempt + 1)
+      }
+      throw new Error('Apps Script ไม่ได้รับคำขอ — กด 🔄 ลองใหม่ ถ้ายังเป็นอยู่ ให้ตรวจลิงก์ VITE_API_URL ใน Netlify ว่าเป็นลิงก์ /exec ของ Deploy ล่าสุด')
+    }
   }
   if (!json.ok) {
     const err = json.error ?? 'unknown error'
     if (AUTH_ERRORS.includes(err)) {
       // token ถูกปฏิเสธ (เช่น เครื่องตั้งเวลาไม่ตรง): ขอใหม่แล้วลองอีกครั้งเดียว
-      if (!retried && (await freshToken(true))) return call<T>(req, true)
+      if (!retried && (await freshToken(true))) return call<T>(req, true, attempt)
       throw new AuthError(err)
     }
     throw new Error(MESSAGES[err] ?? err)

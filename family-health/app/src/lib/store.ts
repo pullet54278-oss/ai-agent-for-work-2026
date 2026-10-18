@@ -74,7 +74,9 @@ export async function refresh() {
   if (!getUser() || state.loading) return
   setState({ loading: true })
   await guarded(async () => {
-    const res = await call<{ data: Record<Table, Record<string, unknown>[]> }>({ action: 'getAll' })
+    const res = await call<{ data?: Record<Table, Record<string, unknown>[]> }>({ action: 'getAll' })
+    // ไม่มีข้อมูลกลับมา: อย่าล้างข้อมูลในเครื่อง ให้แจ้งแล้วลองใหม่ภายหลัง
+    if (!res.data || typeof res.data !== 'object') throw new Error('Apps Script ส่งข้อมูลกลับมาไม่ครบ — กด 🔄 ลองใหม่')
     const data = { ...emptyData }
     for (const t of Object.keys(emptyData) as Table[]) {
       ;(data[t] as unknown[]) = (res.data[t] ?? []).map((r) => normalize(t, r))
