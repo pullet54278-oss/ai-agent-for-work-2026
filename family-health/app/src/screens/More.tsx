@@ -45,7 +45,7 @@ export default function More({ user, person }: { user: User; person?: Person }) 
         <h3>ข้อมูลเก็บใน Google Sheet</h3>
         <p className="mute" style={{ marginTop: 0 }}>
           {syncedAt ? `ดึงข้อมูลล่าสุดเมื่อ ${new Date(syncedAt).toLocaleTimeString('th-TH')} น.` : 'ยังไม่ได้ดึงข้อมูล'}
-          {' · '}ข้อมูลที่อีกฝ่ายบันทึกจะเห็นเมื่อกด 🔄 ด้านบน
+          {' · '}ข้อมูลจากอีกเครื่องจะอัปเดตเองเมื่อเปิดแอปและทุก 2 นาที หรือกด 🔄 ด้านบน
         </p>
         {SHEET_URL && <a className="btn ghost block" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }} href={SHEET_URL} target="_blank" rel="noreferrer">เปิด Google Sheet</a>}
       </div>

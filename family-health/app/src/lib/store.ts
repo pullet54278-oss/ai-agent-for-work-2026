@@ -85,6 +85,26 @@ export async function refresh() {
   setState({ loading: false })
 }
 
+/**
+ * ดึงข้อมูลใหม่อัตโนมัติเมื่อกลับมาเปิดแอป ต่อเน็ตได้อีกครั้ง และทุก 2 นาทีระหว่างเปิดหน้าจออยู่
+ * (ข้ามถ้าเพิ่งดึงไปไม่ถึง 30 วินาที หรือกำลังบันทึกอยู่) — คืนฟังก์ชันยกเลิก
+ */
+export function startAutoRefresh(): () => void {
+  const maybe = () => {
+    if (document.visibilityState !== 'visible' || state.saving > 0) return
+    if (state.syncedAt && Date.now() - state.syncedAt < 30_000) return
+    void refresh()
+  }
+  document.addEventListener('visibilitychange', maybe)
+  window.addEventListener('online', maybe)
+  const timer = setInterval(maybe, 120_000)
+  return () => {
+    document.removeEventListener('visibilitychange', maybe)
+    window.removeEventListener('online', maybe)
+    clearInterval(timer)
+  }
+}
+
 function replaceRow<T extends Table>(data: Data, table: T, row: Row<T> | null, id: string): Data {
   const list = data[table] as Row<T>[]
   let next: Row<T>[]

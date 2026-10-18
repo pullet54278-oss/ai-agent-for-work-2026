@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { authConfigured, useUser } from './lib/auth'
-import { refresh, useStore } from './lib/store'
+import { refresh, startAutoRefresh, useStore } from './lib/store'
 import { ageText } from './lib/date'
 import Login from './screens/Login'
 import Home from './screens/Home'
@@ -31,6 +31,9 @@ export default function App() {
     setTab('home')
     if (user) void refresh()
   }, [user?.email])
+
+  // ข้อมูลที่อีกเครื่องบันทึกจะเข้ามาเองเมื่อกลับมาเปิดแอป หรือทุก 2 นาที
+  useEffect(() => (user ? startAutoRefresh() : undefined), [user?.email])
 
   // แอปนี้เก็บข้อมูลลูกคนเดียว
   const person = useMemo(() => people.find((p) => p.relation === 'child') ?? people[0], [people])
