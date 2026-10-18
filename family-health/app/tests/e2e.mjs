@@ -167,6 +167,19 @@ try {
   await p.getByRole('button', { name: /วัคซีน/ }).first().click()
   await p.locator('.vrow', { hasText: 'วัณโรค (BCG)' }).locator('.pill.ok').waitFor()
 
+  s('install button: prompts when the browser allows install')
+  await p.evaluate(() => {
+    const e = new Event('beforeinstallprompt')
+    e.prompt = async () => { window.__installPrompted = true }
+    e.userChoice = Promise.resolve({ outcome: 'accepted' })
+    window.dispatchEvent(e)
+  })
+  await p.getByRole('button', { name: /เพิ่มเติม/ }).click()
+  await p.getByRole('button', { name: '📲 ติดตั้งแอปลงเครื่อง' }).click()
+  await p.waitForFunction(() => window.__installPrompted === true)
+  await p.evaluate(() => window.dispatchEvent(new Event('appinstalled')))
+  await p.getByText('✅ ติดตั้งแอปในเครื่องนี้แล้ว').waitFor()
+
   s('stranger is refused')
   await p.getByRole('button', { name: /เพิ่มเติม/ }).click()
   await p.getByRole('button', { name: /ออกจากระบบ/ }).click()

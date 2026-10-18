@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { isMock, mockSignIn, renderSignInButton } from '../lib/auth'
+import InstallButton from './InstallButton'
 
 export default function Login() {
   const btn = useRef<HTMLDivElement>(null)
@@ -20,6 +21,7 @@ export default function Login() {
             <button className="btn ghost" onClick={() => mockSignIn('evil@example.com', 'คนนอก')}>ทดสอบ: คนนอก</button>
           </div>
         )}
+        <div style={{ marginTop: 16 }}><InstallButton compact /></div>
         <p className="mute" style={{ marginTop: 24 }}>ใช้ได้เฉพาะบัญชี Google ของพ่อและแม่ที่ตั้งไว้เท่านั้น</p>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { clearCache, newId, save, useStore } from '../lib/store'
 import { emptyPerson, type Person } from '../lib/types'
 import { ageText, formatPhone, parseContacts } from '../lib/date'
 import { photoToDataUrl } from '../lib/photo'
+import InstallButton from './InstallButton'
 
 const SHEET_URL = import.meta.env.VITE_SHEET_URL as string | undefined
 
@@ -33,6 +34,11 @@ export default function More({ user, person }: { user: User; person?: Person }) 
         ) : (
           <button className="btn block" onClick={() => setEditing({ ...emptyPerson })}>+ ใส่ข้อมูลลูก</button>
         )}
+      </div>
+
+      <div className="card">
+        <h3>แอปบนมือถือ</h3>
+        <InstallButton />
       </div>
 
       <div className="card">

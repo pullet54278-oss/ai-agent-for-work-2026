@@ -5,11 +5,15 @@ import { ageText, thaiDate } from '../lib/date'
 import { AppointmentForm, AppointmentList, overdue, upcoming } from './Appointments'
 import { epiFor, epiStatus } from './Vaccines'
 import { recentRepeat } from './Illnesses'
+import { promptInstall, useInstall } from '../lib/install'
 
 interface Props { person?: Person; data: Data; go: (t: Tab, sub?: string) => void; openSos: () => void }
 
 export default function Home({ person, data, go, openSos }: Props) {
   const [addAppt, setAddAppt] = useState(false)
+  const install = useInstall()
+  const [hideInstall, setHideInstall] = useState(() => { try { return localStorage.getItem('fh-hide-install') === '1' } catch { return false } })
+  const dismissInstall = () => { setHideInstall(true); try { localStorage.setItem('fh-hide-install', '1') } catch { /* ไม่เป็นไร */ } }
   if (!person) {
     return (
       <div className="card">
@@ -29,6 +33,14 @@ export default function Home({ person, data, go, openSos }: Props) {
 
   return (
     <>
+      {install === 'ready' && !hideInstall && (
+        <div className="card row" style={{ gap: 8 }}>
+          <span className="grow">📲 <b>ติดตั้งแอปลงเครื่อง</b><br /><small className="mute">เปิดได้จากไอคอนบนหน้าจอ เหมือนแอปทั่วไป</small></span>
+          <button className="btn" onClick={() => promptInstall()}>ติดตั้ง</button>
+          <button className="btn ghost" aria-label="ไม่ต้องแสดงอีก" onClick={dismissInstall}>×</button>
+        </div>
+      )}
+
       {person.g6pd && (
         <div className="card alert red" onClick={openSos} style={{ cursor: 'pointer' }}>
           <b>⚠️ มีภาวะพร่องเอนไซม์ G-6-PD</b>
