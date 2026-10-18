@@ -29,8 +29,8 @@ const listeners = new Set<(u: User | null) => void>()
 
 function load(): User | null {
   try {
-    const u = JSON.parse(localStorage.getItem(KEY) ?? 'null') as User | null
-    return u && u.exp > Date.now() + 60_000 ? u : null
+    // เก็บผู้ใช้ไว้แม้ token หมดอายุ: เปิดแอปครั้งถัดไปจะเห็นข้อมูลทันที แล้วขอ token ใหม่แบบเงียบ
+    return JSON.parse(localStorage.getItem(KEY) ?? 'null') as User | null
   } catch {
     return null
   }
@@ -62,12 +62,18 @@ function waitForGis(): Promise<GoogleId> {
 }
 
 let initialized = false
+let waiting: (() => void)[] = []
+const fresh = (u: User | null) => !!u && u.exp > Date.now() + 60_000
 async function gis(): Promise<GoogleId> {
   const id = await waitForGis()
   if (!initialized) {
     id.initialize({
       client_id: CLIENT_ID!,
-      callback: (r) => set(decode(r.credential)),
+      callback: (r) => {
+        set(decode(r.credential))
+        waiting.forEach((w) => w())
+        waiting = []
+      },
       auto_select: true,
       use_fedcm_for_prompt: true,
     })
@@ -82,12 +88,22 @@ export async function renderSignInButton(el: HTMLElement) {
   id.prompt()
 }
 
-/** token หมดอายุทุก 1 ชม.: ขอใหม่แบบเงียบ ถ้าไม่ได้จะกลับไปหน้าเข้าสู่ระบบ */
-export async function refreshToken(): Promise<void> {
-  if (isMock) return
-  set(null)
+/**
+ * token ที่ใช้ได้ (Google ให้อายุ 1 ชม.) — หมดแล้วขอใหม่แบบเงียบด้วยบัญชีเดิม
+ * ถ้าขอไม่ได้ภายในเวลาที่กำหนด จะกลับไปหน้าเข้าสู่ระบบ
+ */
+export async function freshToken(force = false): Promise<string | null> {
+  if (!current) return null
+  if (isMock || (!force && fresh(current))) return current.token
   const id = await gis()
-  id.prompt()
+  const ok = await new Promise<boolean>((resolve) => {
+    const timer = setTimeout(() => resolve(false), 12_000)
+    waiting.push(() => { clearTimeout(timer); resolve(true) })
+    id.prompt()
+  })
+  if (ok && fresh(current)) return current!.token
+  set(null)
+  return null
 }
 
 export function signOut() {

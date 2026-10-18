@@ -1,4 +1,4 @@
-import { getUser, isMock } from './auth'
+import { freshToken, getUser, isMock } from './auth'
 
 export class AuthError extends Error {}
 
@@ -16,9 +16,11 @@ export interface ApiRequest {
 }
 
 /** เรียก Apps Script Web App (หรือหลังบ้านจำลองในโหมดทดสอบ) */
-export async function call<T = Record<string, unknown>>(req: ApiRequest): Promise<T> {
+export async function call<T = Record<string, unknown>>(req: ApiRequest, retried = false): Promise<T> {
   const user = getUser()
   if (!user) throw new AuthError('unauthenticated')
+  const token = await freshToken()
+  if (!token) throw new AuthError('unauthenticated')
   let json: { ok: boolean; error?: string } & Record<string, unknown>
   if (isMock) {
     const mock = await import('./mock')
@@ -32,7 +34,7 @@ export async function call<T = Record<string, unknown>>(req: ApiRequest): Promis
       res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ ...req, idToken: user.token }),
+        body: JSON.stringify({ ...req, idToken: token }),
       })
     } catch {
       throw new Error(navigator.onLine
@@ -47,7 +49,11 @@ export async function call<T = Record<string, unknown>>(req: ApiRequest): Promis
   }
   if (!json.ok) {
     const err = json.error ?? 'unknown error'
-    if (AUTH_ERRORS.includes(err)) throw new AuthError(err)
+    if (AUTH_ERRORS.includes(err)) {
+      // token ถูกปฏิเสธ (เช่น เครื่องตั้งเวลาไม่ตรง): ขอใหม่แล้วลองอีกครั้งเดียว
+      if (!retried && (await freshToken(true))) return call<T>(req, true)
+      throw new AuthError(err)
+    }
     throw new Error(MESSAGES[err] ?? err)
   }
   return json as T

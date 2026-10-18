@@ -2,7 +2,7 @@
 // และบันทึกแบบแสดงผลทันที (optimistic) แล้วค่อยส่งขึ้น Sheet
 import { useEffect, useState } from 'react'
 import { AuthError, call } from './api'
-import { getUser, refreshToken } from './auth'
+import { getUser } from './auth'
 import { BOOL_FIELDS, NUMBER_FIELDS, emptyData, type Data, type Row, type Table } from './types'
 
 const CACHE = 'fh-cache-v1'
@@ -62,7 +62,6 @@ async function guarded<T>(fn: () => Promise<T>): Promise<T | undefined> {
     return r
   } catch (e) {
     if (e instanceof AuthError) {
-      await refreshToken()
       setState({ error: 'กรุณาเข้าสู่ระบบอีกครั้ง' })
     } else {
       setState({ error: navigator.onLine ? (e as Error).message : 'ไม่มีอินเทอร์เน็ต — แสดงข้อมูลล่าสุดที่บันทึกในเครื่อง' })
