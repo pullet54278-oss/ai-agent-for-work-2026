@@ -9,11 +9,12 @@ import Emergency from './screens/Emergency'
 import More from './screens/More'
 import School from './screens/School'
 import Expenses from './screens/Expenses'
+import Medicines from './screens/Medicines'
 
-export type Tab = 'home' | 'health' | 'school' | 'money' | 'more'
+export type Tab = 'home' | 'health' | 'meds' | 'school' | 'money' | 'more'
 
 const TABS: [Tab, string, string][] = [
-  ['home', '🏠', 'หน้าหลัก'], ['health', '❤️', 'สุขภาพ'], ['school', '🎓', 'การเรียน'],
+  ['home', '🏠', 'หน้าหลัก'], ['health', '❤️', 'สุขภาพ'], ['meds', '🧴', 'ตู้ยา'], ['school', '🎓', 'การเรียน'],
   ['money', '💰', 'ค่าใช้จ่าย'], ['more', '☰', 'เพิ่มเติม'],
 ]
 
@@ -67,6 +68,7 @@ export default function App() {
       <main>
         {tab === 'home' && <Home person={person} data={data} go={go} openSos={() => setSos(true)} />}
         {tab === 'health' && <Health person={person} data={data} sub={healthSub} setSub={setHealthSub} />}
+        {tab === 'meds' && (person ? <Medicines person={person} data={data} /> : null)}
         {tab === 'school' && <School person={person} data={data} />}
         {tab === 'money' && <Expenses key={person?.id} person={person} data={data} />}
         {tab === 'more' && <More user={user} person={person} />}

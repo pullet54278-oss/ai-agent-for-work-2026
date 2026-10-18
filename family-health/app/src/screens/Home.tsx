@@ -77,7 +77,7 @@ export default function Home({ person, data, go, openSos }: Props) {
         {person.g6pd && <button onClick={() => go('health', 'g6pd')}><span>💊</span>ตรวจชื่อยา</button>}
         <button onClick={() => go('health', 'growth')}><span>⚖️</span>น้ำหนัก</button>
         <button onClick={() => go('health', 'ill')}><span>🤒</span>เจ็บป่วย</button>
-        <button onClick={() => go('health', 'meds')}><span>🧴</span>ตู้ยา</button>
+        <button onClick={() => go('meds')}><span>🧴</span>ตู้ยา</button>
       </div>
 
       {!person.phone && (

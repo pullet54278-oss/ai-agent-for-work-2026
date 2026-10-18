@@ -101,7 +101,7 @@ try {
   await p.locator('.tl .pill.bad', { hasText: 'co-trimoxazole' }).waitFor()
 
   s('medicine cabinet flags a G6PD-unsafe drug')
-  await p.getByRole('button', { name: 'ตู้ยา' }).click()
+  await p.locator('nav.bottom').getByRole('button', { name: /ตู้ยา/ }).click()
   await p.getByRole('button', { name: '+ เพิ่มยา' }).click()
   await p.getByLabel('ชื่อยา (ตามฉลาก)').fill('Bactrim')
   await p.getByLabel('ชื่อสามัญ (ใช้ตรวจ G-6-PD)').fill('co-trimoxazole')
@@ -112,6 +112,9 @@ try {
   await p.getByText('2 ขวด', { exact: true }).waitFor()
   await p.getByText(/รวม 2 ขวด/).waitFor()
   await p.screenshot({ path: S + 'v7-meds.png' })
+  await p.getByRole('button', { name: /หน้าหลัก/ }).click()
+  await p.locator('.quick').getByRole('button', { name: /ตู้ยา/ }).click()
+  await p.getByText('💊 ตู้ยาประจำตัว').waitFor()
 
   s('school result')
   await p.getByRole('button', { name: /การเรียน/ }).click()

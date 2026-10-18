@@ -5,10 +5,9 @@ import Soon from './Soon'
 import Vaccines from './Vaccines'
 import Growth from './Growth'
 import Illnesses from './Illnesses'
-import Medicines from './Medicines'
 
 const SUBS: [string, string][] = [
-  ['vax', 'วัคซีน'], ['g6pd', 'G-6-PD'], ['growth', 'การเจริญเติบโต'], ['ill', 'การเจ็บป่วย'], ['meds', 'ตู้ยา'], ['dspm', 'พัฒนาการ'],
+  ['vax', 'วัคซีน'], ['g6pd', 'G-6-PD'], ['growth', 'การเจริญเติบโต'], ['ill', 'การเจ็บป่วย'], ['dspm', 'พัฒนาการ'],
 ]
 
 interface Props { person?: Person; data: Data; sub: string; setSub: (s: string) => void }
@@ -25,7 +24,6 @@ export default function Health({ person, data, sub, setSub }: Props) {
       {sub === 'vax' && (person ? <Vaccines person={person} data={data} /> : <p className="mute">เพิ่มโปรไฟล์ก่อน</p>)}
       {sub === 'growth' && (person ? <Growth person={person} data={data} /> : null)}
       {sub === 'ill' && (person ? <Illnesses person={person} data={data} /> : null)}
-      {sub === 'meds' && (person ? <Medicines person={person} data={data} /> : null)}
       {sub === 'dspm' && <Soon title="พัฒนาการ" phase={6} items={['รายการประเมินตามคู่มือ DSPM ของกรมอนามัย', 'ติ๊กผ่าน/ไม่ผ่าน ตามช่วงอายุ']} />}
     </>
   )
