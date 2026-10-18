@@ -1,13 +1,22 @@
 import { useState } from 'react'
 import type { Data, Measurement, Person } from '../lib/types'
-import { BANDS, assess, exactAgeMonths, lmsFor, valueAtZ, type Band, type Indicator } from '../lib/growth'
+import { AGE_RANGE, BANDS, assess, bmi, exactAgeMonths, heightVelocity, lmsFor, valueAtZ, type Band, type Indicator } from '../lib/growth'
+import { adviceFor } from '../data/advice'
 import { WFH_START, WFL_START } from '../data/who-lms'
-import { thaiDate, todayIso } from '../lib/date'
+import { addMonths, thaiDate, todayIso } from '../lib/date'
 import { newId, remove, save } from '../lib/store'
 
 const TONE_FILL: Record<Band['tone'], string> = { bad: '#fde3e3', warn: '#fff1cc', ok: '#ddf3e6', high: '#ece3fb' }
 const PILL: Record<Band['tone'], string> = { bad: 'bad', warn: 'warn', ok: 'ok', high: 'info' }
-const TITLES: Record<Indicator, string> = { wfa: 'น้ำหนักตามอายุ', hfa: 'ส่วนสูงตามอายุ', wfh: 'น้ำหนักตามส่วนสูง' }
+const TITLES: Record<Indicator, string> = { wfa: 'น้ำหนักตามอายุ', hfa: 'ส่วนสูงตามอายุ', wfh: 'น้ำหนักตามส่วนสูง', bfa: 'BMI ตามอายุ' }
+type Span = 'early' | 'school'
+
+/** ช่วงแกน x (เดือน) ของกราฟตามอายุ: 0–5 ปี หรือ 5 ปีขึ้นไป (WHO 2007) */
+function ageAxis(ind: Indicator, span: Span): [number, number] {
+  if (ind === 'bfa') return [60, 228]
+  if (span === 'early' || ind === 'wfh') return [0, 60]
+  return [60, ind === 'wfa' ? 120 : 228]
+}
 
 interface Point { m: Measurement; x: number; y: number; age: number }
 
@@ -20,6 +29,8 @@ export default function Growth({ person, data }: { person: Person; data: Data })
   const latest = [...rows].reverse().find((m) => m.weightKg != null || m.heightCm != null)
   const latestAge = latest && person.birthDate ? exactAgeMonths(person.birthDate, latest.date) : 0
   const [wfhRange, setWfhRange] = useState<'L' | 'H'>(latestAge >= 24 ? 'H' : 'L')
+  const [span, setSpan] = useState<Span>(latestAge > 60 ? 'school' : 'early')
+  const nowAge = person.birthDate ? exactAgeMonths(person.birthDate, todayIso()) : 0
 
   if (form) return <div className="card"><MeasurementForm person={person} initial={form} onDone={() => setForm(null)} /></div>
   if (!person.birthDate || !sex) {
@@ -39,6 +50,14 @@ export default function Growth({ person, data }: { person: Person; data: Data })
   }
 
   const results = latest ? assess(sex, latestAge, latest.weightKg, latest.heightCm) : []
+  const velocity = heightVelocity(rows)
+  const slowGrowth = velocity && latestAge >= 48 && latestAge <= 132 && velocity.cmPerYear < 4
+  const pickInd = (k: Indicator) => {
+    setInd(k)
+    if (k === 'bfa') setSpan('school')
+    if (k === 'wfh') setSpan('early')
+  }
+  const advice = adviceFor(nowAge, person.g6pd)
 
   return (
     <>
@@ -53,15 +72,25 @@ export default function Growth({ person, data }: { person: Person; data: Data })
             </p>
             <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>
               {results.map((r) => <span key={r.indicator} className={`pill ${PILL[r.band.tone]}`}>{r.band.label}</span>)}
-              {results.length === 0 && <span className="mute">เกินช่วงข้อมูล WHO (0–5 ปี)</span>}
+              {results.length === 0 && <span className="mute">เกินช่วงข้อมูล WHO (0–19 ปี)</span>}
             </div>
+            {latest.weightKg != null && latest.heightCm != null && (
+              <p className="mute" style={{ margin: '6px 0 0' }}>BMI {bmi(latest.weightKg, latest.heightCm).toFixed(1)} กก./ม²</p>
+            )}
+            {velocity && (
+              <p className={slowGrowth ? '' : 'mute'} style={{ margin: '4px 0 0', color: slowGrowth ? 'var(--bad)' : undefined }}>
+                📈 สูงขึ้น {velocity.cmPerYear.toFixed(1)} ซม./ปี ({thaiDate(velocity.from)} – {thaiDate(velocity.to)})
+                {slowGrowth && ' · น้อยกว่า 4 ซม./ปี ควรปรึกษาแพทย์'}
+              </p>
+            )}
+            <p className="mute" style={{ margin: '4px 0 0' }}>วัดครั้งถัดไปประมาณ {thaiDate(addMonths(latest.date, 6))}</p>
           </>
         ) : <p className="mute">ยังไม่มีข้อมูลการวัด</p>}
       </div>
 
       <div className="tabs">
         {(Object.keys(TITLES) as Indicator[]).map((k) => (
-          <button key={k} className={k === ind ? 'on' : ''} onClick={() => setInd(k)}>{TITLES[k]}</button>
+          <button key={k} className={k === ind ? 'on' : ''} onClick={() => pickInd(k)}>{TITLES[k]}</button>
         ))}
       </div>
 
@@ -74,10 +103,31 @@ export default function Growth({ person, data }: { person: Person; data: Data })
             </button>
           </div>
         )}
-        <Chart ind={ind} sex={sex} birth={person.birthDate} rows={rows} wfhRange={wfhRange} sel={sel} onSel={setSel} />
+        {(ind === 'wfa' || ind === 'hfa') && (
+          <div className="row" style={{ marginBottom: 8 }}>
+            <span className="mute grow">{span === 'early' ? 'อายุ 0–5 ปี' : ind === 'wfa' ? 'อายุ 5–10 ปี (WHO 2007)' : 'อายุ 5–19 ปี (WHO 2007)'}</span>
+            <button className="btn ghost" onClick={() => setSpan(span === 'early' ? 'school' : 'early')}>
+              {span === 'early' ? 'ดู 5 ปีขึ้นไป' : 'ดู 0–5 ปี'}
+            </button>
+          </div>
+        )}
+        {ind === 'bfa' && <p className="mute" style={{ marginTop: 0 }}>ดัชนีมวลกาย = น้ำหนัก ÷ ส่วนสูง² · ใช้แทนน้ำหนักตามส่วนสูงเมื่ออายุ 5 ปีขึ้นไป</p>}
+        <Chart ind={ind} sex={sex} birth={person.birthDate} rows={rows} wfhRange={wfhRange} span={span} sel={sel} onSel={setSel} />
         <p className="mute" style={{ marginBottom: 0 }}>
-          เส้นประ = ค่ากลาง · เกณฑ์ตามมาตรฐาน WHO และกราฟในสมุดบันทึกสุขภาพแม่และเด็ก · แตะจุดเพื่อดูรายละเอียด
+          เส้นประ = ค่ากลาง · 0–5 ปี: WHO 2006 และสมุดบันทึกสุขภาพแม่และเด็ก · 5–19 ปี: WHO 2007 · แตะจุดเพื่อดูรายละเอียด
         </p>
+      </div>
+
+      <div className="card">
+        <h3 style={{ marginBottom: 4 }}>💡 คำแนะนำสุขภาพตามวัย</h3>
+        <p className="mute" style={{ marginTop: 0 }}>{advice.label}</p>
+        {advice.items.map((a) => (
+          <div key={a.title} className="vrow" style={{ alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>{a.icon}</span>
+            <span className="grow"><b>{a.title}</b><br /><small className="mute">{a.text}</small></span>
+          </div>
+        ))}
+        <p className="mute" style={{ marginBottom: 0 }}><small>อ้างอิง {advice.source} · เป็นแนวทางทั่วไป ปรึกษาแพทย์เมื่อมีข้อสงสัย</small></p>
       </div>
 
       <div className="card">
@@ -111,24 +161,24 @@ function ageLabel(months: number): string {
   return m < 24 ? `${m} ด.` : `${Math.floor(m / 12)} ป. ${m % 12} ด.`
 }
 
-function Chart({ ind, sex, birth, rows, wfhRange, sel, onSel }: {
-  ind: Indicator; sex: 1 | 2; birth: string; rows: Measurement[]; wfhRange: 'L' | 'H'; sel: string | null; onSel: (id: string) => void
+function Chart({ ind, sex, birth, rows, wfhRange, span, sel, onSel }: {
+  ind: Indicator; sex: 1 | 2; birth: string; rows: Measurement[]; wfhRange: 'L' | 'H'; span: Span; sel: string | null; onSel: (id: string) => void
 }) {
   const W = 360, H = 250, L = 34, R = 74, T = 10, B = 28
   // แกน x: อายุ (เดือน) หรือ ความยาว/ส่วนสูง (ซม.)
-  const [x0, x1] = ind === 'wfh' ? (wfhRange === 'L' ? [WFL_START, 110] : [WFH_START, 120]) : [0, 60]
+  const [x0, x1] = ind === 'wfh' ? (wfhRange === 'L' ? [WFL_START, 110] : [WFH_START, 120]) : ageAxis(ind, span)
   const lmsAt = (x: number) => (ind === 'wfh' ? lmsFor('wfh', sex, wfhRange === 'L' ? 0 : 24, x) : lmsFor(ind, sex, x))
   const xs = Array.from({ length: 61 }, (_, i) => x0 + ((x1 - x0) * i) / 60)
 
   const points: Point[] = rows.flatMap((m) => {
     const age = exactAgeMonths(birth, m.date)
-    const y = ind === 'hfa' ? m.heightCm : m.weightKg
+    const y = ind === 'hfa' ? m.heightCm : ind === 'bfa' ? (m.weightKg != null && m.heightCm != null ? bmi(m.weightKg, m.heightCm) : null) : m.weightKg
     if (y == null) return []
     if (ind === 'wfh') {
       if (m.heightCm == null || (wfhRange === 'L') !== (age < 24)) return []
       return [{ m, x: m.heightCm, y, age }]
     }
-    return age <= 60 ? [{ m, x: age, y, age }] : []
+    return age >= AGE_RANGE[ind][0] && age <= AGE_RANGE[ind][1] ? [{ m, x: age, y, age }] : []
   }).filter((p) => p.x >= x0 && p.x <= x1)
 
   const lo = Math.min(...xs.map((x) => valueAtZ(lmsAt(x)!, -3)), ...points.map((p) => p.y))
@@ -136,11 +186,13 @@ function Chart({ ind, sex, birth, rows, wfhRange, sel, onSel }: {
   const y0 = Math.floor(lo), y1 = Math.ceil(hi)
   const sx = (x: number) => L + ((x - x0) / (x1 - x0)) * (W - L - R)
   const sy = (y: number) => T + (1 - (y - y0) / (y1 - y0)) * (H - T - B)
-  const curve = (z: number) => xs.map((x) => [sx(x), sy(Math.min(y1, Math.max(y0, valueAtZ(lmsAt(x)!, z))))] as const)
+  // นอกช่วงที่สูตร LMS ใช้ได้ (ค่าเป็น NaN/อนันต์) ให้ชิดขอบกราฟ
+  const clampY = (v: number, z: number) => (Number.isFinite(v) ? Math.min(y1, Math.max(y0, v)) : z > 0 ? y1 : y0)
+  const curve = (z: number) => xs.map((x) => [sx(x), sy(clampY(valueAtZ(lmsAt(x)!, z), z))] as const)
 
   const bands = BANDS[ind]
   const edges = [-99, ...bands.slice(1).map((b) => b.min), 99] // z ของขอบแต่ละแถบ
-  const clampZ = (z: number) => (z === -99 ? -6 : z === 99 ? 6 : z)
+  const clampZ = (z: number) => (z === -99 ? -4 : z === 99 ? 4 : z) // แถบนอกสุดวาดถึง ±4 SD (กราฟแสดงแค่ ±3 SD)
   const polys = bands.map((b, i) => {
     const lower = curve(clampZ(edges[i])), upper = curve(clampZ(edges[i + 1]))
     const pts = [...upper, ...lower.reverse()].map(([a, c]) => `${a.toFixed(1)},${c.toFixed(1)}`).join(' ')
@@ -154,7 +206,7 @@ function Chart({ ind, sex, birth, rows, wfhRange, sel, onSel }: {
   for (let v = Math.ceil(y0 / step) * step; v <= y1; v += step) yTicks.push(v)
   const xTicks = ind === 'wfh'
     ? Array.from({ length: 13 }, (_, i) => Math.ceil(x0 / 10) * 10 + i * 10).filter((v) => v <= x1)
-    : [0, 12, 24, 36, 48, 60]
+    : Array.from({ length: 20 }, (_, i) => x0 + i * (x1 - x0 > 60 ? 24 : 12)).filter((v) => v <= x1)
   const selP = points.find((p) => p.m.id === sel)
 
   return (
@@ -181,9 +233,9 @@ function Chart({ ind, sex, birth, rows, wfhRange, sel, onSel }: {
           </text>
         ))}
         <text x={W - R} y={H - 10} fontSize={10} textAnchor="end" fill="#6b7385" dx={R - 2}>{ind === 'wfh' ? 'ซม.' : ''}</text>
-        <text x={4} y={T + 8} fontSize={10} fill="#6b7385">{ind === 'hfa' ? 'ซม.' : 'กก.'}</text>
+        <text x={4} y={T + 8} fontSize={10} fill="#6b7385">{ind === 'hfa' ? 'ซม.' : ind === 'bfa' ? 'กก./ม²' : 'กก.'}</text>
         {polys.filter((p) => p.show).map(({ b, labelY }) => (
-          <text key={b.label} x={W - R + 4} y={labelY + 3.5} fontSize={10} fill="#4a5163">{b.label.replace('น้ำหนัก', '') || b.label}</text>
+          <text key={b.label} x={W - R + 4} y={labelY + 3.5} fontSize={10} fill="#4a5163">{ind === 'wfa' ? b.label.replace('น้ำหนัก', '') : b.label}</text>
         ))}
         {points.length > 1 && (
           <polyline points={points.map((p) => `${sx(p.x)},${sy(p.y)}`).join(' ')} fill="none" stroke="#2f6fed" strokeWidth={2} />

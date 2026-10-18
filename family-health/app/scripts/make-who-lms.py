@@ -10,7 +10,7 @@ def bysex(rows, keycol, keys, keyfmt):
         idx = {r[keycol]: r for r in rows if r['sex'] == sex}
         res[sex] = [f"[{float(idx[keyfmt(k)]['l']):g},{float(idx[keyfmt(k)]['m']):g},{float(idx[keyfmt(k)]['s']):g}]" for k in keys]
     return res
-out = ['// สร้างอัตโนมัติจาก WHO Child Growth Standards (github.com/WorldHealthOrganization/anthro, data-raw/growthstandards)',
+out = ['// สร้างอัตโนมัติจาก WHO Child Growth Standards 2006 (github.com/WorldHealthOrganization/anthro) และ WHO Growth Reference 2007 (github.com/WorldHealthOrganization/anthroplus)',
        '// [L, M, S] — อายุรายเดือน 0–60 (จากตารางรายวัน), ความยาว/ส่วนสูงทุก 0.5 ซม. — sex 1 = ชาย, 2 = หญิง',
        'export type LMS = [number, number, number]', '']
 for name, f in (('WFA', 'weianthro.txt'), ('LHFA', 'lenanthro.txt'), ('HCFA', 'hcanthro.txt')):
@@ -23,5 +23,10 @@ for name, f, col, lo, hi in (('WFL', 'wflanthro.txt', 'length', 45, 110), ('WFH'
     keys = [lo + i * 0.5 for i in range(int((hi - lo) * 2) + 1)]
     r = bysex(rows, col, keys, fmt)
     out += [f"/** {name}: index = (ซม. − {lo}) × 2 */", f"export const {name}_START = {lo}",
+            f"export const {name}: Record<1 | 2, LMS[]> = {{\n  1: [{','.join(r['1'])}],\n  2: [{','.join(r['2'])}],\n}}"]
+# WHO Growth Reference 2007 (5–19 ปี) ตารางรายเดือนเริ่มที่ 60 เดือน
+for name, f, hi in (('WFA07', 'wfawho2007.txt', 121), ('HFA07', 'hfawho2007.txt', 229), ('BFA07', 'bfawho2007.txt', 229)):
+    r = bysex(load(f), 'age', range(60, hi + 1), str)
+    out += [f"/** {name} (WHO 2007): index = อายุ (เดือน) − 60, ถึง {hi} เดือน */",
             f"export const {name}: Record<1 | 2, LMS[]> = {{\n  1: [{','.join(r['1'])}],\n  2: [{','.join(r['2'])}],\n}}"]
 print('\n'.join(out))

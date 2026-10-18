@@ -1,7 +1,7 @@
 // ตรวจการคำนวณ z-score กับค่าอ้างอิงที่ตีพิมพ์ของ WHO: npm run test:growth
 import { buildSync } from 'esbuild'
 import assert from 'node:assert/strict'
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -31,8 +31,11 @@ near(g.zScore(g.valueAtZ(l, 1.5), l, true), 1.5, 1e-9, 'valueAtZ inverse')
 // นอกช่วง ±3 SD ใช้การปรับของ WHO: ห่างจาก +3SD เท่ากับช่วง 2→3 SD คือ z = 4
 const sd3 = g.valueAtZ(l, 3), sd2 = g.valueAtZ(l, 2)
 near(g.zScore(sd3 + (sd3 - sd2), l, true), 4, 1e-9, 'WHO restricted z above +3SD')
-// เกินช่วง 0–5 ปี → ไม่มีข้อมูล
-assert.equal(g.lmsFor('wfa', 1, 61), null); n++
+// เกินช่วงของดัชนี → ไม่มีข้อมูล (น้ำหนักตามอายุถึง 10 ปี, น้ำหนักตามส่วนสูงถึง 5 ปี)
+assert.equal(g.lmsFor('wfa', 1, 121.5), null); n++
+assert.equal(g.lmsFor('wfh', 1, 61, 110), null); n++
+// ต่อจาก 2006 ไป 2007 ที่ 60 เดือนแบบไม่กระโดด (ค่ากลางส่วนสูงชายต่างกันไม่ถึง 0.5 ซม.)
+near(g.lmsFor('hfa', 1, 60.01)[1], g.lmsFor('hfa', 1, 60)[1], 0.5, 'HFA continuity at 5y')
 // การแปลผล
 assert.equal(g.classify('wfh', 0).label, 'สมส่วน'); n++
 assert.equal(g.classify('wfh', 1.6).label, 'ท้วม'); n++
@@ -44,4 +47,25 @@ assert.equal(g.classify('wfa', -1.5).label, 'น้ำหนักตามเ�
 const a = g.assess(1, 48, 16.3, 103.3)
 assert.deepEqual(a.map((x) => x.indicator), ['wfa', 'hfa', 'wfh']); n++
 assert.ok(a.every((x) => x.band.tone === 'ok')); n++
+
+// อายุ 5–19 ปี: เทียบกับ z-score ที่ WHO คำนวณไว้ในชุดข้อมูลตัวอย่างของ anthroplus (ปัดทศนิยม 2 ตำแหน่ง)
+const cases = JSON.parse(readFileSync(new URL('./who2007-cases.json', import.meta.url), 'utf8'))
+for (const c of cases) {
+  const z = (ind, x, wb) => { const lms = g.lmsFor(ind, c.sex, c.age); return lms ? g.zScore(x, lms, wb) : null }
+  const check = (got, want, ind) => {
+    if (want == null) { assert.equal(got, null, `${ind} should be outside range at ${c.age}m`); n++; return }
+    near(got, want, 0.006, `${ind} sex ${c.sex} age ${c.age}`)
+  }
+  check(z('hfa', c.h, false), c.zhfa, 'hfa')
+  check(c.age >= 60 && c.age <= 120 ? z('wfa', c.w, true) : null, c.zwfa, 'wfa')
+  check(z('bfa', g.bmi(c.w, c.h), true), c.zbfa, 'bfa')
+}
+// หลัง 5 ปี: ไม่ใช้น้ำหนักตามส่วนสูงแล้ว ใช้ BMI ตามอายุแทน
+assert.deepEqual(g.assess(1, 72, 20, 116).map((x) => x.indicator), ['wfa', 'hfa', 'bfa']); n++
+assert.deepEqual(g.assess(1, 150, 40, 145).map((x) => x.indicator), ['hfa', 'bfa'], 'no WFA after 10 years'); n++
+assert.equal(g.classify('bfa', 1.2).label, 'น้ำหนักเกิน'); n++
+// อัตราการเพิ่มส่วนสูง: 6 ซม. ใน 1 ปี
+const v = g.heightVelocity([{ date: '2025-05-01', heightCm: 100 }, { date: '2025-11-01', heightCm: 103 }, { date: '2026-05-01', heightCm: 106 }])
+near(v.cmPerYear, 6, 0.05, 'height velocity'); assert.equal(v.from, '2025-05-01'); n++
+assert.equal(g.heightVelocity([{ date: '2026-01-01', heightCm: 100 }, { date: '2026-03-01', heightCm: 101 }]), null, 'needs ≥ 6 months'); n++
 console.log(`${n} passed`)

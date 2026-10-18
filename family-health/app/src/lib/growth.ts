@@ -1,7 +1,12 @@
 // คำนวณ z-score ตามมาตรฐาน WHO และแปลผลตามกราฟในสมุดบันทึกสุขภาพแม่และเด็ก (กรมอนามัย 2564)
-import { HCFA, LHFA, WFA, WFH, WFH_START, WFL, WFL_START, type LMS } from '../data/who-lms'
+// 0–5 ปี: WHO Child Growth Standards 2006 · 5–19 ปี: WHO Growth Reference 2007
+import { BFA07, HCFA, HFA07, LHFA, WFA, WFA07, WFH, WFH_START, WFL, WFL_START, type LMS } from '../data/who-lms'
 
-export type Indicator = 'wfa' | 'hfa' | 'wfh'
+export type Indicator = 'wfa' | 'hfa' | 'wfh' | 'bfa'
+
+/** ช่วงอายุ (เดือน) ที่แต่ละดัชนีมีข้อมูล WHO */
+// ขอบบนตาม WHO anthroplus: น้ำหนักตามอายุ < 121 เดือน, ส่วนสูงและ BMI < 229 เดือน
+export const AGE_RANGE: Record<Indicator, [number, number]> = { wfa: [0, 121], hfa: [0, 229], wfh: [0, 60], bfa: [60, 229] }
 type Sex = 1 | 2
 
 function lerp(a: LMS, b: LMS, t: number): LMS {
@@ -34,8 +39,10 @@ export function zScore(x: number, lms: LMS, weightBased: boolean): number {
 
 /** LMS ของดัชนี ณ อายุ (เดือน, ทศนิยมได้) หรือความยาว/ส่วนสูง (ซม.) — null ถ้านอกช่วงข้อมูล WHO */
 export function lmsFor(ind: Indicator, sex: Sex, ageMonths: number, heightCm?: number): LMS | null {
-  if (ind === 'wfa') return at(WFA[sex], ageMonths)
-  if (ind === 'hfa') return at(LHFA[sex], ageMonths)
+  if (ageMonths < AGE_RANGE[ind][0] || ageMonths > AGE_RANGE[ind][1]) return null
+  if (ind === 'wfa') return ageMonths <= 60 ? at(WFA[sex], ageMonths) : at(WFA07[sex], ageMonths - 60)
+  if (ind === 'hfa') return ageMonths <= 60 ? at(LHFA[sex], ageMonths) : at(HFA07[sex], ageMonths - 60)
+  if (ind === 'bfa') return at(BFA07[sex], ageMonths - 60)
   if (heightCm == null) return null
   // อายุต่ำกว่า 2 ปีใช้ตารางความยาว (นอนวัด) อายุ 2 ปีขึ้นไปใช้ตารางส่วนสูง (ยืนวัด)
   return ageMonths < 24 ? at(WFL[sex], (heightCm - WFL_START) * 2) : at(WFH[sex], (heightCm - WFH_START) * 2)
@@ -75,7 +82,17 @@ export const BANDS: Record<Indicator, Band[]> = {
     { min: 2, label: 'เริ่มอ้วน', tone: 'high' },
     { min: 3, label: 'อ้วน', tone: 'high' },
   ],
+  // ดัชนีมวลกายตามอายุ 5–19 ปี ตามเกณฑ์ WHO 2007 (ผอม < −2 SD, น้ำหนักเกิน > +1 SD, อ้วน > +2 SD)
+  bfa: [
+    { min: -Infinity, label: 'ผอมมาก', tone: 'bad' },
+    { min: -3, label: 'ผอม', tone: 'bad' },
+    { min: -2, label: 'สมส่วน', tone: 'ok' },
+    { min: 1, label: 'น้ำหนักเกิน', tone: 'warn' },
+    { min: 2, label: 'อ้วน', tone: 'high' },
+  ],
 }
+
+export const bmi = (weightKg: number, heightCm: number) => weightKg / (heightCm / 100) ** 2
 
 export function classify(ind: Indicator, z: number): Band {
   const bands = BANDS[ind]
@@ -90,7 +107,7 @@ export interface Assessment {
   band: Band
 }
 
-/** ประเมินการวัดหนึ่งครั้ง (ข้ามดัชนีที่ไม่มีข้อมูลหรืออยู่นอกช่วงอายุ 0–5 ปี) */
+/** ประเมินการวัดหนึ่งครั้ง (ข้ามดัชนีที่ไม่มีข้อมูลหรืออยู่นอกช่วงอายุของดัชนีนั้น) */
 export function assess(sex: Sex, ageMonths: number, weightKg: number | null, heightCm: number | null): Assessment[] {
   const out: Assessment[] = []
   const add = (indicator: Indicator, x: number | null, lms: LMS | null) => {
@@ -101,7 +118,25 @@ export function assess(sex: Sex, ageMonths: number, weightKg: number | null, hei
   add('wfa', weightKg, lmsFor('wfa', sex, ageMonths))
   add('hfa', heightCm, lmsFor('hfa', sex, ageMonths))
   if (heightCm != null) add('wfh', weightKg, lmsFor('wfh', sex, ageMonths, heightCm))
+  if (heightCm != null && weightKg != null) add('bfa', bmi(weightKg, heightCm), lmsFor('bfa', sex, ageMonths))
   return out
+}
+
+/**
+ * อัตราการเพิ่มส่วนสูง (ซม./ปี) จากการวัดล่าสุดเทียบกับครั้งก่อนที่ห่างกันอย่างน้อย 6 เดือน (เลือกครั้งที่ใกล้ 12 เดือนที่สุด)
+ * เด็กอายุ 4 ปีจนถึงก่อนวัยรุ่นปกติสูงขึ้นประมาณ 5–6 ซม./ปี ถ้าน้อยกว่า 4 ซม./ปี ควรปรึกษาแพทย์
+ */
+export function heightVelocity(rows: { date: string; heightCm: number | null }[]):
+  { cmPerYear: number; from: string; to: string } | null {
+  const hs = rows.filter((r) => r.heightCm != null).sort((a, b) => a.date.localeCompare(b.date))
+  const last = hs[hs.length - 1]
+  if (!last) return null
+  const days = (a: string, b: string) => (new Date(b).getTime() - new Date(a).getTime()) / 86_400_000
+  const prior = hs.filter((r) => days(r.date, last.date) >= 182)
+    .sort((a, b) => Math.abs(days(a.date, last.date) - 365) - Math.abs(days(b.date, last.date) - 365))[0]
+  if (!prior) return null
+  const cmPerYear = ((last.heightCm! - prior.heightCm!) / days(prior.date, last.date)) * 365.25
+  return { cmPerYear, from: prior.date, to: last.date }
 }
 
 /** อายุเป็นเดือนแบบทศนิยม (สำหรับคำนวณ) */
