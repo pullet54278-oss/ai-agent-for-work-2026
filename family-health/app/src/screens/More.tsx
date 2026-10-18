@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { signOut, type User } from '../lib/auth'
 import { clearCache, newId, save, useStore } from '../lib/store'
-import { emptyPerson, type Person } from '../lib/types'
+import { emptyPerson, type Data, type Person } from '../lib/types'
 import { ageText, formatPhone, parseContacts } from '../lib/date'
 import { photoToDataUrl } from '../lib/photo'
 import InstallButton from './InstallButton'
+import InsuranceList, { PolicyRow } from './Insurance'
 
 const SHEET_URL = import.meta.env.VITE_SHEET_URL as string | undefined
 
-export default function More({ user, person }: { user: User; person?: Person }) {
+export default function More({ user, person, data }: { user: User; person?: Person; data: Data }) {
   const [editing, setEditing] = useState<Partial<Person> | null>(null)
+  const [insurance, setInsurance] = useState(false)
   const { syncedAt } = useStore()
 
   if (editing) return <PersonForm initial={editing} onDone={() => setEditing(null)} />
+  if (insurance && person) return <InsuranceList person={person} data={data} onBack={() => setInsurance(false)} />
 
   return (
     <>
@@ -35,6 +38,15 @@ export default function More({ user, person }: { user: User; person?: Person }) 
           <button className="btn block" onClick={() => setEditing({ ...emptyPerson })}>+ ใส่ข้อมูลลูก</button>
         )}
       </div>
+
+      {person && (
+        <div className="card">
+          <div className="row"><h3 className="grow" style={{ margin: 0 }}>🛡️ ประกัน</h3>
+            <button className="btn ghost" onClick={() => setInsurance(true)}>ดูทั้งหมด ›</button></div>
+          {data.insurance.filter((p) => p.personId === person.id).map((p) => <PolicyRow key={p.id} p={p} onOpen={() => setInsurance(true)} />)}
+          {!data.insurance.some((p) => p.personId === person.id) && <p className="mute" style={{ marginBottom: 0 }}>ยังไม่มีกรมธรรม์ · กด ดูทั้งหมด เพื่อเพิ่ม</p>}
+        </div>
+      )}
 
       <div className="card">
         <h3>แอปบนมือถือ</h3>

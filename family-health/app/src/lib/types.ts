@@ -115,6 +115,32 @@ export interface Medicine extends Base {
   notes: string
 }
 
+/** ผลประโยชน์หนึ่งรายการในกรมธรรม์ (เก็บเป็น JSON ในคอลัมน์ benefits) */
+export interface Benefit {
+  group: 'ipd' | 'opd' | 'other'
+  label: string
+  amount: number | null // บาท
+  per: string // เช่น 'วัน', 'ครั้ง' (ต่อการเจ็บป่วย), 'ปี'
+  limit: string // เงื่อนไข เช่น 'สูงสุด 31 วันต่อการเจ็บป่วยแต่ละครั้ง'
+  maxPerYear?: number // จำนวนครั้งต่อปีกรมธรรม์ (เช่น OPD 30 ครั้ง)
+}
+
+/** กรมธรรม์ประกัน */
+export interface Insurance extends Base {
+  personId: string
+  company: string
+  plan: string
+  memberNo: string
+  policyNo: string
+  holder: string // เจ้าของกรมธรรม์ (เช่น บริษัทนายจ้างของประกันกลุ่ม)
+  employeeNo: string
+  startDate: string
+  endDate: string
+  phone: string
+  benefits: string // JSON ของ Benefit[]
+  notes: string
+}
+
 export interface Data {
   people: Person[]
   vaccines: Vaccine[]
@@ -124,12 +150,13 @@ export interface Data {
   expenses: Expense[]
   school: SchoolResult[]
   medicines: Medicine[]
+  insurance: Insurance[]
 }
 export type Table = keyof Data
 export type Row<T extends Table> = Data[T][number]
 
 export const emptyData: Data = {
-  people: [], vaccines: [], appointments: [], measurements: [], illnesses: [], expenses: [], school: [], medicines: [],
+  people: [], vaccines: [], appointments: [], measurements: [], illnesses: [], expenses: [], school: [], medicines: [], insurance: [],
 }
 
 // คอลัมน์ที่ต้องแปลงจากข้อความใน Sheet

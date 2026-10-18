@@ -1,8 +1,10 @@
-import type { Person } from '../lib/types'
+import type { Insurance, Person } from '../lib/types'
+import { activePolicies } from './Insurance'
 import { G6PD_ITEMS } from '../data/g6pd'
 import { ageText, formatPhone, parseContacts } from '../lib/date'
 
-export default function Emergency({ person, onClose }: { person: Person; onClose: () => void }) {
+export default function Emergency({ person, insurance = [], onClose }: { person: Person; insurance?: Insurance[]; onClose: () => void }) {
+  const policies = activePolicies(insurance, person.id)
   const names = (level: string) => G6PD_ITEMS.filter((i) => i.level === level).map((i) => i.name).join(' · ')
   const contacts = parseContacts(person.phone)
   return (
@@ -37,6 +39,12 @@ export default function Emergency({ person, onClose }: { person: Person; onClose
               </div>
             </>
           )}
+          {policies.map((p) => (
+            <p key={p.id} style={{ margin: '10px 0 0' }}>
+              🛡️ {p.company}{p.plan && ` (${p.plan})`} · เลขสมาชิก <b>{p.memberNo}</b>
+              {p.phone && <> · <a href={`tel:${p.phone.replace(/\D/g, '')}`}>{p.phone}</a></>}
+            </p>
+          ))}
           {contacts.map((c) => (
             <p key={c.phone} style={{ margin: '10px 0 0' }}>
               📞 {c.label || 'ผู้ปกครอง'} <a href={`tel:${c.phone}`}>{formatPhone(c.phone)}</a>

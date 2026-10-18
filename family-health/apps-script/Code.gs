@@ -21,6 +21,8 @@ const TABLES = {
   school: ['id', 'personId', 'academicYear', 'term', 'program', 'subject', 'score', 'maxScore', 'grade', 'comment'],
   medicines: ['id', 'personId', 'name', 'generic', 'strength', 'purpose', 'dose', 'source', 'date', 'expiry', 'amount',
     'qty', 'status', 'notes'],
+  insurance: ['id', 'personId', 'company', 'plan', 'memberNo', 'policyNo', 'holder', 'employeeNo', 'startDate', 'endDate',
+    'phone', 'benefits', 'notes'],
 }
 const META = ['createdAt', 'updatedAt', 'updatedBy']
 const CALENDAR_NAME = 'สมุดสุขภาพครอบครัว'

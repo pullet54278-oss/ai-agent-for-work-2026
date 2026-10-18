@@ -74,7 +74,7 @@ export default function App() {
         {tab === 'meds' && (person ? <Medicines person={person} data={data} /> : null)}
         {tab === 'school' && <School person={person} data={data} />}
         {tab === 'money' && <Expenses key={person?.id} person={person} data={data} />}
-        {tab === 'more' && <More user={user} person={person} />}
+        {tab === 'more' && <More user={user} person={person} data={data} />}
       </main>
 
       <nav className="bottom">
@@ -86,7 +86,7 @@ export default function App() {
         ))}
       </nav>
 
-      {sos && person && <Emergency person={person} onClose={() => setSos(false)} />}
+      {sos && person && <Emergency person={person} insurance={data.insurance} onClose={() => setSos(false)} />}
     </div>
   )
 }

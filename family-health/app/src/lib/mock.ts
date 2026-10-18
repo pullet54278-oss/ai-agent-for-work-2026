@@ -3,7 +3,7 @@ import type { ApiRequest } from './api'
 
 const KEY = 'fh-mock-db'
 const ALLOWED = ['dad@example.com', 'mom@example.com']
-const TABLES = ['people', 'vaccines', 'appointments', 'measurements', 'illnesses', 'expenses', 'school', 'medicines']
+const TABLES = ['people', 'vaccines', 'appointments', 'measurements', 'illnesses', 'expenses', 'school', 'medicines', 'insurance']
 type Db = Record<string, Record<string, string>[]>
 
 function load(): Db {

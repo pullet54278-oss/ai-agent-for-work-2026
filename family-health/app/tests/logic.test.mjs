@@ -11,6 +11,7 @@ writeFileSync(join(dir, 'entry.ts'), `
 export { g6pdHits, medList, repeatEpisodes, schoolYear, leaveByYear } from '${src}screens/Illnesses'
 export { yearOf, nextPeriod } from '${src}screens/Expenses'
 export { medicineHits, expiryState } from '${src}screens/Medicines'
+export { activePolicies, opdVisits, benefitsOf } from '${src}screens/Insurance'
 export { nextDoseDate } from '${src}data/vaccines'
 export { addMonths, isoDate, parseContacts } from '${src}lib/date'
 `)
@@ -85,5 +86,15 @@ t('medicine cabinet: G6PD check by generic name, expiry warning', () => {
   assert.equal(m.expiryState(m.addMonths(m.isoDate(new Date()), 1)), 'soon')
   assert.equal(m.expiryState('2099-01-01'), '')
   assert.equal(m.expiryState(''), '')
+})
+t('insurance: active policy and outpatient visits counted inside the coverage year', () => {
+  const pol = { id: 'x', personId: 'p', startDate: '2026-01-01', endDate: '2026-12-31', benefits: '[{"group":"opd","label":"OPD","amount":2000,"per":"วัน","limit":"","maxPerYear":30}]' }
+  assert.equal(m.activePolicies([pol], 'p', '2026-10-19').length, 1)
+  assert.equal(m.activePolicies([pol], 'p', '2027-01-02').length, 0)
+  const ill = (startDate, cost, admitted = false) => ({ personId: 'p', startDate, cost, admitted })
+  const visits = m.opdVisits(pol, [ill('2025-12-30', 300), ill('2026-02-17', 360), ill('2026-03-05', 4800, true), ill('2026-06-14', 280), ill('2026-06-29', null)])
+  assert.deepEqual(visits.map((v) => v.startDate), ['2026-02-17', '2026-06-14'])
+  assert.equal(m.benefitsOf(pol)[0].maxPerYear, 30)
+  assert.deepEqual(m.benefitsOf({ benefits: 'not json' }), [])
 })
 console.log(`${n} passed`)
