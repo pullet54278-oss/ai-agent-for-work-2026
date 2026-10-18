@@ -42,7 +42,7 @@
 3. Deploy → คัดลอก **Web app URL** (ลงท้ายด้วย `/exec`)
 4. ทดสอบ: เปิด URL ในเบราว์เซอร์ ต้องเห็น `{"ok":true,"app":"family-health"}`
 
-**แก้สคริปต์ภายหลัง:** Deploy → **Manage deployments → ✏️ → Version: New version → Deploy** (URL เดิม ไม่ต้องแก้แอป)
+**แก้สคริปต์ภายหลัง:** วางโค้ดใหม่ → 💾 → Deploy → **Manage deployments → ✏️ → Version: New version → Deploy** (URL เดิม ไม่ต้องแก้แอป) · ทำให้อัตโนมัติได้ ดูขั้นที่ 8.2
 
 ## 6. เผยแพร่แอปบน Netlify
 1. https://app.netlify.com → **Add new site → Import an existing project → GitHub** → เลือก repo นี้
@@ -62,6 +62,40 @@
 3. **การแจ้งเตือน:** เปิดแอป Google Calendar → ตรวจว่าปฏิทิน **สมุดสุขภาพครอบครัว** (ของผู้ติดตั้ง) หรือคำเชิญนัด (ของอีกฝ่าย) เปิดการแจ้งเตือนไว้
    - ผู้ติดตั้งสคริปต์: นัดอยู่ในปฏิทิน "สมุดสุขภาพครอบครัว"
    - อีกฝ่าย: ได้รับนัดเป็นคำเชิญ (guest) ในปฏิทินของตัวเองอัตโนมัติ
+
+## 8. ตั้งให้อัปเดตอัตโนมัติ (ทำครั้งเดียว)
+
+### 8.1 แอป: Netlify build เองทุกครั้งที่มีโค้ดใหม่ใน GitHub
+1. https://app.netlify.com → เปิดเว็บ → **Project configuration → Build & deploy → Continuous deployment → Link repository**
+2. เลือก **GitHub** → repo `pullet54278-oss/ai-agent-for-work-2026` (ถ้าไม่เห็น กด *Configure the Netlify app on GitHub* แล้วอนุญาต repo นี้)
+3. **Branch to deploy:** `claude/relaxed-davinci-qji2eu` · **Base directory:** `family-health/app` → Save
+4. ตรวจที่ **Deploys**: build ล่าสุดต้องขึ้นชื่อ commit และ **Published** (Environment variables เดิมยังอยู่)
+
+### 8.2 สคริปต์: GitHub ส่ง Code.gs ขึ้น Apps Script เอง (ไม่บังคับ)
+ไฟล์ `.github/workflows/apps-script.yml` จะตรวจ Code.gs ด้วยชุดทดสอบ แล้วส่งขึ้นโปรเจกต์ Apps Script และอัปเดต deployment เดิม (ลิงก์ `/exec` ไม่เปลี่ยน)
+
+> ต้องเก็บสิทธิ์เข้าบัญชี Google (ไฟล์ `.clasprc.json`) ไว้ใน GitHub Secrets — ใครที่เป็นเจ้าของ repo หรือแก้ workflow ได้จะใช้สิทธิ์นี้ได้ ถ้าไม่สบายใจ ให้ข้ามข้อนี้และอัปเดตสคริปต์เองตาม "แก้สคริปต์ภายหลัง" ในขั้นที่ 5
+
+1. เปิด API: https://script.google.com/home/usersettings → **Google Apps Script API: On**
+2. ติดตั้ง Node.js (https://nodejs.org เลือก LTS) บนคอมพิวเตอร์ → เปิด Command Prompt / Terminal แล้วพิมพ์
+   ```
+   npx @google/clasp@2.4.2 login
+   ```
+   เบราว์เซอร์จะเปิดให้เลือกบัญชีเจ้าของ Sheet → Allow → จะได้ไฟล์ `.clasprc.json` ในโฟลเดอร์ผู้ใช้
+   (Windows: `C:\Users\<ชื่อ>\.clasprc.json` · Mac: `~/.clasprc.json`) → เปิดด้วย Notepad แล้วคัดลอกทั้งหมด
+3. เก็บ ID 2 ตัวจาก Apps Script
+   - **Script ID:** ⚙️ Project Settings → IDs → Script ID
+   - **Deployment ID:** Deploy → Manage deployments → เลือก Web app ที่ใช้อยู่ → Deployment ID (ขึ้นต้น `AKfycb…` คือส่วนกลางของลิงก์ `/exec`)
+4. GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret** สร้าง 3 ตัว
+   | Name | Value |
+   |---|---|
+   | `CLASPRC_JSON` | เนื้อหาไฟล์ `.clasprc.json` ทั้งหมด |
+   | `APPS_SCRIPT_ID` | Script ID |
+   | `APPS_SCRIPT_DEPLOYMENT_ID` | Deployment ID |
+5. ทดสอบ: GitHub → **Actions → Deploy Apps Script → Run workflow** → ต้องขึ้น ✅ แล้วใน Apps Script → Manage deployments จะเห็นเวอร์ชันใหม่ชื่อ `auto …`
+6. ลบไฟล์ `.clasprc.json` ในเครื่องได้ (หรือเก็บไว้ถ้าจะใช้ clasp ต่อ) · ถ้าจะยกเลิกสิทธิ์ภายหลัง: https://myaccount.google.com/permissions → ลบ "clasp"
+
+**หมายเหตุ:** ถ้าสคริปต์เวอร์ชันใหม่ขอสิทธิ์เพิ่ม (เช่น บริการ Google ใหม่) ต้องเปิด Apps Script แล้วรัน `setup` เองหนึ่งครั้งเพื่อกด Allow
 
 ---
 

@@ -1,3 +1,5 @@
 /icons/
 preview-private.html
 /private/
+.clasp.json
+.clasprc.json

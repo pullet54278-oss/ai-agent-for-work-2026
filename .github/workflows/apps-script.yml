@@ -1,0 +1,47 @@
+# ส่ง Code.gs ขึ้น Apps Script อัตโนมัติเมื่อไฟล์เปลี่ยน (ลิงก์ /exec เดิม ไม่ต้องแก้แอป)
+# ต้องตั้ง Repository secrets 3 ตัว: CLASPRC_JSON, APPS_SCRIPT_ID, APPS_SCRIPT_DEPLOYMENT_ID — ดู family-health/app/SETUP.md
+name: Deploy Apps Script
+
+on:
+  push:
+    branches: [claude/relaxed-davinci-qji2eu]
+    paths: ['family-health/apps-script/**']
+  workflow_dispatch:
+
+concurrency: apps-script
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test Code.gs
+        run: node family-health/apps-script/test.mjs
+
+      - name: Check secrets
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+          APPS_SCRIPT_DEPLOYMENT_ID: ${{ secrets.APPS_SCRIPT_DEPLOYMENT_ID }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ] || [ -z "$APPS_SCRIPT_ID" ] || [ -z "$APPS_SCRIPT_DEPLOYMENT_ID" ]; then
+            echo "::error::ยังไม่ได้ตั้ง secrets CLASPRC_JSON / APPS_SCRIPT_ID / APPS_SCRIPT_DEPLOYMENT_ID"
+            exit 1
+          fi
+
+      - name: Push and redeploy
+        working-directory: family-health/apps-script
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+          APPS_SCRIPT_DEPLOYMENT_ID: ${{ secrets.APPS_SCRIPT_DEPLOYMENT_ID }}
+        run: |
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+          printf '{"scriptId":"%s","rootDir":"."}' "$APPS_SCRIPT_ID" > .clasp.json
+          npx -y @google/clasp@2.4.2 push --force
+          npx -y @google/clasp@2.4.2 deploy --deploymentId "$APPS_SCRIPT_DEPLOYMENT_ID" --description "auto ${GITHUB_SHA::7}"
+          rm -f ~/.clasprc.json
