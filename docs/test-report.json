@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-19T05:36:11.903Z",
-  "pass": 367,
+  "generatedAt": "2026-10-19T05:58:03.622Z",
+  "pass": 372,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -27,7 +27,11 @@
       "pass": 51,
       "fail": 0
     },
-    "Email gate (once per device)": {
+    "Open access (no sign-in in the production build)": {
+      "pass": 5,
+      "fail": 0
+    },
+    "Email gate code (kept for EMAIL_GATE=on · test list injected)": {
       "pass": 17,
       "fail": 0
     },

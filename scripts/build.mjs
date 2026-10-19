@@ -148,8 +148,10 @@ if (thMissing) warnings.push(`อัปเดต Copilot: ${thMissing}/${updates
 const buildId = pkg.version + '-' + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);
 // email gate: only salted hashes reach dist/
 const allowed = loadAllowed(ROOT);
-const gate = { on: allowed.emails.length > 0, salt: GATE_SALT, h: allowed.emails.map(hashEmail).sort() };
-if (!gate.on) warnings.push('Email gate ปิดอยู่: ไม่พบรายชื่อ Email (วางไฟล์ใน private/ หรือตั้ง ALLOWED_EMAILS)');
+// เจ้าของงานสั่ง (19 ต.ค. 2569): เปิดให้ทุกคนเข้าได้โดยไม่ต้องลงชื่อ · เปิด gate คืนได้ด้วย env EMAIL_GATE=on
+const gateWanted = process.env.EMAIL_GATE === 'on';
+const gate = gateWanted && allowed.emails.length > 0 ? { on: true, salt: GATE_SALT, h: allowed.emails.map(hashEmail).sort() } : { on: false, salt: GATE_SALT, h: [] };
+if (gateWanted && !gate.on) warnings.push('Email gate ปิดอยู่: ไม่พบรายชื่อ Email (วางไฟล์ใน private/ หรือตั้ง ALLOWED_EMAILS)');
 
 // ---- appendices ----
 const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/g, '<div class="table-wrap" tabindex="0"><table class="tbl">').replace(/<\/table>/g, '</table></div>').replace(/(https?:\/\/[^\s<]+)/g, (m, u, off, s) => s.slice(Math.max(0, off - 6), off).includes('href=') ? m : `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);

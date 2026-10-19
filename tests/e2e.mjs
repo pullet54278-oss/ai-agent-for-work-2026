@@ -280,7 +280,22 @@ await suite('AI + Excel Formula Mastery', async () => {
   await page.click('[data-xd-sample]'); await page.waitForTimeout(60); ok((await text('[data-xd-status]')).includes('PROTOTYPE'), 'back to sample data');
   page.off('pageerror', onErr); eq(errs.length, 0, 'no page errors on AI + Excel pages');
 });
-await suite('Email gate (once per device)', async () => {
+await suite('Open access (no sign-in in the production build)', async () => {
+  const html = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8');
+  const cfg = JSON.parse(html.match(/<script type="application\/json" id="gate-cfg">([\s\S]*?)<\/script>/)[1]);
+  eq(cfg.on, false, 'build ships with the email gate off');
+  eq(cfg.h.length, 0, 'no email hashes in the build');
+  const octx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  const o = await octx.newPage(); const errs = []; o.on('pageerror', e => errs.push(e.message));
+  await o.goto('file://' + path.join(ROOT, 'dist', 'index.html'));
+  await o.waitForSelector('.hero', { timeout: 8000 });
+  ok(!(await o.$('#gate')), 'a new device opens the app directly (no email prompt)');
+  ok(!(await o.$('[data-app-act="signout"]')) && !(await o.$('.sb-user')), 'no sign-out / user chip when open');
+  eq(errs.length, 0, 'no page errors');
+  await octx.close();
+});
+
+await suite('Email gate code (kept for EMAIL_GATE=on · test list injected)', async () => {
   const gctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
   const g = await gctx.newPage(); const errs = []; g.on('pageerror', e => errs.push(e.message));
   await g.goto(url); await g.waitForSelector('#gate');

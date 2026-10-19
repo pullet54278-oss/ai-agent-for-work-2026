@@ -1,4 +1,4 @@
-# Test Report — Copilot AI Agents for Work 2026 · v3.3.0 (19 ต.ค. 2569)
+# Test Report — Copilot AI Agents for Work 2026 · v3.3.1 (19 ต.ค. 2569)
 
 ทดสอบจริงใน Chromium (Playwright 1.56) กับไฟล์ที่ build แล้ว (`dist/`) โดยเปิดผ่านเซิร์ฟเวอร์ที่ใส่ header จาก `dist/_headers` (CSP แบบเดียวกับ Netlify)
 ผลดิบ: `docs/audit-report.json`, `docs/test-report.json`
@@ -33,7 +33,7 @@
 
 **Mutation test:** แก้ค่าที่คาดหวัง 2 เซลล์ (FCR และ Data Quality Status) → verify_workbook รายงานครบทั้ง 2 จุด แล้วคืนค่า
 
-## 2. ฟังก์ชัน (`node tests/e2e.mjs`) — **367/367 ผ่าน**
+## 2. ฟังก์ชัน (`node tests/e2e.mjs`) — **372/372 ผ่าน**
 
 | ชุด | ผ่าน | ทดสอบอะไร |
 |---|---|---|
@@ -67,6 +67,7 @@
 
 - **ไม่ได้ทดสอบบน Safari/Firefox และอุปกรณ์จริง** — ทดสอบเฉพาะ Chromium ที่จำลองขนาดจอ
 - **AI + Excel:** สูตร Microsoft 365 26 สูตรยังไม่ได้รันใน Excel จริง · ไม่ได้เปิด sample-workbook.xlsx ใน Microsoft Excel จริง (ตรวจด้วย LibreOffice) · M Code / Office Scripts / Power Automate เป็นแม่แบบ ยังไม่ได้รันในบัญชีจริง · Dashboard เป็น Prototype + อัปโหลดไฟล์ ไม่ได้เชื่อมแหล่งข้อมูลจริง
+- **v3.3.1 ปิด Email gate แล้ว (ทุกคนเข้าได้)** — e2e ตรวจว่า build จริงไม่มีรายชื่อ/hash และเครื่องใหม่เปิดได้ทันที · โค้ด gate ยังทดสอบด้วยรายชื่อทดสอบ
 - **Email gate ตรวจในเบราว์เซอร์** (ไม่ใช่ระบบความปลอดภัยฝั่งเซิร์ฟเวอร์) ทดสอบด้วยรายชื่อทดสอบ และทดสอบ build จริงด้วยรายชื่อชั่วคราว (.csv/.txt/.xlsx/env) แล้วลบออก — **ยังไม่ได้รับไฟล์รายชื่อ Email จริง** (ไอคอนแอปได้รับแล้ว ใช้ใน v3.1.0)
 - **Prompt Lab อัตโนมัติ:** Prompt สร้างจากแม่แบบตามโครงสร้างเอกสาร (rule-based) ไม่ได้เข้าใจเนื้อหาแบบ AI · PDF สแกนอ่านข้อความไม่ได้ · PDF ภาษาไทยบางไฟล์ (เช่นฟอนต์ Type 1 ที่ LibreOffice ฝัง) ดึงสระ/วรรณยุกต์ไม่ครบ — แก้ glyph ไทยแบบ PUA (U+F700–F71A) ให้แล้ว แต่ยังไม่ได้ทดสอบกับ PDF จาก Microsoft Word จริง · อ่าน PDF ได้เมื่อเปิดผ่านเว็บไซต์ (file:// แจ้งข้อจำกัด) · ไฟล์ Word/PowerPoint สร้าง Prompt จากชื่อไฟล์เท่านั้น · ทดสอบใน Chromium เท่านั้น
 - PWA ทดสอบใน Chromium เท่านั้น ยังไม่ได้ทดสอบการติดตั้งบน iPhone/Android จริง

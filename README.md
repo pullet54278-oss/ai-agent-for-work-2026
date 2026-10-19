@@ -26,7 +26,7 @@ Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์�
 | **อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot** (อัตโนมัติจาก Microsoft 365 Roadmap) สรุปภาษาไทยทุกการ์ด · หน้าแรกแสดง 3 ข่าวเด่น · ข่าวทั้งหมดกดเปิดดูได้ | หน้าแรก / `#/updates` |
 | **AI + Excel Formula Mastery** 3 ระดับ · Prompt Library · Formula Lab · Interactive Dashboard · ไฟล์ Excel ตัวอย่าง · แบบทดสอบก่อน/หลังเรียน | `#/excel`, `#/x/{slug}` |
 | **PWA** ติดตั้งเป็นแอปบนมือถือ/แท็บเล็ต ใช้ออฟไลน์ได้ · ปุ่ม **รีเฟรช · อัปเดตแอป** | แถบบน / เมนูเครื่องมือ |
-| **Email gate** กรอก Email ที่มีสิทธิ์ครั้งเดียวต่อเครื่อง | หน้าแรกก่อนเข้าใช้งาน |
+| **เปิดให้ทุกคนเข้าได้** ไม่ต้องลงชื่อ (Email gate ปิดตั้งแต่ v3.3.1 · เปิดคืนได้ด้วย `EMAIL_GATE=on`) | — |
 | หมายเลขเวอร์ชัน + เครดิตผู้สร้าง Nattapon Yokkret | หน้าแรก (ป้าย v3.0.0) และท้ายทุกหน้า |
 | Light/Dark, Desktop/Tablet/Mobile (ลิ้นชักสารบัญ < 900px + แถบล่าง), ลูกศรซ้าย/ขวาเปลี่ยนหน้า | — |
 
@@ -106,7 +106,10 @@ AXE=path/to/axe.min.js node tests/e2e.mjs   # เพิ่มการตรว�
 
 ลำดับเมื่อแก้เนื้อหา: แก้ `content/excel/*.mjs` → `node scripts/excel/verify-formulas.mjs` (ต้อง 0 ปัญหา) → `npm run build` → `node scripts/excel/export.mjs` → `npm run audit` → `node tests/e2e.mjs`
 
-## Email gate (สิทธิ์เข้าใช้งาน)
+## Email gate (สิทธิ์เข้าใช้งาน) — ปิดอยู่
+
+ตั้งแต่ v3.3.1 เจ้าของงานให้ทุกคนเข้าใช้ได้โดยไม่ต้องลงชื่อ build จะไม่ฝังรายชื่อหรือ hash ใด ๆ · ถ้าต้องการเปิดคืน ตั้ง env `EMAIL_GATE=on` (Netlify → Environment variables) พร้อมรายชื่อตามขั้นตอนด้านล่าง แล้ว build ใหม่
+
 
 1. รายชื่อ Email: วางไฟล์ `.txt` / `.csv` / `.xlsx` ใน `private/` (ไม่ถูก commit) หรือ Netlify → Environment variables → `ALLOWED_EMAILS` (คั่นด้วย , หรือขึ้นบรรทัดใหม่) แล้ว build ใหม่
 2. build แปลงทุก Email เป็น SHA-256 (+ salt) แล้วฝังเฉพาะ hash ในหน้าเว็บ · เครื่องผู้ใช้จำ hash ไว้ใน localStorage — เปิดแอปใหม่เข้าได้ทันที, ล้างข้อมูลเว็บไซต์หรือ "ออกจากระบบ" เพื่อเปลี่ยน Email
