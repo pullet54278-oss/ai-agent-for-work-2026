@@ -16,6 +16,7 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - เวอร์ชันแอปอ่านจาก `package.json` (แสดงบนหน้าแรกและท้ายหน้า) ขึ้นเวอร์ชันพร้อมบันทึกใน `CHANGELOG.md`
 - `data/` ข้อมูลเสริมที่ MD สูญหายตอนแปลงจากหน้าเว็บ (Prompt Lab 11 หมวด, ชื่อปุ่ม Agent, Office chips, Agent #28) build จะตรวจว่าตรงกับ MD เมื่อมีทั้งสองที่
 - `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)
+- Prompt Lab อัตโนมัติ (หน้าแรก `#/plab`): `src/promptlab.js` ฉีดเข้า app.js ตอน build · วิเคราะห์ไฟล์/ข้อความในเครื่องเท่านั้น (ห้ามส่งข้อมูลออก) · PDF ใช้ `assets/vendor/pdfjs/` (pdfjs-dist 4.10.38, Apache-2.0) โหลดเมื่อใช้ · fixtures ทดสอบที่ `tests/fixtures/`
 - `scripts/build.mjs` สร้าง `dist/` (index.html ไฟล์เดียว + logo.png + vendor/ + _headers) · `scripts/inventory.mjs` · `scripts/audit.mjs`
 - `tests/e2e.mjs` ทดสอบทุกฟังก์ชันด้วย Playwright · `docs/` แผน รายงาน
 - `assets/logo.png` โลโก้ AI Agent for Work · `assets/brand/copilot-logo.svg` โลโก้ Copilot ทางการ (แสดงที่แถบบนและหน้าแรก)

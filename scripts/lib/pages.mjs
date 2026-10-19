@@ -218,6 +218,7 @@ export function renderPLab(page, ctx) {
   must(norm(h[1].text) === norm(lab[0][1]), 'prompt lab category 1 description mismatch');
   must(norm(h[2].text) === norm(lab[0][2][0]) && norm(h[3].text) === norm(lab[0][2][1]), 'prompt lab category 1 prompts mismatch');
   return `<p class="lede">${inline(h[0].text)}</p>
+  <a class="callout tip resume pa-link" href="#/plab">${ic('sparkle')}<div><b>ใหม่: สร้าง Prompt อัตโนมัติจากไฟล์ของคุณ</b><p>โยนไฟล์ PDF, Excel หรือวางข้อความบนหน้าแรก ระบบวิเคราะห์ในเครื่องแล้วสร้าง Prompt 7 แบบให้ทันที</p></div>${ic('chevron_right')}</a>
   <div class="tabs plab" data-tabs>
     <div class="tablist" role="tablist" aria-label="หมวด Prompt">${lab.map((c, i) => `<button type="button" role="tab" id="plt-${i}" aria-controls="plp-${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(c[0])}</button>`).join('')}</div>
     ${lab.map((c, i) => `<div role="tabpanel" id="plp-${i}" aria-labelledby="plt-${i}" ${i ? 'hidden' : ''}><p class="hint">${esc(c[1])}</p><div class="cards grid-2">${c[2].map((p, k) => `<article class="card">${codeHTML(p, `${c[0]} · ${k + 1}`)}</article>`).join('')}</div>${i ? '<p class="src-note">' + ic('info') + ' หมวดนี้มาจาก data/guides.json (ไม่อยู่ในไฟล์ MD ต้นฉบับ)</p>' : ''}</div>`).join('')}

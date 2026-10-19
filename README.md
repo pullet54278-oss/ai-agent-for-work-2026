@@ -14,6 +14,7 @@ Live (Netlify): https://ai-agent-for-work-2026.netlify.app · **เวอร์�
 | Agent Builder Setup ในทุกหน้า Agent — เว็บไซต์ 4 แหล่ง, แนบไฟล์ (SheetJS อ่านชีต/คอลัมน์), บล็อกคัดลอก + ตัวนับ Name ≤30 / Description ≤1,000 / Instructions ≤8,000 | หน้า Agent (แผงขวา) |
 | Agent Builder Studio — เขียนการตั้งค่าเอง ตรวจ 8 ส่วน ตรวจกติกา URL ดาวน์โหลด .txt | `#/builder` |
 | Prompt Builder (5 ช่อง → Prompt 3 แบบทันที) | หน้า 9 |
+| **Prompt Lab อัตโนมัติ** — โยนไฟล์ PDF / Excel / CSV / TXT หรือวางข้อความ → วิเคราะห์ในเครื่อง (ประเภทเอกสาร หัวข้อ คำสำคัญ ตัวเลข/วันที่ โครงสร้างตาราง) → Prompt พร้อมคัดลอก 7 แบบ ปรับตามเป้าหมาย/ผู้อ่าน/รูปแบบ · ไม่ส่งข้อมูลออกนอกเครื่อง | หน้าแรก (ต่อจาก Hero) / `#/plab` |
 | Prompt Lab 12 หมวด | หน้า 23 |
 | เครื่องคำนวณ 2 ตัว (ราคาอาหารสัตว์, พื้นที่เลี้ยง) | หน้า 70, 115 |
 | Agent Flow player + หน้าต่างแชทจำลอง | 14 หน้า Flow |
@@ -42,8 +43,9 @@ netlify/functions/                      copilot-updates.mjs (API สด /api/cop
 content/forbidden-terms.txt             รายการคำต้องห้ามสำหรับ audit (เจ้าของงานเติม)
 data/*.json                             ข้อมูลเสริมที่ MD สูญหาย (Prompt Lab 11 หมวด, ปุ่ม Agent, Office chips, Agent #28)
 src/template.html · app.css · app.js    UI (Fluent 2 + design tokens ส่วนที่ 1), vanilla JS
+src/promptlab.js                        Prompt Lab อัตโนมัติ (ฉีดเข้า app.js ตอน build เหมือน src/excel.js)
 src/icons.json                          Fluent UI System Icons (MIT) ที่ใช้
-assets/logo.png · favicon.svg · vendor/ โลโก้ AI Agent for Work, SheetJS 0.18.5
+assets/logo.png · favicon.svg · vendor/ โลโก้ AI Agent for Work, SheetJS 0.18.5, pdf.js 4.10.38 (Apache-2.0, vendor/pdfjs/ โหลดเมื่อโยน PDF)
 scripts/build.mjs                       MD + JSON → dist/ (ไฟล์เดียว index.html + assets + _headers)
 scripts/inventory.mjs                   Content inventory + รายการความคลาดเคลื่อนของต้นฉบับ
 scripts/audit.mjs                       ตรวจความครบถ้วนเนื้อหาเทียบ MD ทุกตัวอักษร (ในเบราว์เซอร์จริง)

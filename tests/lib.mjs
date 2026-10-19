@@ -7,7 +7,7 @@ import { hashEmail, GATE_SALT, loadAllowed } from '../scripts/lib/gate.mjs';
 
 export const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 export const DIST = path.join(ROOT, 'dist');
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.css': 'text/css' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.css': 'text/css' };
 
 // Apply the "/*" block of dist/_headers (as Netlify would) so tests run under the production CSP
 function netlifyHeaders() {

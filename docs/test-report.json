@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-14T14:19:44.440Z",
-  "pass": 334,
+  "generatedAt": "2026-10-19T05:36:11.903Z",
+  "pass": 367,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -65,6 +65,10 @@
     },
     "Agent Flow player": {
       "pass": 5,
+      "fail": 0
+    },
+    "Prompt Lab อัตโนมัติ (หน้าแรก: ไฟล์/ข้อความ → Prompt)": {
+      "pass": 33,
       "fail": 0
     },
     "Prompt Lab tabs + supplements": {

@@ -202,6 +202,7 @@ function route() {
   if (m && PI.has(+m[1])) return +m[1] === 1 ? renderHome() : renderPage(+m[1]);
   const dm = h.match(/^d\/(\d+)$/); if (dm && PI.has(DEEP0 + +dm[1])) return renderPage(DEEP0 + +dm[1]);
   const xm = h.match(/^x\/([a-z0-9-]+)$/); if (xm && XSLUG.has(xm[1])) return renderPage(XSLUG.get(xm[1]));
+  if (h === 'plab') { renderHome(); const pl = document.getElementById('plab'); if (pl) { pl.scrollIntoView({ block: 'start' }); const ta = document.getElementById('paText'); if (ta) ta.focus({ preventScroll: true }); } return; }
   if (h === 'excel') return renderExcelHome();
   if (h === 'deep') return renderDeepHome();
   const tm = h.match(/^track\/([a-z]+)$/); if (tm && D.tracks.some(t => t.key === tm[1])) return renderTrack(tm[1]);
@@ -475,6 +476,7 @@ const TOOLS = [
   ['#/agents', 'people_team', 'Agent Directory', 'ค้นหาและกรอง Agent ทั้ง 67 ตัวตามกลุ่มงานและระดับความพร้อม'],
   ['#/builder', 'toolbox', 'Agent Builder Studio', 'เขียนการตั้งค่า Agent เอง พร้อมตัวนับและตรวจกติกา URL'],
   ['#/p/9', 'edit', 'Prompt Builder', 'กรอกงานของคุณ ได้ Prompt 3 แบบทันที'],
+  ['#/plab', 'sparkle', 'Prompt Lab อัตโนมัติ', 'โยนไฟล์ PDF/Excel หรือวางข้อความ ได้ Prompt 7 แบบทันที'],
   ['#/p/23', 'beaker', 'Prompt Lab', 'Prompt ตัวอย่าง 12 หมวด พร้อมคัดลอก'],
   ['#/p/70', 'calculator', 'คำนวณผลกระทบราคาอาหารสัตว์', 'Δต้นทุนต่อ กก. ไก่เป็น เนื้อไก่ ต่อเดือน และต่อปี'],
   ['#/p/115', 'calculator', 'คำนวณพื้นที่เลี้ยง', 'ลูกไก่ต่อวัน ความจุ และจำนวนโรงเรือน'],
@@ -512,6 +514,7 @@ function renderHome() {
     <p class="hero-desc">คู่มือเรียนรู้ Microsoft Copilot เชิงลึก <b>เริ่มที่ Copilot Agent</b> ตั้งแต่แนวคิด สร้าง ทดสอบ จนนำไปใช้กับงานจริง ต่อด้วย Copilot ใน Excel, Word, PowerPoint การใช้งานบนเบราว์เซอร์ และเทคนิคขั้นสูง</p>
     <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#/track/agent">${ic('bot')}<span>เริ่มเรียน Copilot Agent →</span></a><a class="btn btn-outline btn-lg" href="#/p/${moduleOf(chByKey.pmode)}">เริ่มที่ Prompt Mode →</a><button type="button" class="btn btn-subtle btn-lg" data-open-finder>${ic('people_team')}<span>ค้นหา Agent ตามกลุ่มงาน</span></button></div>
   </div><div class="hero-art">${heroScene()}</div></div></section>
+  ${paSectionHTML()}
   ${updatesPanelHTML(true)}
   <section class="cgroup tracks-sec"><h2 class="sec">${ic('compass_northwest')}<span>เส้นทางการเรียน</span></h2><p>เรียงตามความสำคัญ เริ่มจาก Copilot Agent · แต่ละเส้นทางรวมหน้าในคอร์สหลักและบทเรียนเชิงลึกที่พูดเรื่องเดียวกันไว้ด้วยกัน</p>${tracksGridHTML()}</section>
   <div class="stats">
@@ -527,7 +530,7 @@ function renderHome() {
   <section class="cgroup x-home"><h2 class="sec">${ic('table')}<span>AI + Excel Formula Mastery · 3 ระดับ</span></h2><p>เปลี่ยนภาษาคนเป็นสูตร Excel ด้วย AI · Prompt Library, Formula Lab, Interactive Dashboard และไฟล์ Excel ตัวอย่าง · <a href="#/excel">เปิดหน้าหลักสูตร</a></p><div class="ccards">${XCH.map(chapterCardHTML).join('')}</div></section>
   <section class="cgroup"><h2 class="sec">${ic('hat_graduation')}<span>Deep Learning · 36 บทเชิงลึก</span></h2><p>บทเรียนเชิงลึกพร้อม Workshop, Prompt Builder และแบบทดสอบประจำบท · <a href="#/deep">ดูภาพรวมและหลักคิดร่วม</a></p><div class="ccards">${DEEPCH.map(chapterCardHTML).join('')}</div></section>
   ${copyLine()}`, '', 1);
-  wireUpdates($('#main')); refreshUpdates();
+  wireUpdates($('#main')); wirePromptLab($('#main')); refreshUpdates();
   renderTOC(); updateProgress();
 }
 
@@ -951,6 +954,7 @@ window.addEventListener('hashchange', route);
 mq.addEventListener && mq.addEventListener('change', () => { if (!mq.matches) closeDrawer(); });
 
 /*__EXCEL_JS__*/
+/*__PROMPTLAB_JS__*/
 
 // ---------- Email gate (once per device) ----------
 const GATE = (() => { try { return JSON.parse(document.getElementById('gate-cfg').textContent); } catch (e) { return { on: false, h: [] }; } })();

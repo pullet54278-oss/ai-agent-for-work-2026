@@ -185,8 +185,9 @@ data.meta.copilotLogo = copilotLogo ? 'brand/' + copilotLogo : null;
 // ---- assemble ----
 const tpl = fs.readFileSync(path.join(ROOT, 'src', 'template.html'), 'utf8');
 const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8');
-const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'));
-if (js.includes('/*__EXCEL_JS__*/')) throw new Error('excel.js not injected');
+const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'))
+  .replace('/*__PROMPTLAB_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'promptlab.js'), 'utf8'));
+if (js.includes('/*__EXCEL_JS__*/') || js.includes('/*__PROMPTLAB_JS__*/')) throw new Error('excel.js / promptlab.js not injected');
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">${Object.entries(icons).map(([k, v]) => `<symbol id="i-${k}" viewBox="0 0 24 24" fill="currentColor">${v}</symbol>`).join('')}</svg>`;
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 const html = tpl
@@ -209,6 +210,10 @@ fs.copyFileSync(path.join(ROOT, 'ai-excel-formula-mastery', 'data', 'sample-work
 fs.copyFileSync(path.join(ROOT, 'assets', 'logo.png'), path.join(DIST, 'logo.png'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.full.min.js'), path.join(DIST, 'vendor', 'xlsx.full.min.js'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'xlsx.LICENSE'), path.join(DIST, 'vendor', 'xlsx.LICENSE.txt'));
+// Prompt Lab อัตโนมัติ: pdf.js (Apache-2.0) อ่าน PDF ในเครื่อง · โหลดเมื่อผู้ใช้โยน PDF เท่านั้น
+fs.mkdirSync(path.join(DIST, 'vendor', 'pdfjs'), { recursive: true });
+for (const f of ['pdf.min.mjs', 'pdf.worker.min.mjs']) fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'pdfjs', f), path.join(DIST, 'vendor', 'pdfjs', f));
+fs.copyFileSync(path.join(ROOT, 'assets', 'vendor', 'pdfjs', 'LICENSE.txt'), path.join(DIST, 'vendor', 'pdfjs.LICENSE.txt'));
 if (fs.existsSync(path.join(ROOT, 'assets', 'favicon.svg'))) fs.copyFileSync(path.join(ROOT, 'assets', 'favicon.svg'), path.join(DIST, 'favicon.svg'));
 // ---- PWA: icons, manifest, service worker, version.json ----
 fs.mkdirSync(path.join(DIST, 'icons'), { recursive: true });
@@ -245,6 +250,9 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
 
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
+
+/vendor/pdfjs/*
+  Content-Type: text/javascript; charset=utf-8
 
 /deep-data.js
   Cache-Control: public, max-age=0, must-revalidate

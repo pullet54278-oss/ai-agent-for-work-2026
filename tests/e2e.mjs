@@ -92,7 +92,7 @@ await suite('Copilot Agent first + learning paths', async () => {
   ok(cta[0].includes('เริ่มเรียน Copilot Agent') && cta[1] === '#/track/agent', 'primary CTA = Copilot Agent');
   ok((await text('.hero-cta')).includes('เริ่มที่ Prompt Mode →'), 'Prompt Mode CTA kept');
   const order = await page.$$eval('#main > .wrap > section, #main > .wrap > div.stats', l => l.map(e => e.className));
-  ok(order[0].includes('hero') && order[1].includes('updates') && order[2].includes('tracks-sec'), 'home order: hero → live updates → learning paths (' + order.slice(0, 3).join(' | ') + ')');
+  ok(order[0].includes('hero') && order[1].includes('pa') && order[2].includes('updates') && order[3].includes('tracks-sec'), 'home order: hero → Prompt Lab อัตโนมัติ → live updates → learning paths (' + order.slice(0, 4).join(' | ') + ')');
   const tracks = await page.$$eval('.tracks .track b', l => l.map(e => e.textContent));
   eq(tracks[0], 'Copilot Agent', 'first learning path is Copilot Agent');
   ok(tracks.length === 8 && tracks.some(t => /AI \+ Excel/.test(t)) && tracks.some(t => /Excel, Word และ PowerPoint/.test(t)) && tracks.some(t => /เบราว์เซอร์/.test(t)) && tracks.some(t => /Tips & Tricks/.test(t)) && tracks.some(t => /งานจริง/.test(t)), '8 paths: Agent, AI + Excel, Office, browser, tips, real work, …');
@@ -543,6 +543,90 @@ await suite('Agent Flow player', async () => {
   ok((await text('.chat')).includes('ผลลัพธ์:'), 'final output bubble');
   await page.click('[data-reset]');
   eq(await page.$$eval('.chat .bub.a', l => l.length), 0, 'reset clears chat');
+});
+
+await suite('Prompt Lab อัตโนมัติ (หน้าแรก: ไฟล์/ข้อความ → Prompt)', async () => {
+  const PFX = path.join(ROOT, 'tests', 'fixtures');
+  const p = await ctx.newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)|net::ERR|ERR_TUNNEL|ERR_PROXY/.test(m.text())) errs.push(m.text()); });
+  await p.goto(url); await p.waitForSelector('#plab');
+  // placement: right after the hero, before the news; Copilot is still the biggest word
+  eq(await p.evaluate(() => { const h = document.querySelector('.hero'); return h.nextElementSibling && h.nextElementSibling.id; }), 'plab', 'Prompt Lab section directly after the hero');
+  ok(await p.evaluate(() => { const s = document.querySelector('#plab').compareDocumentPosition(document.querySelector('.updates.home')); return !!(s & Node.DOCUMENT_POSITION_FOLLOWING); }), 'Prompt Lab comes before the news panel');
+  ok(await p.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#heroT')).fontSize) > parseFloat(getComputedStyle(document.querySelector('#paT')).fontSize) * 2), 'Copilot title remains the largest text');
+  eq(await p.$$eval('[data-pa-card]', l => l.length), 0, 'no prompt cards before input');
+  // all requests while analysing must stay on this origin
+  const reqs = []; p.on('request', r => reqs.push(r.url()));
+  // 1) pasted text
+  const TXT = 'บันทึกการประชุมทีมวางแผนการผลิต\nวาระที่ 1 ติดตามยอดผลิต\nยอดผลิตเดือนกันยายน 8,200 ตัน คิดเป็นร้อยละ 94 ของเป้าหมาย ต้นทุนเฉลี่ย 37.5 บาทต่อกิโลกรัม\nวาระที่ 2 แผนซ่อมบำรุง\nที่ประชุมมีมติให้ผู้รับผิดชอบงานซ่อมบำรุงจัดทำแผนหยุดเครื่องภายในวันที่ 15/11/2569 และรายงานผลการประชุมครั้งถัดไป\nวาระที่ 3 เรื่องอื่น ๆ\nที่ประชุมรับทราบแผนการผลิตไตรมาสหน้าและมติให้ติดตามต้นทุนการผลิตทุกสัปดาห์';
+  await p.fill('#paText', TXT);
+  await p.waitForSelector('[data-pa-card]', { timeout: 4000 });
+  eq(await p.$$eval('[data-pa-card]', l => l.length), 7, 'pasted text → 7 prompt cards');
+  eq(await p.$eval('[data-pa-prof] .pill', e => e.textContent.trim()), 'บันทึกการประชุม', 'document type detected (meeting)');
+  const heads = await p.$$eval('.pa-heads li', l => l.map(x => x.textContent));
+  ok(heads.some(h => h.includes('วาระที่ 1')), 'headings detected: ' + heads.slice(0, 3).join(' | '));
+  ok((await p.$$eval('.pa-dl .pa-chips .chip', l => l.length)) >= 2, 'keywords detected (Intl.Segmenter Thai)');
+  const sumTxt = await p.$eval('[data-pa-card="summary"] pre', e => e.textContent);
+  ok(sumTxt.includes('วาระที่ 1') && sumTxt.includes('--- ข้อความ ---') && sumTxt.includes('ห้ามแต่งเพิ่ม'), 'summary prompt uses headings, includes pasted text and verification lines');
+  ok(await p.$('[data-pa-card="numbers"] .prompt-head') && (await p.$eval('[data-pa-card="numbers"] .prompt-head', e => e.textContent)).includes('ตัวเลข'), 'numbers card when numbers found');
+  const agentTxt = await p.$eval('[data-pa-card="agent"] pre', e => e.textContent);
+  ok(['บทบาท', 'เป้าหมาย', 'ข้อมูลนำเข้า', 'ขั้นตอน', 'รูปแบบผลลัพธ์', 'การตรวจสอบ', 'ข้อห้าม', 'เมื่อไม่แน่ใจ'].every(h => agentTxt.includes('\n' + h + '\n')), 'Agent Instructions have all 8 sections');
+  const nameLine = agentTxt.match(/^Name: (.*)$/m); ok(nameLine && nameLine[1].length <= 30, 'Agent Name ≤ 30 chars');
+  ok(!/ผู้จัดการ|หัวหน้างาน|Manager|Supervisor/.test(await p.$eval('[data-pa-cards]', e => e.textContent)), 'no job titles in generated prompts');
+  // options change prompts + recommended card moves first
+  await p.selectOption('#paGoal', 'email'); await p.waitForTimeout(50);
+  eq(await p.$eval('[data-pa-card]', e => e.dataset.paCard), 'email', 'goal → recommended card first');
+  await p.selectOption('#paAud', 'ผู้มีอำนาจอนุมัติ'); await p.selectOption('#paFmt', 'ppt'); await p.fill('#paExtra', 'เน้นเรื่องต้นทุน'); await p.waitForTimeout(50);
+  const conv = await p.$eval('[data-pa-card="convert"] pre', e => e.textContent);
+  ok(conv.includes('PowerPoint') && conv.includes('ผู้มีอำนาจอนุมัติ') && conv.includes('เน้นเรื่องต้นทุน'), 'format/audience/extra applied to prompts');
+  await p.uncheck('[data-pa-opt="inc"]'); await p.waitForTimeout(50);
+  ok(!(await p.$eval('[data-pa-card="summary"] pre', e => e.textContent)).includes('--- ข้อความ ---'), 'can exclude pasted text from prompt');
+  await p.check('[data-pa-opt="inc"]');
+  // copy = card text
+  await p.click('[data-pa-card="agent"] [data-copy]');
+  eq(await p.evaluate(() => navigator.clipboard.readText()), await p.$eval('[data-pa-card="agent"] pre', e => e.textContent), 'copy button copies the card prompt');
+  // 2) PDF with Thai + English text (2 pages)
+  await p.setInputFiles('[data-pa-file]', path.join(PFX, 'sample-th.pdf'));
+  await p.waitForFunction(() => document.querySelector('[data-pa-name]') && document.querySelector('[data-pa-name]').textContent === 'sample-th.pdf', null, { timeout: 20000 });
+  const prof = await p.$eval('[data-pa-prof]', e => e.textContent);
+  ok(prof.includes('2 หน้า'), 'PDF page count read (2 หน้า)');
+  ok(prof.includes('รายงานผล'), 'PDF type detected as report');
+  const pheads = await p.$$eval('.pa-heads li', l => l.map(x => x.textContent));
+  ok(pheads.some(h => h.includes('สรุปผลการผลิต')), 'PDF headings extracted: ' + pheads.slice(0, 4).join(' | '));
+  const psum = await p.$eval('[data-pa-card="summary"] pre', e => e.textContent);
+  ok(psum.includes('แนบไฟล์ "sample-th.pdf" (PDF 2 หน้า)') && psum.includes('สรุปผลการผลิต') && !psum.includes('--- ข้อความ ---'), 'PDF prompt references the attached file, its pages and headings');
+  ok(prof.includes('เปอร์เซ็นต์ พบ') && prof.includes('จำนวนเงิน พบ'), 'PDF numbers / % / money detected');
+  // 3) PDF without text (scan)
+  await p.setInputFiles('[data-pa-file]', path.join(PFX, 'scan-no-text.pdf'));
+  await p.waitForSelector('[data-pa-warn]', { timeout: 15000 });
+  ok((await p.$eval('[data-pa-warn]', e => e.textContent)).includes('ไม่พบข้อความ (อาจเป็นภาพสแกน)'), 'scanned PDF → "ไม่พบข้อความ" notice');
+  eq(await p.$$eval('[data-pa-card]', l => l.length), 7, 'scanned PDF still produces prompts from file name/pages');
+  // 4) broken PDF → error, not stuck
+  await p.setInputFiles('[data-pa-file]', path.join(PFX, 'broken.pdf'));
+  await p.waitForFunction(() => /อ่านไฟล์ไม่ได้/.test(document.querySelector('[data-pa-status]').textContent), null, { timeout: 15000 });
+  ok(!(await p.$('.pa-empty .spin')), 'broken PDF: error shown, analysis not stuck');
+  // 5) Excel → column names in prompt
+  await p.setInputFiles('[data-pa-file]', path.join(FIX, 'farm-sample.xlsx'));
+  await p.waitForFunction(() => document.querySelector('[data-pa-name]') && document.querySelector('[data-pa-name]').textContent === 'farm-sample.xlsx', null, { timeout: 10000 });
+  const xs = await p.$eval('[data-pa-card="summary"] pre', e => e.textContent);
+  ok(xs.includes('Farm_ID') && xs.includes('Mortality (ตัวเลข)') && xs.includes('ชีต "Daily"'), 'Excel: sheet, columns and guessed types in prompt');
+  // 6) unsupported type
+  await p.setInputFiles('[data-pa-file]', path.join(FIX, 'virus.exe'));
+  await p.waitForFunction(() => /ชนิดไฟล์ไม่รองรับ/.test(document.querySelector('[data-pa-status]').textContent), null, { timeout: 5000 });
+  ok(true, 'unsupported file type rejected');
+  // clear
+  await p.click('[data-pa-clear]');
+  eq(await p.$$eval('[data-pa-card]', l => l.length), 0, 'clear resets the tool');
+  const ext = reqs.filter(u => !u.startsWith(url) && !u.startsWith('blob:') && !u.startsWith('data:') && !/fonts\.(googleapis|gstatic)/.test(u));
+  eq(ext.join(' '), '', 'no requests leave the site while analysing');
+  ok(reqs.some(u => u.includes('vendor/pdfjs/pdf.min.mjs')) && reqs.some(u => u.includes('pdf.worker.min.mjs')), 'pdf.js loaded on demand from /vendor (self)');
+  // entry points: tools menu, Ctrl+K, page 23 callout, #/plab route
+  await p.goto(url + '#/p/23'); await p.waitForSelector('.pa-link');
+  await p.click('.pa-link'); await p.waitForSelector('#plab');
+  ok(await p.evaluate(() => document.activeElement && document.activeElement.id === 'paText'), '#/plab opens home and focuses the text box');
+  ok(await p.$('.tools a[href="#/plab"]'), 'listed in home tools');
+  eq(errs.join(' | '), '', 'no console/page errors under CSP');
+  await p.close();
 });
 
 await suite('Prompt Lab tabs + supplements', async () => {

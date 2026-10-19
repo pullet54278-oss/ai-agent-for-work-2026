@@ -1,12 +1,686 @@
 {
- "fetchedAt": "2026-10-14T02:29:59.176Z",
- "feedUpdated": "2026-10-13T23:01:05.000Z",
+ "fetchedAt": "2026-10-19T05:20:45.081Z",
+ "feedUpdated": "2026-10-16T22:00:35.000Z",
  "source": {
   "name": "Microsoft 365 Roadmap",
   "url": "https://www.microsoft.com/microsoft-365/roadmap?filters=Microsoft%20Copilot",
   "rss": "https://www.microsoft.com/releasecommunications/api/v2/m365/rss"
  },
  "items": [
+  {
+   "id": "575292",
+   "title": "Microsoft Viva: Copilot Analytics - Agent 365 reporting availability for Microsoft platform agents",
+   "summary": "Customers can now view agent insights in the Agent 365 Dashboard in Microsoft Viva Insights (Copilot Analytics) without an Agent 365 license. Customers will be able to view reporting on their Microsoft platform-built agents in one consolidated picture, along with context on who built each agent and why.",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=575292",
+   "updated": "2026-10-16T22:00:35Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "October CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Microsoft Viva"
+   ],
+   "agent": true
+  },
+  {
+   "id": "557561",
+   "title": "Microsoft Edge: Auto-open Copilot side pane for Outlook links",
+   "summary": "When users open links from Outlook, Microsoft Edge can automatically open the Copilot side pane to provide contextual insights and actionable suggestion chips based on email and destination content - such as highlighting key points, and recommending next actions - without disrupting the browsing flow. This experience helps users quickly understand content, take action with fewer steps, and get more value from…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=557561",
+   "updated": "2026-10-16T22:00:35Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "December CY2026",
+   "preview": "",
+   "topic": "teams",
+   "products": [
+    "Microsoft Edge"
+   ],
+   "agent": false
+  },
+  {
+   "id": "519571",
+   "title": "Microsoft 365 admin center: Usage reports – Microsoft 365 Copilot Connectors",
+   "summary": "A new usage report will be available in the Microsoft 365 admin center for Copilot Connectors in Microsoft 365 Copilot, designed to give organizations a detailed view of how connectors are being used within Microsoft 365 Copilot. This report provides insights into overall connector activity, and connector powered response patterns over time, along with detailed user-level connectors adoption data. With these…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=519571",
+   "updated": "2026-10-16T22:00:35Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "November CY2026",
+   "preview": "June CY2026",
+   "topic": "admin",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Microsoft 365 admin center"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576884",
+   "title": "Dynamics 365 Field Service: Optimize resource scheduling - Optimize multiple resources with Scheduling Operations Agent",
+   "summary": "This release expands the optimization capabilities of the Scheduling Operations Agent to include multiple resources. The agent considers the availability of the resources, their current schedules, and unscheduled requirements. It suggests a schedule that honors configured constraints and optimizes it according to the selected goal. Dispatchers can review and compare the proposed schedules with the current…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576884",
+   "updated": "2026-10-16T19:10:11Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "March CY2027",
+   "preview": "June CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Field Service"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576875",
+   "title": "Dynamics 365 Contact Center: Service representative experiences - Use pinned contacts and queues during consult and transfer",
+   "summary": "In the Copilot Service admin center, administrators configure and manage pinned contacts and queues for representatives as follows: Enable pins in the Customer settings &gt; Manage pins &gt; Admin pins page so that representatives pin their contacts and queues. Pin specific contacts and queues for representatives. Display pinned items to representatives based on business units. Business Value: This feature…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576875",
+   "updated": "2026-10-16T19:10:04Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "admin",
+   "products": [
+    "Dynamics 365 Contact Center"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576864",
+   "title": "Dynamics 365 Business Central: Reporting and data analysis - Use new APIs for analyzing approval workflows for auditors and IT staff",
+   "summary": "In this release wave, we're introducing read-only APIs on the (workflow) approval system. This allows for establishing security and auditing analytics and reporting outside Business Central—for example, creating reports with Power BI or agents with Microsoft Copilot Studio and MCP Server for Business Central. The APIs are read-only and allow querying for: Workflow Workflow and User mappings Workflow, User, and…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576864",
+   "updated": "2026-10-16T19:09:56Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Business Central"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576855",
+   "title": "Dynamics 365 Customer Service: Workforce engagement management - Filter the adherence tracker by planning group",
+   "summary": "This feature provides the following capabilities: The adherence tracker includes a planning group filter that supervisors can use to scope the view to a specific planning group. The planning group filter works with the existing shift plan and service representative filters, so supervisors can combine filters to refine a single view. The tracker displays representatives based on the planning groups associated with…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576855",
+   "updated": "2026-10-16T19:09:50Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "",
+   "topic": "admin",
+   "products": [
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576854",
+   "title": "Dynamics 365 Customer Service: Workforce engagement management - Filter adherence historical analytics by planning group",
+   "summary": "This feature provides the following capabilities: The adherence historical analytics report includes a planning group filter that workforce managers can use to scope results to one or more planning groups. The planning group filter works with the report’s existing filters, allowing managers to combine planning groups, date ranges, and other report parameters in a single view. The report recalculates adherence…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576854",
+   "updated": "2026-10-16T19:09:50Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "",
+   "topic": "admin",
+   "products": [
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576851",
+   "title": "Dynamics 365 Customer Service: Copilot and AI innovation - Use Copilot Cowork to orchestrate insights and actions for representatives",
+   "summary": "The plugin in Copilot Cowork is available out of the box for service representatives. They can use the Customer Service skills after the administrator enables the plugin for them in Cowork settings. The key capabilities are as follows: Prioritizes and enriches cases: Surfaces highest-attention cases with suggested next actions. Reviews for criticality and severity: Flags cases where severity mismatches actual…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576851",
+   "updated": "2026-10-16T19:09:47Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "May CY2026",
+   "topic": "office",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576850",
+   "title": "Dynamics 365 Sales: Copilot and AI innovation - Use Dynamics 365 Sales skills in Microsoft 365 Copilot Cowork",
+   "summary": "As an admin, you can control who can access Copilot Cowork in your organization. The Dynamics 365 Sales plugin is installed by default in Copilot Cowork and available to all users who have access to Cowork. As a seller, you can use the sales skills in Copilot Cowork to: Understand customer, opportunity, and pipeline context without manually gathering information from multiple systems. Identify changes, risks,…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576850",
+   "updated": "2026-10-16T19:09:47Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "May CY2026",
+   "topic": "admin",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Sales"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576843",
+   "title": "Microsoft Dataverse: Activate Enterprise Data in Copilot - Create Dataverse agent users with Microsoft Entra agent identity",
+   "summary": "Organizations can securely deploy AI agents to access and interact with Dataverse data by using enterprise‑managed Microsoft Entra agent identities. This feature enables agents to be provisioned as Dataverse agent users with dedicated, least‑privileged security roles based on their intended capabilities. This feature ensures agents have only the access required to perform tasks autonomously or on behalf of users.…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576843",
+   "updated": "2026-10-16T19:09:45Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "June CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Microsoft Dataverse"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576841",
+   "title": "Dynamics 365 Business Central: Reporting and data analysis - Use new APIs for analyzing permissions for auditors and IT staff",
+   "summary": "In this release wave, we're introducing read-only APIs on the permission system. This allows for establishing security and auditing analytics and reporting outside Business Central—for example, creating reports with Power BI or agents with Microsoft Copilot Studio and MCP Server for Business Central. The APIs are read-only and allow querying for: Permission Set Object, Scope, Extension info, and Permission Set…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576841",
+   "updated": "2026-10-16T19:09:43Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Business Central"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576838",
+   "title": "Dynamics 365 Finance and Operations cross-app: Boost productivity with Copilot - Use Copilot Cowork to orchestrate insights and actions across Dynamics 365 ERP",
+   "summary": "The Copilot Cowork plugin for finance and operations apps enables users to move from business intent to insight to execution in a single experience. Copilot orchestrates work across ERP data, emails, documents, spreadsheets, collaboration tools, and downstream business processes. Key capabilities Orchestrate workflows across ERP and Microsoft 365 data sources. Analyze business data and generate contextual…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576838",
+   "updated": "2026-10-16T19:09:41Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "June CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Finance and Operations cross-app"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576837",
+   "title": "Dynamics 365 Contact Center: Unified routing - Use pick-based assignment method for work items",
+   "summary": "Use the No auto assignment method for queues in Copilot Service admin center when you want routed conversations to remain unassigned after they enter a queue. Instead of being assigned automatically, conversations stay in the queue until a service representative picks them up from their Inbox or a supervisor assigns them manually. This assignment method supports a pick-based work distribution model, giving…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576837",
+   "updated": "2026-10-16T19:09:41Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "",
+   "topic": "teams",
+   "products": [
+    "Dynamics 365 Contact Center"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576831",
+   "title": "Dynamics 365 Contact Center: Workforce engagement management - Analyze adherence history to optimize workforce planning",
+   "summary": "The Adherence History Report provides a complete view of customer service representatives’ historical adherence to scheduled tasks and activities. It helps supervisors analyze patterns, identify gaps, and improve workforce efficiency. Key capabilities Trend chart: Visualize adherence patterns for individual service representatives or the entire team over time. Metrics dashboard: Track adherence percentage, total…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576831",
+   "updated": "2026-10-16T19:09:36Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "admin",
+   "products": [
+    "Dynamics 365 Contact Center",
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576826",
+   "title": "Dynamics 365 Finance and Operations cross-app: Boost productivity with Copilot - Enable agents to work with attachments through Dynamics 365 ERP MCP server",
+   "summary": "Document attachments provide valuable context and detail about ERP records. With this release, the Dynamics 365 ERP MCP server will provide access for agents to work with the attachments by creating, deleting, or reading and reasoning over the content of the attachments in agentic flows. Business Value: Document attachments provide valuable context and detail about ERP records. Enabling agents to access the…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576826",
+   "updated": "2026-10-16T19:09:33Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "July CY2026",
+   "preview": "April CY2026",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Finance and Operations cross-app"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576825",
+   "title": "Dynamics 365 Finance and Operations cross-app: Boost productivity with Copilot - Open records in Dynamics 365 ERP applications with deep links from copilot responses",
+   "summary": "The Dynamics 365 ERP MCP server enables copilots to respond to prompts related to data across the Dynamics 365 ERP suite of applications. Users expect visibility into how copilot responses relate to the underlying business data and system records. With this release, copilot responses generated from the Dynamics 365 ERP MCP server will include deep links to the data used to generate the response, improving…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576825",
+   "updated": "2026-10-16T19:09:32Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "May CY2026",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Finance and Operations cross-app"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576818",
+   "title": "Dynamics 365 Customer Service: Copilot and AI innovation - Improve customer outcomes with Service Agent in Microsoft 365 Copilot",
+   "summary": "Microsoft 365 Copilot Chat is becoming a consistent way that users interact with AI across Microsoft experiences. With this update, that same chat experience is available in Dynamics 365 Customer Service, with service-aware grounding and workflows. Service users can start in Microsoft 365 Copilot Chat and then: See and prioritize work (for example, top cases and what needs attention). Draft customer…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576818",
+   "updated": "2026-10-16T19:09:27Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "March CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576792",
+   "title": "Dynamics 365 Business Central: Reporting and data analysis - Use new APIs for getting the PDF of a document report",
+   "summary": "We're introducing read-only APIs in the document report system. The APIs help establish automation on document reporting outside Business Central. For example, to create agents with Microsoft Copilot Studio and MCP Server for Business Central to automate business processes that involve document PDFs. The APIs are read-only and allow you to query the following types of documents: Sales documents Blanket sales…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576792",
+   "updated": "2026-10-16T19:09:08Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Business Central"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576789",
+   "title": "Dynamics 365 Business Central: Copilot and agents - Unlock more Business Central data with MCP server enhancements",
+   "summary": "With this update of the MCP server for Business Central, customers and developers can expose a broader set of Business Central APIs as tools, making it easier to build solutions that interact deeply and consistently with Business Central data and processes. Key improvements include: Access to all Microsoft APIs The MCP server can now surface the full set of standard Microsoft APIs in Business Central. This…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576789",
+   "updated": "2026-10-16T19:09:06Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Business Central"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576788",
+   "title": "Microsoft Dataverse: Improved enterprise experiences in Power Platform - Enhance Dataverse record descriptions for Copilot /mention",
+   "summary": "End users of Microsoft 365 Copilot will see improved Microsoft Dataverse, Dynamics 365, and Power Apps record references in Context IQ with richer, more descriptive labels that include environment, app, and table information. This makes it easier to identify and select the correct records during Copilot interactions. Business Value: Enables Microsoft 365 Copilot to surface business data with meaningful context,…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576788",
+   "updated": "2026-10-16T19:09:06Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "July CY2026",
+   "topic": "teams",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Microsoft Dataverse"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576780",
+   "title": "Dynamics 365 Contact Center: Administrator experiences - Support average wait time in messaging API channels",
+   "summary": "Average wait time (AWT) is now supported for custom messaging channels built using the messaging APIs, apart from live chat and voice channels. The system computes the average wait time using an exponential moving average algorithm, giving more weight to recently connected conversations and automatically excluding abandoned ones. Administrators and supervisors can retrieve the wait-time metric through the…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576780",
+   "updated": "2026-10-16T19:08:59Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "June CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Contact Center"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576777",
+   "title": "Dynamics 365 Business Central: Copilot and agents - Speed up processing with Known Senders in Payables Agent",
+   "summary": "This feature introduces email review policy and a Known Senders list page to give accounts payable teams more control over which incoming emails require human approval before the Payables Agent processes them. A new Email review field in the Payables Agent setup lets administrators choose when incoming emails require human approval. The following options are available: Always: Every email requires approval,…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576777",
+   "updated": "2026-10-16T19:08:57Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Business Central"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576776",
+   "title": "Dynamics 365 Business Central: Copilot and agents - Try Payables Agent for free without setting up email",
+   "summary": "Payables Agent introduces a free trial mode that any user can start without help from an administrator or having paid credits. You can start the trial directly from the agent setup card or from the Purchase Invoices page. You don't need to have an administrator role or configure an email account. You upload invoice PDFs manually to start processing, bypassing the email-based sourcing flow entirely. The trial…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576776",
+   "updated": "2026-10-16T19:08:56Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "July CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Business Central"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576775",
+   "title": "Dynamics 365 Customer Service: Copilot and AI innovation - Classify emails by category and subcategory with Case Management Agent",
+   "summary": "With email classification, administrators can define a custom taxonomy of categories and subcategories to automatically classify inbound emails in Dynamics 365 Customer Service. AI analyzes the email subject and body, then stores the assigned category or subcategory on the email activity record. Case Management Agent, automatic record creation rules, Power Automate flows, reporting, and other downstream processes…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576775",
+   "updated": "2026-10-16T19:08:55Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576772",
+   "title": "Dynamics 365 Contact Center: Omnichannel customer experiences - Handle duplicate callback requests in overflowing queues",
+   "summary": "In the in-queue and pre-queue overflow settings within the Copilot Service admin center, administrators can define the following settings: Prevent duplicate callback requests from the same phone number. Define deduplication logic using combinations of caller phone number, channel phone number, and queue ID. Configure caller experiences when a duplicate is detected. An option to end the call or play a custom…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576772",
+   "updated": "2026-10-16T19:08:53Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "August CY2026",
+   "preview": "",
+   "topic": "office",
+   "products": [
+    "Dynamics 365 Contact Center"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576762",
+   "title": "Dynamics 365 Finance: Business performance - MCP for ERP Analytics",
+   "summary": "MCP for Analytics provides AI agents with structured access to ERP analytics data and tools. It ensures agents use the same definitions and models as users. Key benefits: Data Access: Gives agents access to ERP analytics data for analysis and insights. Metrics and Dimensions: Provides access to key metrics, dimensions, and relationships used in reporting. Semantic Model: Exposes the full semantic model to support…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576762",
+   "updated": "2026-10-16T19:08:46Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "December CY2026",
+   "preview": "January CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Finance"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576761",
+   "title": "Dynamics 365 Customer Service: Workforce engagement management - Detect intraday volume spikes with workforce alerts",
+   "summary": "Supervisors can create volume spike alerts that compare real-time conversation volume with the forecast linked to a shift plan. When volume remains above forecast for the configured number of intervals, selected recipients receive an in-app notification. The capability includes the following features: Administrators can enable workforce alerts in Copilot Service admin center by going to Workforce management &gt;…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576761",
+   "updated": "2026-10-16T19:08:45Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "October CY2026",
+   "preview": "August CY2026",
+   "topic": "admin",
+   "products": [
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576755",
+   "title": "Dynamics 365 Finance and Operations cross-app: Boost productivity with Copilot - Boost agent performance with optimal tool execution paths in Dynamics 365 ERP MCP",
+   "summary": "With the dynamic tools of the Dynamics 365 ERP MCP server, large language models often have multiple options for tool-calling sequences to perform an operation or retrieve data. The orchestration can select the tool execution sequence and can include more tool calls than are required. This enhancement to the MCP server improves performance and accuracy of the server response by enabling the server to use optimal…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576755",
+   "updated": "2026-10-16T19:08:39Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "December CY2026",
+   "preview": "October CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Finance and Operations cross-app"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576754",
+   "title": "Dynamics 365 Supply Chain Management: Copilot and AI innovation - Understand forecast accuracy with AI explanations",
+   "summary": "By combining forecast results with contextual insights, planners can gain a detailed understanding of the key factors influencing each forecast rather than simply viewing the numbers. This increased transparency builds confidence and supports more informed planning decisions. Key benefits include: See symmetric mean absolute percentage error (SMAPE) values. View historical data and forecast results in one place.…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576754",
+   "updated": "2026-10-16T19:08:38Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "October CY2026",
+   "preview": "July CY2026",
+   "topic": "general",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Supply Chain Management"
+   ],
+   "agent": false
+  },
+  {
+   "id": "576748",
+   "title": "Dynamics 365 Customer Service: Workforce engagement management - Monitor intraday performance against the forecast",
+   "summary": "The intraday performance report provides supervisors with an interval-level view of performance against the forecast. In Copilot Service workspace, go to Workforce management to access the report. Compare forecast and actual contact volume and average handle time. Variances appear as values and percentages, making outliers easier to identify. Compare forecast, required, and scheduled staffing levels to identify…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576748",
+   "updated": "2026-10-16T19:08:32Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "October CY2026",
+   "preview": "August CY2026",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Customer Service"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576636",
+   "title": "Dynamics 365 Contact Center: Copilot and AI innovation - Use agentic simulations to evaluate contact center setup",
+   "summary": "Agentic simulations are an AI-driven capability of Service Operations Agent that enable organizations to evaluate how their contact center behaves under realistic customer conditions before those conditions occur in production. Administrators define simulation scenarios using natural-language prompts. Agentic simulations then generate realistic synthetic conversations, runs them end-to-end through the configured…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576636",
+   "updated": "2026-10-16T17:39:48Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "June CY2027",
+   "preview": "July CY2026",
+   "topic": "agent",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)",
+    "Dynamics 365 Contact Center"
+   ],
+   "agent": true
+  },
+  {
+   "id": "576634",
+   "title": "Dynamics 365 Contact Center: Administrator experiences - Use industry templates to set up autonomous contact centers",
+   "summary": "This release introduces industry-specific templates that simplify the creation and deployment of autonomous contact centers. Organizations can start with a preconfigured template in Copilot Service admin center &gt; Service Operations Agent and deploy an autonomous customer service experience in just a few clicks, significantly reducing the setup effort required to design agents, workflows, and service journeys…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=576634",
+   "updated": "2026-10-16T17:39:44Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "June CY2027",
+   "preview": "July CY2026",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Contact Center"
+   ],
+   "agent": true
+  },
+  {
+   "id": "571663",
+   "title": "Dynamics 365 Field Service: Microsoft Copilot in Field Service Mobile app",
+   "summary": "Microsoft Copilot in the Dynamics 365 Field Service mobile app brings conversational AI chat capabilities directly to frontline workers. Once enabled, technicians can ask natural-language questions about Dynamics 365 Field Service data and receive contextual answers based on the app experience and their organization’s Dataverse data. With standard capabilities, Dataverse Q&A supports questions such as “What is…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=571663",
+   "updated": "2026-10-15T22:47:30Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "February CY2027",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Dynamics 365 Field Service"
+   ],
+   "agent": true
+  },
+  {
+   "id": "573696",
+   "title": "SharePoint: Copilot Search in SharePoint and OneDrive",
+   "summary": "Copilot Search brings AI-powered, natural-language search to SharePoint and OneDrive, combining relevant results, AI-generated summaries with source references, intuitive filters, and a seamless handoff to Copilot.",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573696",
+   "updated": "2026-10-15T22:47:30Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "January CY2027",
+   "preview": "October CY2026",
+   "topic": "browser",
+   "products": [
+    "OneDrive",
+    "SharePoint"
+   ],
+   "agent": false
+  },
+  {
+   "id": "569424",
+   "title": "Excel: Excel canvas",
+   "summary": "A Copilot-generated canvas that turns workbook data into a polished, interactive view of key visualizations, metrics, and insights. As workbook data changes, it automatically updates to reflect the latest information. Users can modify the canvas by chatting with Copilot.",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=569424",
+   "updated": "2026-10-15T22:47:30Z",
+   "status": "Rolling out",
+   "statusTh": "กำลังทยอยเปิดใช้",
+   "ga": "September CY2026",
+   "preview": "",
+   "topic": "office",
+   "products": [
+    "Current Channel",
+    "Excel"
+   ],
+   "agent": false
+  },
+  {
+   "id": "500872",
+   "title": "Microsoft Copilot (Microsoft 365): Export Copilot metrics in the Copilot Dashboard",
+   "summary": "This enables users to export row-level Copilot metrics from the Copilot Dashboard for reporting and deeper analysis.",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=500872",
+   "updated": "2026-10-15T22:47:30Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "November CY2026",
+   "preview": "October CY2026",
+   "topic": "general",
+   "products": [
+    "Microsoft Viva",
+    "Microsoft Copilot (Microsoft 365)"
+   ],
+   "agent": false
+  },
+  {
+   "id": "573168",
+   "title": "Planner: Planner Agent in Copilot V2 Improvements",
+   "summary": "Planner Agent brings Planner’s intelligent work management directly into Copilot Chat, enabling users to create, update, and manage personal tasks and shared basic plans without switching context. Integrated across Microsoft 365, it provides insights into priorities, deadlines, and at-risk work, along with interactive task cards to help users stay organized and keep work moving. Building on the initial launch,…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573168",
+   "updated": "2026-10-14T23:01:02Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "October CY2026",
+   "preview": "",
+   "topic": "agent",
+   "products": [
+    "Planner",
+    "Teams and Surface Devices"
+   ],
+   "agent": true
+  },
+  {
+   "id": "574111",
+   "title": "Microsoft Copilot (Microsoft 365): Copilot response personalization - Memory citations",
+   "summary": "When Copilot Chat uses memory to personalize a response, users can now see what informed the answer. Select Sources beneath the response, then open the Personalization tab to view the custom instructions, saved memories, memories learned from conversations, and past chats that shaped the response. From there, users can return to a cited chat to pick up where they left off or review and delete saved memories.…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=574111",
+   "updated": "2026-10-14T23:01:02Z",
+   "status": "Launched",
+   "statusTh": "เปิดใช้แล้ว",
+   "ga": "October CY2026",
+   "preview": "",
+   "topic": "general",
+   "products": [
+    "Microsoft Copilot (Microsoft 365)"
+   ],
+   "agent": false
+  },
+  {
+   "id": "570846",
+   "title": "Microsoft Teams: Express face enrollment",
+   "summary": "Express face enrollment makes it easier for users to create a face profile in Teams by using their camera during eligible meetings, after they opt in. Once enrolled, users can be recognized in supported Teams Rooms experiences, helping identify who is in the room and improving downstream meeting experiences such as Copilot and recap. Admins can enable or disable the feature for their organization.",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=570846",
+   "updated": "2026-10-14T23:01:02Z",
+   "status": "In development",
+   "statusTh": "กำลังพัฒนา",
+   "ga": "December CY2026",
+   "preview": "",
+   "topic": "teams",
+   "products": [
+    "Microsoft Teams"
+   ],
+   "agent": false
+  },
+  {
+   "id": "561032",
+   "title": "Microsoft Purview: Data Loss Prevention – New Guided Experience to Diagnose and Resolve DLP Issues",
+   "summary": "We’re introducing a new guided diagnostics experience to help users understand why their DLP policies may not be behaving as expected. This experience provides a clear summary of why a DLP action was taken on a document, including which policies were triggered, the order of evaluation, and detailed insights into which conditions evaluated as true or false. For Microsoft 365 E5 customers, the experience also…",
+   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=561032",
+   "updated": "2026-10-14T23:01:02Z",
+   "status": "Rolling out",
+   "statusTh": "กำลังทยอยเปิดใช้",
+   "ga": "October CY2026",
+   "preview": "September CY2026",
+   "topic": "admin",
+   "products": [
+    "Microsoft Purview"
+   ],
+   "agent": false
+  },
   {
    "id": "575298",
    "title": "SharePoint: Agent chat web part",
@@ -645,677 +1319,6 @@
    "statusTh": "เปิดใช้แล้ว",
    "ga": "October CY2026",
    "preview": "September CY2026",
-   "topic": "browser",
-   "products": [
-    "Microsoft Purview"
-   ],
-   "agent": false
-  },
-  {
-   "id": "566318",
-   "title": "Microsoft 365 app: New Copilot Notebooks design in the Microsoft 365 Copilot App (iOS)",
-   "summary": "Copilot Notebooks in the Microsoft 365 Copilot app (iOS) now lets users organize related chats, output creations, and references into a persistent AI workspace. Copilot uses the Notebook's accumulated context to ground responses, so work continues across sessions instead of starting over each time.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=566318",
-   "updated": "2026-10-06T22:56:31Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "September CY2026",
-   "preview": "",
-   "topic": "general",
-   "products": [
-    "Microsoft 365 app"
-   ],
-   "agent": false
-  },
-  {
-   "id": "560539",
-   "title": "Microsoft Copilot (Microsoft 365): Dataverse data connected to Microsoft 365 Copilot",
-   "summary": "Let people search and query Dataverse business data from Microsoft 365 Copilot.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=560539",
-   "updated": "2026-10-06T22:56:31Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "September CY2026",
-   "preview": "June CY2026",
-   "topic": "general",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "545896",
-   "title": "Microsoft Copilot (Microsoft 365): Structured Document Generation with Forms",
-   "summary": "Structured Document Generation with Forms enables organizations to create, manage, and generate standardized documents at scale with built-in governance and compliance in SharePoint. Business process owners can centrally build and maintain form-driven templates -- such as contracts, agreements, proposals, and HR documents -- ensuring content stays accurate and up to date. Users can then generate the right…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=545896",
-   "updated": "2026-10-06T22:56:31Z",
-   "status": "Rolling out",
-   "statusTh": "กำลังทยอยเปิดใช้",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "browser",
-   "products": [
-    "SharePoint",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "508524",
-   "title": "Outlook: User-initiated Copilot insights in classic Outlook",
-   "summary": "Users can manually select text and ask Copilot to help provide relevant information.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=508524",
-   "updated": "2026-10-06T22:56:31Z",
-   "status": "Rolling out",
-   "statusTh": "กำลังทยอยเปิดใช้",
-   "ga": "October CY2026",
-   "preview": "May CY2026",
-   "topic": "teams",
-   "products": [
-    "Current Channel",
-    "Outlook"
-   ],
-   "agent": false
-  },
-  {
-   "id": "503771",
-   "title": "Microsoft Copilot (Microsoft 365): [Copilot Extensibility] Users in GCC-H will be able to use custom engine agents",
-   "summary": "Users in GCC-H will be able to use custom engine agents.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=503771",
-   "updated": "2026-10-05T23:03:05Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "December CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "506749",
-   "title": "Microsoft Viva: Copilot Analytics - Agent Dashboard.",
-   "summary": "Viva Insights is creating an Agent Dashboard, designed to be a central place for leaders, delegates and analysts to understand how your organization is adopting agents. #copilotcontrolsystem",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=506749",
-   "updated": "2026-10-05T23:03:05Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "February CY2027",
-   "preview": "February CY2026",
-   "topic": "agent",
-   "products": [
-    "Microsoft Viva",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "555852",
-   "title": "Microsoft Copilot (Microsoft 365): Branded footer in the Microsoft 365 Copilot app",
-   "summary": "This update introduces a co-branding experience in the Microsoft 365 Copilot app that helps organizations present an admin approved visual identifier directly within the Chat screen. Specifically, the experience enables administrators to leverage the organization-supported logo already managed in the Microsoft Admin Center theming settings and display it in the footer of the Chat screen, paired with a fixed…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=555852",
-   "updated": "2026-10-05T23:03:05Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "August CY2026",
-   "preview": "",
-   "topic": "admin",
-   "products": [
-    "Microsoft 365",
-    "Microsoft 365 app",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "493752",
-   "title": "Microsoft Purview compliance portal: Cloud Attachments preservation for users on hold",
-   "summary": "Enables cloud attachment preservation for users put on infinite hold so that file versions shared are preserved across any OneDrive or SharePoint site. This is a new capability which is different from the existing capability of applying label to cloud attachments and links present in OneDrive and SharePoint and shared in Exchange, Teams, Viva Engage and Copilot",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=493752",
-   "updated": "2026-10-05T23:03:05Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "May CY2027",
-   "preview": "March CY2027",
-   "topic": "admin",
-   "products": [
-    "Microsoft Purview"
-   ],
-   "agent": false
-  },
-  {
-   "id": "571394",
-   "title": "Microsoft Copilot (Microsoft 365): Use Dataverse Business Skills in Sales Agent",
-   "summary": "Business Skills are natural language instructions authored and stored in Microsoft Dataverse that teach Sales Agent how work gets done within a specific organization. Business Skills enable organizations to create natural language instructions for Sales Agent to follow, which represent their business processes, policies, and business knowledge. Business skills can represent common sales workflows such as lead…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=571394",
-   "updated": "2026-10-02T22:01:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "November CY2026",
-   "preview": "September CY2026",
-   "topic": "agent",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573280",
-   "title": "Outlook: Draft, edit and format emails conversationally with Copilot in Outlook",
-   "summary": "In Outlook, Copilot now works side by side with users to draft, refine, and format emails conversationally, powered by the same agentic capabilities available in Word, Excel, and PowerPoint.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573280",
-   "updated": "2026-10-02T22:01:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "November CY2026",
-   "preview": "",
-   "topic": "teams",
-   "products": [
-    "Outlook"
-   ],
-   "agent": false
-  },
-  {
-   "id": "571400",
-   "title": "Microsoft Copilot (Microsoft 365): Chat: Access to UBB models via the model selector",
-   "summary": "Users will be able to access models that require usage-based billing (UBB) from the model selector in Chat. Tenant admins will need to allocate credits so that users can interact with these models. If users consume their allotted credits, they will be able to request credits from their tenant admins.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=571400",
-   "updated": "2026-10-02T22:01:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "general",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "561040",
-   "title": "Microsoft Edge: Commercial Journeys - AI-powered task completion for Microsoft 365 Copilot users",
-   "summary": "Commercial Journeys helps information workers stay on top of their most important work when browsing in Microsoft Edge. Powered by AI, it proactively surfaces unfinished, new, and recurring tasks on the Copilot new tab page- with context-rich cards that explain why each task matters now. One click opens a guided execution flow that delivers ready-to-use outputs (emails, documents, presentations, and more), so…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=561040",
-   "updated": "2026-10-02T22:01:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "January CY2027",
-   "preview": "November CY2026",
-   "topic": "browser",
-   "products": [
-    "Microsoft Edge",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "568762",
-   "title": "Microsoft Copilot Studio: Agent Readiness in Microsoft Copilot Studio",
-   "summary": "Agent Readiness gives makers a real-time, always-visible health check for their Copilot Studio agents. A single \"Review\" indicator in the build experience surfaces anything blocking or at risk — from policy restrictions to missing evaluations — before it derails a publish. Blocked capabilities are grayed out up front with a clear reason, so makers never waste time configuring something that was never going to work.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=568762",
-   "updated": "2026-10-01T23:00:07Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "September CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Microsoft Copilot Studio"
-   ],
-   "agent": true
-  },
-  {
-   "id": "515465",
-   "title": "Microsoft Teams: Adaptive card-based app & copilot agent link unfurling in Teams",
-   "summary": "Discover and add SharePoint agents in chats and channels from in-context store. Users can click on 'Add agents and bots' from the roster drop down. This will open the in-context store, where users can discover SharePoint agents and add them directly to the conversation and collaborate in the group. Updated January 29, 2026: Due to a blocker we have paused rollout until March for this feature. We apologize for any…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=515465",
-   "updated": "2026-10-01T23:00:07Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Microsoft Teams"
-   ],
-   "agent": true
-  },
-  {
-   "id": "559613",
-   "title": "Microsoft Copilot (Microsoft 365): Copilot Chat can now better match search results from Scanned PDFs",
-   "summary": "Copilot Chat can now better match search results from Scanned PDFs on Copilot users' files they are working on — content that was previously difficult to search and find. This feature will work for new/updated user's working files on a go-forward basis.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=559613",
-   "updated": "2026-10-01T23:00:07Z",
-   "status": "Rolling out",
-   "statusTh": "กำลังทยอยเปิดใช้",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "general",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "573380",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Improve purchase order matching in Payables Agent",
-   "summary": "This feature improves PO matching quality in Payables Agent and aligns draft finalization behavior with existing posting controls. The agent uses an enriched PO Lines list page during matching that includes these fields: Line Amount — enables matching on value, not just description and quantity. This field is especially valuable for service lines where quantity (often just 1) isn't a meaningful discriminator.…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573380",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573372",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Updates to Agent UI experience",
-   "summary": "Manage agents more easily by grouping avatars and using a dedicated action to start new tasks.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573372",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573370",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Manage agent permissions easier",
-   "summary": "Assign additional permissions to agents when they request them.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573370",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573366",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Review content generated by agents directly on pages",
-   "summary": "This improvement introduces the ability for Business Central users to review and approve content generated by agents directly on the pages where they work. You no longer need to navigate to separate task pane to understand that a given document was created by an agent. Instead, agent‑generated suggestions—such as descriptions, text proposals, or field‑specific updates—appear inline where they can be evaluated and…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573366",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573364",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Show avatars for record creators and modifiers in list",
-   "summary": "This feature introduces visual avatars in Business Central list pages to indicate which user or agent created or last modified a record. The capability enhances traceability and supports collaborative work by making identity information immediately visible without opening the record. The avatars reflect either a named Business Central user, a system user or an AI agent, following the existing identity model.…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573364",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573363",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Manage tasks from all agents in dedicated task pane",
-   "summary": "This feature introduces a dedicated task pane in Business Central that displays all tasks generated by the agents. The task pane appears as an additional panel in the user interface and can be opened from anywhere in Business Central. Tasks include suggestions, validations, follow‑ups access to draft documents, and other agent‑initiated actions. Users can review task details, navigate directly to the affected…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573363",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573362",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Enable Microsoft Copilot chat experience",
-   "summary": "The updated Microsoft Copilot chat experience introduces a modern, consistent, and intuitive interface that aligns Business Central with the broader Microsoft Copilot ecosystem. The enhancement modernizes the chat panel, streamlines navigation, and improves user workflows by adopting familiar interaction patterns from Microsoft Copilot. This update benefits users who regularly interact with Copilot to accelerate…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573362",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "October CY2026",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573312",
-   "title": "Dynamics 365 Business Central: Copilot and agents - Run data queries with MCP Server",
-   "summary": "Use new MCP tools to define, validate, and run custom data queries. Your MCP application can then query data for which no existing APIs exist.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573312",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Business Central"
-   ],
-   "agent": true
-  },
-  {
-   "id": "570432",
-   "title": "Microsoft Copilot Studio: Self-learning for Copilot Studio Agents",
-   "summary": "Soon agents can help makers improve agents using lessons from completed runs. It will identify repeated tool sequences that can be handled by workflows to standardize agent behavior, minimize errors, and most importantly control costs. Makers will be presented with recommendations and supporting evidence, expected impact, and the related instruction and tool changes. Makers accept recommendations, configure,…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=570432",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "September CY2026",
-   "topic": "agent",
-   "products": [
-    "Microsoft Copilot Studio"
-   ],
-   "agent": true
-  },
-  {
-   "id": "570430",
-   "title": "Microsoft Copilot Studio: Persistent identity for Copilot Studio Agents",
-   "summary": "Makers can now give their Copilot Studio agents their own accounts, making it a governed Microsoft 365 identity for shared, collaborative business processes that spans across teams. With its own mailbox, Teams presence & Office access, the agent can collaborate where work happens while admins can control and govern its access, policies and use as its own first-class entity.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=570430",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "November CY2026",
-   "preview": "September CY2026",
-   "topic": "agent",
-   "products": [
-    "Microsoft Copilot Studio"
-   ],
-   "agent": true
-  },
-  {
-   "id": "573373",
-   "title": "Dynamics 365 Sales: Sales tools, skills and plugin are now available in Copilot Cowork",
-   "summary": "The updated Sales plugin brings expanded Dynamics 365 Sales context, actions, and guided workflows to Copilot Cowork, building on the native Sales skills already available in Cowork. Sellers can work with sales data and take supported actions directly in the flow of work, reducing the need to switch to Dynamics 365 Sales. The native Sales skills invoke tools published through the Dynamics 365 MCP server to…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=573373",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "September CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Sales"
-   ],
-   "agent": false
-  },
-  {
-   "id": "571678",
-   "title": "Dynamics 365 Customer Service: Service tools, skills and plugins are now available for Cowork, Code and Scout",
-   "summary": "The updated Service application brings Dynamics 365 Customer Service context, actions, and guided workflows into supported Copilot experiences, including Chat, Cowork, Code, and Scout. Customer service teams can work with service information and take supported actions in the flow of work, reducing the need to switch to Dynamics 365. First-party tools delivered through the Service package on Dynamics 365 MCP…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=571678",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "September CY2026",
-   "preview": "",
-   "topic": "agent",
-   "products": [
-    "Dynamics 365 Customer Service"
-   ],
-   "agent": false
-  },
-  {
-   "id": "568933",
-   "title": "Microsoft Teams: Use Copilot Chat after a call in Queues app",
-   "summary": "After a recorded call is completed, use Copilot in the Queues app to quickly catch up on key details, uncover insights, and resolve customer issues faster without having to manually search through a transcript or listen back to a recording. Navigate to the unified call history in the Queues app, select the recorded call record, and launch the Copilot Chat sidecar from within the Recap tab. You can then ask…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=568933",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "September CY2026",
-   "preview": "",
-   "topic": "teams",
-   "products": [
-    "Microsoft Teams",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "523223",
-   "title": "Microsoft Copilot (Microsoft 365): Deep citations in Copilot",
-   "summary": "Deep citations let users quickly verify Copilot's results by linking directly to the relevant part of the reference, boosting trust. We're starting with Word and PPT files, then adding Meetings, Web, and PDF references.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=523223",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "February CY2027",
-   "preview": "January CY2026",
-   "topic": "office",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "422324",
-   "title": "OneNote: Summary and Q&A in OneNote Mobile with Copilot (Iphone)",
-   "summary": "With this new Summary feature in OneNote mobile, you can create a short and fluent summary of your longer pages which will help to consume relevant information faster. With the Question and Answer at your fingertips, you can get real-time answers to your queries directly within your notes, enhancing your ability to access and utilize information quickly and effectively. We inadvertently marked this item as…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=422324",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "office",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)",
-    "OneNote"
-   ],
-   "agent": false
-  },
-  {
-   "id": "422323",
-   "title": "OneNote: Summary and Q&A in OneNote Mobile with Copilot (Android)",
-   "summary": "With this new Summary feature in OneNote mobile, you can create a short and fluent summary of your longer pages which will help to consume relevant information faster. With the Question and Answer at your fingertips, you can get real-time answers to your queries directly within your notes, enhancing your ability to access and utilize information quickly and effectively.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=422323",
-   "updated": "2026-09-30T23:31:03Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "office",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)",
-    "OneNote"
-   ],
-   "agent": false
-  },
-  {
-   "id": "571880",
-   "title": "Microsoft Copilot Studio: Discover & Add Skills from the skill catalog",
-   "summary": "With the Skills catalog in Copilot Studio, makers can discover, reuse and selectively share approved organizational skills instead of recreating the same instructions and workflows for every agent. The shared catalog powered by Microsoft 365 App Store enables shared skills to extend across experiences such as Copilot Studio M365 copilot, and Cowork, helping organizations standardize proven ways of working while…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=571880",
-   "updated": "2026-09-29T23:05:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "September CY2026",
-   "topic": "agent",
-   "products": [
-    "Microsoft Copilot Studio"
-   ],
-   "agent": true
-  },
-  {
-   "id": "560538",
-   "title": "Microsoft Viva: Copilot Analytics - Export metrics from Agent Dashboard",
-   "summary": "Users can export de-identified, row-level agent metrics and attributes from the Agent Dashboard. Exported data provides detailed insights into agent usage and user-level agent interactions across the organization, with personal identifiers removed. #copilotcontrolsystem",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=560538",
-   "updated": "2026-09-29T23:05:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "May CY2026",
-   "topic": "agent",
-   "products": [
-    "Microsoft Viva",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "543422",
-   "title": "Microsoft Copilot (Microsoft 365): Excel Agent",
-   "summary": "Excel Agent helps you turn data into clear charts, summaries, and insights using built‑in formulas and logic. It streamlines data preparation, formulas, and visualization so you can stay focused on the story behind the numbers. Use multi‑turn chat to refine your output or open it in Excel for full editing and collaboration. Ideal for financial forecasts, project plans, and decision‑making tools. Available to…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=543422",
-   "updated": "2026-09-29T23:05:21Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "March CY2026",
-   "preview": "November CY2025",
-   "topic": "agent",
-   "products": [
-    "Excel",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "569425",
-   "title": "Microsoft Copilot (Microsoft M365): Delegated prompt publishing for organization prompts",
-   "summary": "This release follows the availability of organization prompts, providing admins the ability to upload custom prompts for their organization in the Copilot app home screen. Now, admins can delegate organization prompt publishing to users, AAD security groups, and distribution groups. These delegated users and groups will be able to create, edit and delete organization prompts at the tenant level through the Prompt…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=569425",
-   "updated": "2026-09-29T23:05:21Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "October CY2026",
-   "preview": "",
-   "topic": "admin",
-   "products": [
-    "Microsoft 365 admin center",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "567121",
-   "title": "Microsoft Copilot (Microsoft 365): Microsoft 365 admin center - Usage reports - Copilot Chat for GCC, GCC High and DoD",
-   "summary": "We will be introducing a new Usage report covering Copilot Chat. This report will include total active users, Copilot Chat usage with a breakout per Microsoft 365 app, and user-level activity insights (anonymized by default). #copilotcontrolsystem",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=567121",
-   "updated": "2026-09-29T23:05:21Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "July CY2026",
-   "preview": "",
-   "topic": "admin",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "502858",
-   "title": "Microsoft Copilot (Microsoft 365): Live subtitles on voice chat in Copilot when using the quick composer",
-   "summary": "Live subtitles for voice chats in Copilot will be available for users to help them follow the conversation when using the quick composer.",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=502858",
-   "updated": "2026-09-29T23:05:21Z",
-   "status": "Launched",
-   "statusTh": "เปิดใช้แล้ว",
-   "ga": "January CY2026",
-   "preview": "",
-   "topic": "general",
-   "products": [
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": false
-  },
-  {
-   "id": "567003",
-   "title": "Microsoft Copilot (Microsoft 365): Enrich Sales agent meeting prep with more data sources",
-   "summary": "Walking into a customer meeting with incomplete context can mean missed risks, overlooked issues, and conversations that fall flat. With access to richer data, like service tickets, directly in your meeting prep, you can spot open issues and opportunities before the conversation starts. This insight helps you engage more meaningfully, build stronger relationships, and drive better sales outcomes. UPDATE: This…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=567003",
-   "updated": "2026-09-28T22:58:08Z",
-   "status": "",
-   "statusTh": "",
-   "ga": "March CY2027",
-   "preview": "September CY2026",
-   "topic": "agent",
-   "products": [
-    "Cancelled",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "567002",
-   "title": "Microsoft Copilot (Microsoft 365): Add custom insights to record summaries in Sales agent",
-   "summary": "Sales agent gives you strong CRM-based account and opportunity summaries, but important context is often spread across non-CRM systems. With this capability, you can add insights from any application to enrich account and opportunity summaries in Sales agent, so sellers get a unified view of their accounts and deals in one place without switching applications. UPDATE: This roadmap item is no longer accurate and…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=567002",
-   "updated": "2026-09-28T22:58:08Z",
-   "status": "",
-   "statusTh": "",
-   "ga": "March CY2027",
-   "preview": "September CY2026",
-   "topic": "agent",
-   "products": [
-    "Cancelled",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "567000",
-   "title": "Microsoft Copilot (Microsoft 365): Engage prospects faster with Sales Agent-enriched leads",
-   "summary": "To reach their sales goals, sales teams need to constantly generate enough pipeline. They need to decide which inbound leads to engage. This decision takes a lot of time because sellers must sift through large amounts of data across tools and data sources. This data includes information from internal systems like their CRM and external resources like the web and third-party data services. Sales Agent handles the…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=567000",
-   "updated": "2026-09-28T22:58:08Z",
-   "status": "",
-   "statusTh": "",
-   "ga": "September CY2026",
-   "preview": "June CY2025",
-   "topic": "agent",
-   "products": [
-    "Cancelled",
-    "Microsoft Copilot (Microsoft 365)"
-   ],
-   "agent": true
-  },
-  {
-   "id": "571309",
-   "title": "Microsoft Purview: Information Protection-Auto-labeling scale increase for SharePoint and OneDrive",
-   "summary": "We are increasing the maximum auto-labeling capacity for SharePoint and OneDrive from 100,000 up to 500,000 files per tenant per day. This helps organizations label and protect more of their data at rest, faster, closing labeling gaps across existing content. With sensitivity labels and protection settings applied to more files sooner, organizations can better prepare their data estate for Microsoft 365 Copilot…",
-   "url": "https://www.microsoft.com/microsoft-365/roadmap?id=571309",
-   "updated": "2026-09-28T22:58:08Z",
-   "status": "In development",
-   "statusTh": "กำลังพัฒนา",
-   "ga": "November CY2026",
-   "preview": "",
    "topic": "browser",
    "products": [
     "Microsoft Purview"
