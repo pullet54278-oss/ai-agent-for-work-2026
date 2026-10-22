@@ -2,8 +2,8 @@
 (() => {
   'use strict';
   // Bump on every release; BUILD must match VERSION in sw.js.
-  const APP_VERSION = '1.0.1';
-  const BUILD = '2026.10.22 · gaw-v2';
+  const APP_VERSION = '1.0.2';
+  const BUILD = '2026.10.22 · gaw-v3';
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -20,9 +20,55 @@
   const visitedTools = new Set(store.get('tools', []));
   function updateProgress() {
     const total = LESSONS.length + TOOLS.length;
-    const p = Math.round((done.size + visitedTools.size) / total * 100);
-    $('#pc-text').textContent = p + '%';
-    $('#pc-fg').style.strokeDashoffset = 94.25 * (1 - p / 100);
+    $('#learn-pill').textContent = `เรียนแล้ว ${done.size + visitedTools.size}/${total}`;
+    updateSide();
+  }
+
+  // ---------- sidebar: lessons + tool box + menu ----------
+  function buildSide() {
+    const lessonRows = LESSONS.map(l => `
+      <div class="sl" data-f="${esc((l.title + ' ' + l.sub).toLowerCase())}">
+        <a class="sl-row" href="#/lesson/${l.id}" data-side="lesson/${l.id}">
+          <span class="sl-n" style="--c:${l.color}">${String(l.n).padStart(2, '0')}</span>
+          <span class="sl-t">${esc(l.title)}<small>${l.stations.length > 1 ? l.stations.length + ' สถานี · ' : ''}${l.stations.reduce((a, x) => a + x.steps.length, 0)} ขั้นเดโม · ${l.minutes} นาที</small></span>
+          <i class="sl-dot" data-dot="${l.id}"></i>
+        </a>
+        ${l.stations.length > 1 ? `<button class="sl-exp" aria-label="แสดงสถานี">▸</button><div class="sl-sub">${l.stations.map((x, i) => `<a href="#/lesson/${l.id}/${i}">${x.icon} ${esc(x.title.split(':')[0])}</a>`).join('')}</div>` : ''}
+      </div>`).join('');
+    const cats = Object.entries(CATS).map(([k, c]) => {
+      const list = TOOLS.filter(t => t.cat === k);
+      return `<details class="sg-cat" style="--c:${c.c}"><summary><i></i>${c.t}<small>${list.length}</small></summary>
+        ${list.map(t => `<a class="st-row" href="#/tool/${t.id}" data-side="tool/${t.id}" data-f="${esc((t.t + ' ' + t.d).toLowerCase())}"><span>${t.e}</span>${esc(t.t)}<i class="tv" data-tv="${t.id}"></i></a>`).join('')}</details>`;
+    }).join('');
+    $('#side-nav').innerHTML = `
+      <div class="sg-title">🎓 บทเรียน</div>${lessonRows}
+      <div class="sg-title">🧰 กล่องเครื่องมือ</div>${cats}
+      <div class="sg-title">เมนู</div>
+      <a class="sm" href="#/" data-side="">🏠 <span>หน้าแรก</span></a>
+      <a class="sm" href="#/lessons" data-side="lessons">🧭 <span>เส้นทางการเรียน</span></a>
+      <a class="sm" href="#/tools" data-side="tools">🗂️ <span>คลังเครื่องมือทั้งหมด</span></a>
+      <a class="sm" href="#/lab" data-side="lab">🧪 <span>Prompt Lab รวม</span></a>
+      <a class="sm" href="#/appendix" data-side="appendix">📖 <span>ภาคผนวก</span></a>
+      <button class="sm install-side" id="install-side">⬇️ <span>ติดตั้งแอป</span></button>`;
+    $('#side-nav').addEventListener('click', e => {
+      const ex = e.target.closest('.sl-exp');
+      if (ex) { ex.parentElement.classList.toggle('open'); return; }
+      if (e.target.closest('a') && innerWidth < 900) $('#layout').classList.remove('drawer');
+    });
+    $('#side-filter').addEventListener('input', e => {
+      const k = e.target.value.trim().toLowerCase();
+      $$('[data-f]', $('#side-nav')).forEach(el => { el.hidden = k && !el.dataset.f.includes(k); });
+      $$('.sg-cat', $('#side-nav')).forEach(d => { const any = $$('.st-row', d).some(r => !r.hidden); d.hidden = !!k && !any; if (k) d.open = any; });
+    });
+  }
+  function updateSide() {
+    const last = store.get('last', null);
+    $$('[data-dot]').forEach(d => { const id = d.dataset.dot; d.className = 'sl-dot' + (done.has(id) ? ' done' : id === last ? ' cur' : ''); });
+    $$('[data-tv]').forEach(d => { d.classList.toggle('on', visitedTools.has(d.dataset.tv)); });
+    const h = (location.hash || '#/').replace(/^#\/?/, '').split('/').slice(0, 2).join('/');
+    $$('[data-side]').forEach(a => a.classList.toggle('active', a.dataset.side === h));
+    const act = $('.st-row.active');
+    if (act) { act.closest('details').open = true; }
   }
   function completeLesson(id) {
     if (done.has(id)) return;
@@ -142,7 +188,7 @@
   }
 
   // ---------- LESSON ----------
-  function lesson(id) {
+  function lesson(id, jump) {
     const l = LESSONS.find(x => x.id === id); if (!l) return home();
     store.set('last', id);
     const pos = LESSONS.indexOf(l), next = LESSONS[pos + 1], prev = LESSONS[pos - 1];
@@ -194,6 +240,7 @@
         $$('.station').forEach(st => { const sr = st.getBoundingClientRect(); st.classList.toggle('active', sr.top < innerHeight * .55 && sr.bottom > innerHeight * .3); });
       };
       addEventListener('scroll', on, { passive: true }); on();
+      if (jump != null) setTimeout(() => document.getElementById('st-' + jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350);
       cleanup.push(() => removeEventListener('scroll', on));
     }
   }
@@ -396,18 +443,62 @@
       <div class="app-list">${chapters.map(c => `<a class="app-item reveal" href="#/appendix/${c.id}"><span>${c.id === 'summary' ? '★' : c.id}</span>${esc(c.title)}</a>`).join('')}</div>`, 'ภาคผนวก');
   }
 
+  // ---------- Prompt Lab hub ----------
+  function labHub() {
+    mount(`<div class="page-head"><span class="kicker">🧪 Prompt Lab รวม</span><h1>ทดลองสั่งงานทุกบทเรียน</h1><p class="muted">เลือกบทเรียนด้านล่าง หรือเปิด Prompt Lab ของเครื่องมือแต่ละตัวจากกล่องเครื่องมือด้านข้าง</p></div>
+      <div class="lab-tabs">${LESSONS.map((l, i) => `<button class="chip${i ? '' : ' on'}" data-lt="${i}" style="--c:${l.color}">${l.icon} ${esc(l.title)}</button>`).join('')}</div>
+      <div class="lab-host" id="hub-lab"></div>`, 'Prompt Lab');
+    const show = i => { promptLab($('#hub-lab'), LESSONS[i].lab, 'lab:' + LESSONS[i].id); $$('[data-lt]').forEach(b => b.classList.toggle('on', +b.dataset.lt === i)); };
+    $$('[data-lt]').forEach(b => b.onclick = () => show(+b.dataset.lt));
+    show(0);
+  }
+
+  // ---------- global search (Ctrl K) ----------
+  function gsearch() {
+    const input = $('#gq'), box = $('#gs-results');
+    const items = [
+      ...LESSONS.map(l => ({ t: `${l.icon} บทที่ ${l.n} · ${l.title}`, s: l.sub, h: '#/lesson/' + l.id })),
+      ...TOOLS.map(t => ({ t: `${t.e} ${t.t}`, s: t.d, h: '#/tool/' + t.id, x: t.steps.join(' ') })),
+      ...chapters.map(c => ({ t: `📖 ${c.title}`, s: 'ภาคผนวก', h: '#/appendix/' + c.id }))
+    ];
+    let sel = 0, res = [];
+    const draw = () => {
+      const k = input.value.trim().toLowerCase();
+      if (!k) { box.hidden = true; return; }
+      const rank = i => i.t.toLowerCase().includes(k) ? 0 : i.s.toLowerCase().includes(k) ? 1 : 2;
+      res = items.filter(i => (i.t + ' ' + i.s + ' ' + (i.x || '')).toLowerCase().includes(k)).sort((x, y) => rank(x) - rank(y)).slice(0, 8);
+      sel = 0;
+      box.innerHTML = res.length ? res.map((r, i) => `<a href="${r.h}" class="${i === sel ? 'on' : ''}"><b>${esc(r.t)}</b><small>${esc(r.s)}</small></a>`).join('') : '<div class="gs-none">ไม่พบผลลัพธ์</div>';
+      box.hidden = false;
+    };
+    input.addEventListener('input', draw);
+    input.addEventListener('focus', draw);
+    input.addEventListener('keydown', e => {
+      const links = $$('a', box);
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = (sel + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % Math.max(links.length, 1); links.forEach((a, i) => a.classList.toggle('on', i === sel)); }
+      if (e.key === 'Enter' && res[sel]) { location.hash = res[sel].h; input.value = ''; box.hidden = true; input.blur(); }
+      if (e.key === 'Escape') { box.hidden = true; input.blur(); }
+    });
+    box.addEventListener('click', () => { input.value = ''; box.hidden = true; });
+    document.addEventListener('click', e => { if (!e.target.closest('#gsearch')) box.hidden = true; });
+    document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); input.focus(); input.select(); } });
+  }
+
   // ---------- router ----------
   function route() {
-    const [, a, b] = (location.hash || '#/').split('/');
+    const [, a, b, c] = (location.hash || '#/').split('/');
+    $('#layout').classList.remove('drawer');
     const go = () => {
       if (a === 'lessons') lessons();
-      else if (a === 'lesson') lesson(b);
+      else if (a === 'lesson') lesson(b, c);
+      else if (a === 'lab') labHub();
       else if (a === 'tools') tools();
       else if (a === 'tool') tool(b);
       else if (a === 'appendix') appendix(b);
       else home();
-      const nav = { lesson: 'lessons', tool: 'tools' }[a] || a || 'home';
+      const nav = { lesson: 'lessons', tool: 'tools', lab: 'lessons' }[a] || a || 'home';
       $$('[data-nav]').forEach(x => x.classList.toggle('active', x.dataset.nav === (nav === '' ? 'home' : nav)));
+      updateSide();
     };
     if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(go); else go();
   }
@@ -416,7 +507,7 @@
   document.addEventListener('click', e => {
     const cp = e.target.closest('[data-copypre]');
     if (cp) copyText(cp.closest('.code').querySelector('pre').textContent).then(() => toast('📋 คัดลอกแล้ว'));
-    const b = e.target.closest('.btn, .install-btn');
+    const b = e.target.closest('.btn');
     if (b) { const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), sp = document.createElement('span'); sp.className = 'ripple'; sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`; b.appendChild(sp); setTimeout(() => sp.remove(), 600); }
     if (e.target.closest('[data-close]') || e.target.classList.contains('modal-wrap')) $$('.modal-wrap').forEach(m => m.hidden = true);
   });
@@ -432,16 +523,34 @@
   let deferred = null;
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const ib = $('#install-btn');
-  if (standalone()) ib.hidden = true;
-  addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; ib.classList.add('pulse'); });
-  addEventListener('appinstalled', () => { ib.hidden = true; toast('✅ ติดตั้งแอปเรียบร้อย'); confetti(); });
-  ib.onclick = async () => {
-    if (deferred) { deferred.prompt(); const r = await deferred.userChoice; deferred = null; if (r.outcome === 'accepted') ib.hidden = true; return; }
+  const installBtns = () => [$('#install-side'), $('#install-top')];
+  const markInstalled = () => installBtns().forEach(b => { b.classList.add('installed'); b.classList.remove('pulse'); if (b.querySelector('span')) b.querySelector('span').textContent = 'ติดตั้งแล้ว'; b.title = 'ติดตั้งแล้ว'; });
+  if (standalone()) markInstalled();
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; installBtns().forEach(b => b.classList.add('pulse')); });
+  addEventListener('appinstalled', () => { markInstalled(); toast('✅ ติดตั้งแอปเรียบร้อย'); confetti(); });
+  const doInstall = async () => {
+    if (standalone()) { toast('แอปติดตั้งอยู่แล้ว'); return; }
+    if (deferred) { deferred.prompt(); const r = await deferred.userChoice; deferred = null; if (r.outcome === 'accepted') markInstalled(); return; }
     $(isIOS ? '#ios-modal' : '#help-modal').hidden = false;
   };
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* ignore */ }));
+  // service worker + "new version" prompt
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(reg => {
+      const offer = w => { $('#update-bar').hidden = false; $('#update-btn').onclick = () => w.postMessage('skipWaiting'); };
+      if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+      reg.addEventListener('updatefound', () => { const w = reg.installing; w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) offer(w); }); });
+    }).catch(() => { /* ignore */ }));
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloaded) { reloaded = true; location.reload(); } });
+  }
+  $('#menu-btn').onclick = () => $('#layout').classList.toggle('drawer');
+  $('#scrim').onclick = () => $('#layout').classList.remove('drawer');
 
+  buildSide();
+  installBtns().forEach(b => b.onclick = doInstall);
+  if (standalone()) markInstalled();
+  gsearch();
+  $$('.v-ver').forEach(x => { x.textContent = APP_VERSION; });
   $('#app-version').textContent = APP_VERSION;
   $('#app-build').textContent = BUILD;
   updateProgress();

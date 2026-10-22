@@ -23,31 +23,44 @@
   <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
   <div id="read-progress" aria-hidden="true"></div>
 
-  <header class="topbar">
-    <a class="brand" href="#/">
-      <span class="logo-mark"><img src="icons/logo.svg" alt=""></span>
-      <span class="brand-text">Chat GPT <b>AI Agents</b> <span>for Work</span></span>
-    </a>
-    <nav class="top-nav" aria-label="เมนูหลัก">
-      <a href="#/" data-nav="home">หน้าแรก</a>
-      <a href="#/lessons" data-nav="lessons">บทเรียน</a>
-      <a href="#/tools" data-nav="tools">เครื่องมือ</a>
-      <a href="#/appendix" data-nav="appendix">ภาคผนวก</a>
-    </nav>
-    <div class="top-actions">
-      <div class="progress-chip" title="ความคืบหน้า"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="pc-bg"/><circle cx="18" cy="18" r="15" class="pc-fg" id="pc-fg"/></svg><span id="pc-text">0%</span></div>
-      <button class="icon-btn" id="sound-btn" title="เสียงเอฟเฟกต์" aria-label="เปิด/ปิดเสียง">🔊</button>
-      <button class="icon-btn" id="theme-btn" title="สลับธีม" aria-label="สลับธีม">🌙</button>
-      <button class="install-btn" id="install-btn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg><span>ติดตั้งแอป</span></button>
+  <div class="layout" id="layout">
+    <aside class="side" id="side" aria-label="สารบัญและเครื่องมือ">
+      <a class="side-brand" href="#/">
+        <span class="logo-mark"><img src="icons/logo.svg" alt=""></span>
+        <span><b>Chat GPT AI Agents</b><small>for Work · Interactive Course 2026</small></span>
+      </a>
+      <div class="side-rainbow"></div>
+      <input class="side-filter" id="side-filter" placeholder="กรองสารบัญ…" aria-label="กรองสารบัญ">
+      <nav class="side-scroll" id="side-nav"></nav>
+      <div class="side-foot">© 2026 · v<span class="v-ver"></span> · Created by Nattapon Yokkret</div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <div class="main-col">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menu-btn" aria-label="เปิดเมนู">☰</button>
+        <div class="gsearch" id="gsearch">
+          <span>🔎</span><input id="gq" placeholder="ค้นหาบทเรียนและเครื่องมือ…" autocomplete="off" aria-label="ค้นหา"><kbd>Ctrl K</kbd>
+          <div class="gs-results" id="gs-results" hidden></div>
+        </div>
+        <div class="top-actions">
+          <span class="learn-pill" id="learn-pill" title="ความคืบหน้า">เรียนแล้ว 0/0</span>
+          <button class="icon-btn" id="sound-btn" title="เสียงเอฟเฟกต์" aria-label="เปิด/ปิดเสียง">🔊</button>
+          <button class="icon-btn" id="theme-btn" title="สลับธีม" aria-label="สลับธีม">🌙</button>
+          <button class="icon-btn install-top" id="install-top" aria-label="ติดตั้งแอป" title="ติดตั้งแอป">⬇️</button>
+        </div>
+      </header>
+
+      <main class="view" id="view" tabindex="-1"></main>
+
+      <footer class="site-foot">
+        <p class="foot-copy">© 2026 Chat GPT AI Agents for Work · Created by Nattapon Yokkret</p>
+        <p class="foot-meta">เวอร์ชัน <span id="app-version"></span> · ผู้สร้าง Nattapon Yokkret · build <span id="app-build"></span></p>
+      </footer>
     </div>
-  </header>
+  </div>
 
-  <main class="view" id="view" tabindex="-1"></main>
-
-  <footer class="site-foot">
-    <p class="foot-copy">© 2026 Chat GPT AI Agents for Work · Created by Nattapon Yokkret</p>
-    <p class="foot-meta">เวอร์ชัน <span id="app-version"></span> · ผู้สร้าง Nattapon Yokkret · build <span id="app-build"></span></p>
-  </footer>
+  <div class="update-bar" id="update-bar" hidden><span>มีเวอร์ชันใหม่</span><button id="update-btn">อัปเดตเลย</button></div>
 
   <nav class="bottom-nav" aria-label="เมนูมือถือ">
     <a href="#/" data-nav="home"><span>🏠</span>หน้าแรก</a>
