@@ -1,0 +1,21 @@
+{
+  "name": "Chat GPT AI Agents for Work",
+  "short_name": "GPT Agents",
+  "description": "เรียนสร้าง AI Agent ด้วย ChatGPT แบบ Interactive พร้อม Prompt Lab ทุกเครื่องมือ",
+  "lang": "th",
+  "id": "./",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "บทเรียนแรก: สร้าง Agent", "url": "./#/lesson/agent" },
+    { "name": "คลังเครื่องมือ", "url": "./#/tools" }
+  ]
+}
