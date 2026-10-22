@@ -2,8 +2,8 @@
 (() => {
   'use strict';
   // Bump on every release; BUILD must match VERSION in sw.js.
-  const APP_VERSION = '1.0.2';
-  const BUILD = '2026.10.22 · gaw-v3';
+  const APP_VERSION = '1.0.3';
+  const BUILD = '2026.10.22 · gaw-v4';
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -523,9 +523,8 @@
   let deferred = null;
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const installBtns = () => [$('#install-side'), $('#install-top')];
+  const installBtns = () => [$('#install-side'), $('#install-top')].filter(Boolean);
   const markInstalled = () => installBtns().forEach(b => { b.classList.add('installed'); b.classList.remove('pulse'); if (b.querySelector('span')) b.querySelector('span').textContent = 'ติดตั้งแล้ว'; b.title = 'ติดตั้งแล้ว'; });
-  if (standalone()) markInstalled();
   addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; installBtns().forEach(b => b.classList.add('pulse')); });
   addEventListener('appinstalled', () => { markInstalled(); toast('✅ ติดตั้งแอปเรียบร้อย'); confetti(); });
   const doInstall = async () => {
