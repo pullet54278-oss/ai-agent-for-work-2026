@@ -17,7 +17,7 @@ const store = {
 // ---------- data ----------
 const DEEP0 = 1000;
 const EX0 = 20000; // AI + Excel pages: 20101…
-const TOTAL = D.meta.totalPages + D.meta.deepTotal + D.meta.excelTotal;
+const TOTAL = D.meta.totalPages + D.meta.deepTotal + D.meta.excelTotal + (D.meta.extTotal || 0);
 const HOME = { n: 1, title: 'หน้าแรก: Copilot AI Agents for Work 2026', type: 'home', chapter: 1, icon: 'home', typeLabel: 'หน้าแรก' };
 const DEEPCH = D.deepGroups.map((g, i) => ({ n: 101 + i, key: g.key, title: g.th, en: g.name, desc: g.desc, group: g.key, goals: [], deep: true, pages: D.deepIndex.filter(l => l.group === g.key).map(l => DEEP0 + l.n), agents: 0 }));
 const DEEPP = D.deepIndex.map(l => ({ n: DEEP0 + l.n, k: l.n, title: l.title, type: 'deep', typeLabel: 'Deep Learning', icon: 'hat_graduation', chapter: DEEPCH.find(c => c.key === l.group).n, header: { short: l.outcome ? 'ผลลัพธ์หลังเรียน: ' + l.outcome : '' }, outcome: l.outcome, text: l.text, html: null }));
@@ -25,14 +25,19 @@ const X_KIND_ICON = { overview: 'compass_northwest', lesson: 'book_open', worksh
 const XCH = D.excel.chapters.map(c => ({ ...c, group: c.key, goals: [], excel: true, agents: 0 }));
 const XP = D.excel.index.map(x => ({ n: x.n, slug: x.slug, k: x.code, title: x.title, type: 'excel', kind: x.kind, typeLabel: 'AI + Excel', icon: X_KIND_ICON[x.kind] || 'table', chapter: x.chapter, header: { short: x.short }, text: x.text, html: null }));
 const XSLUG = new Map(XP.map(p => [p.slug, p.n]));
-const PAGES = [HOME, ...D.pages, ...DEEPP, ...XP].sort((a, b) => a.n - b.n);
+// หน้าเสริมในคอร์สหลัก (เช่น 21A Skill ของ Agent): n เป็นทศนิยมเพื่อเรียงต่อจากหน้าที่กำหนด · route #/s/{slug}
+const EXTP = (D.ext || []).map(e => ({ ...e }));
+const SSLUG = new Map(EXTP.map(p => [p.slug, p.n]));
+const PAGES = [HOME, ...D.pages, ...EXTP, ...DEEPP, ...XP].sort((a, b) => a.n - b.n);
 const PI = new Map(PAGES.map(p => [p.n, p]));
 const CH = new Map([...D.chapters, ...DEEPCH, ...XCH].map(c => [c.n, c]));
 const ALLCH = [...D.chapters, ...DEEPCH, ...XCH];
 const isEx = n => n > EX0;
 const isDeep = n => n > DEEP0 && n < EX0;
-const hrefOf = n => isEx(n) ? `#/x/${PI.get(n).slug}` : isDeep(n) ? `#/d/${n - DEEP0}` : `#/p/${n}`;
-const refN = r => { const [k, v] = r.split(':'); return k === 'd' ? DEEP0 + +v : k === 'x' ? XSLUG.get(v) : +v; };
+const isExt = n => !Number.isInteger(n);
+const hrefOf = n => isEx(n) ? `#/x/${PI.get(n).slug}` : isDeep(n) ? `#/d/${n - DEEP0}` : isExt(n) ? `#/s/${PI.get(n).slug}` : `#/p/${n}`;
+const pageNo = p => p.k ?? p.n;
+const refN = r => { const [k, v] = r.split(':'); return k === 'd' ? DEEP0 + +v : k === 'x' ? XSLUG.get(v) : k === 's' ? SSLUG.get(v) : +v; };
 const AG = D.agents;
 const AGL = Object.values(AG).sort((a, b) => a.id - b.id);
 CH.get(1).pages = [1, ...CH.get(1).pages];
@@ -97,12 +102,12 @@ function renderTOC() {
   const q = $('#tocQ').value.trim().toLowerCase();
   const g = $('#tocGroup').value;
   const html = ALLCH.map(ch => {
-    const pages = ch.pages.map(n => PI.get(n)).filter(p => (!g || pageGroup(p) === g || (p.type === 'module' && ch.group === g)) && (!q || p.title.toLowerCase().includes(q) || String(p.n) === q));
+    const pages = ch.pages.map(n => PI.get(n)).filter(p => (!g || pageGroup(p) === g || (p.type === 'module' && ch.group === g)) && (!q || p.title.toLowerCase().includes(q) || String(pageNo(p)).toLowerCase() === q));
     if (!pages.length) return '';
     const exp = q || g || openCh.has(ch.n) || (cur && cur.chapter === ch.n);
     const d = chapterDone(ch);
     return `${ch.n === 101 ? '<p class="sb-sec">' + ic('hat_graduation') + ' <span>Deep Learning · 36 บทเชิงลึก</span></p>' : ch.n === 201 ? '<p class="sb-sec">' + ic('table') + ' <span>AI + Excel Formula Mastery</span></p>' : ''}<div class="ch" style="${gvar(ch.group)}"><button type="button" class="ch-h" data-ch="${ch.n}" aria-expanded="${!!exp}" aria-controls="pl-${ch.n}">${ic('chevron_right', 'chev')}<span class="ch-n">${ch.excel ? 'X' + (ch.n - 200) : ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span class="ch-t">${esc(ch.title)}</span>${ring(d, ch.pages.length)}<span class="sr-only">เรียนแล้ว ${d} จาก ${ch.pages.length} หน้า</span></button>
-    <ul class="pl" id="pl-${ch.n}" ${exp ? '' : 'hidden'}>${pages.map(p => `<li style="${gvar(pageGroup(p))}"><a href="${hrefOf(p.n)}" ${cur && cur.n === p.n ? 'aria-current="page"' : ''}><span class="pn">${isDeep(p.n) || isEx(p.n) ? p.k : p.n}</span><span class="pt">${esc(p.title)}</span><span class="dot ${done.has(p.n) ? 'd' : visited.has(p.n) ? 'v' : ''}" title="${done.has(p.n) ? 'เรียนแล้ว' : visited.has(p.n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`).join('')}</ul></div>`;
+    <ul class="pl" id="pl-${ch.n}" ${exp ? '' : 'hidden'}>${pages.map(p => `<li style="${gvar(pageGroup(p))}"><a href="${hrefOf(p.n)}" ${cur && cur.n === p.n ? 'aria-current="page"' : ''}><span class="pn">${pageNo(p)}</span><span class="pt">${esc(p.title)}</span><span class="dot ${done.has(p.n) ? 'd' : visited.has(p.n) ? 'v' : ''}" title="${done.has(p.n) ? 'เรียนแล้ว' : visited.has(p.n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`).join('')}</ul></div>`;
   }).join('');
   $('#tocList').innerHTML = html || '<p class="empty">ไม่พบหน้าที่ตรงกับตัวกรอง</p>';
 }
@@ -173,7 +178,7 @@ function headerHTML(p) {
     ? `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/excel">AI + Excel</a><span aria-hidden="true">›</span><span>${esc(ch.title)}</span><span class="pill">${ic(p.icon)}<span>${esc(p.k)}</span></span></nav>`
     : isDeep(p.n)
     ? `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/deep">Deep Learning</a><span aria-hidden="true">›</span><span>${esc(ch.title)}</span><span class="pill">${ic('hat_graduation')}<span>บทเชิงลึก ${p.k} / ${D.meta.deepTotal}</span></span></nav>`
-    : `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/p/${moduleOf(ch)}">บทที่ ${ch.n} · ${esc(ch.title)}</a><span class="pill">${ic(p.icon)}<span>${esc(p.typeLabel)}</span></span><span class="pill">หน้า ${p.n} / ${D.meta.totalPages}</span></nav>`;
+    : `<nav class="crumb" aria-label="ตำแหน่ง"><a href="#/">${ic('home')} หน้าแรก</a><span aria-hidden="true">›</span><a href="#/p/${moduleOf(ch)}">บทที่ ${ch.n} · ${esc(ch.title)}</a><span class="pill">${ic(p.icon)}<span>${esc(p.typeLabel)}</span></span><span class="pill">${isExt(p.n) ? 'หน้าเสริม ' + esc(p.k) : `หน้า ${p.n} / ${D.meta.totalPages}`}</span></nav>`;
   let meta = '';
   if (p.type === 'agent' || p.type === 'agentflow') {
     const ready = p.header.ready || a.readinessName;
@@ -202,6 +207,7 @@ function route() {
   if (m && PI.has(+m[1])) return +m[1] === 1 ? renderHome() : renderPage(+m[1]);
   const dm = h.match(/^d\/(\d+)$/); if (dm && PI.has(DEEP0 + +dm[1])) return renderPage(DEEP0 + +dm[1]);
   const xm = h.match(/^x\/([a-z0-9-]+)$/); if (xm && XSLUG.has(xm[1])) return renderPage(XSLUG.get(xm[1]));
+  const sm = h.match(/^s\/([a-z0-9-]+)$/); if (sm && SSLUG.has(sm[1])) return renderPage(SSLUG.get(sm[1]));
   if (h === 'plab') { renderHome(); const pl = document.getElementById('plab'); if (pl) { pl.scrollIntoView({ block: 'start' }); const ta = document.getElementById('paText'); if (ta) ta.focus({ preventScroll: true }); } return; }
   if (h === 'excel') return renderExcelHome();
   if (h === 'deep') return renderDeepHome();
@@ -255,6 +261,7 @@ function mount(root, p) {
   $$('[data-deep-pb]', root).forEach(initDeepPB);
   $$('[data-decision]', root).forEach(initDecision);
   mountExcel(root);
+  $$('[data-skill-builder]', root).forEach(mountSkillBuilder);
 }
 
 // ---------- tabs ----------
@@ -477,6 +484,7 @@ const TOOLS = [
   ['#/builder', 'toolbox', 'Agent Builder Studio', 'เขียนการตั้งค่า Agent เอง พร้อมตัวนับและตรวจกติกา URL'],
   ['#/p/9', 'edit', 'Prompt Builder', 'กรอกงานของคุณ ได้ Prompt 3 แบบทันที'],
   ['#/plab', 'sparkle', 'Prompt Lab อัตโนมัติ', 'โยนไฟล์ PDF/Excel หรือวางข้อความ ได้ Prompt 7 แบบทันที'],
+  ['#/s/agent-skills', 'layer', 'Skill ของ Agent (SKILL.md / .zip)', 'Skill Builder: โยนไฟล์ PDF/Word/Excel → ได้ .zip พร้อมอัปโหลด · ตัวอย่าง 5 แบบ'],
   ['#/p/23', 'beaker', 'Prompt Lab', 'Prompt ตัวอย่าง 12 หมวด พร้อมคัดลอก'],
   ['#/p/70', 'calculator', 'คำนวณผลกระทบราคาอาหารสัตว์', 'Δต้นทุนต่อ กก. ไก่เป็น เนื้อไก่ ต่อเดือน และต่อปี'],
   ['#/p/115', 'calculator', 'คำนวณพื้นที่เลี้ยง', 'ลูกไก่ต่อวัน ความจุ และจำนวนโรงเรือน'],
@@ -524,7 +532,7 @@ function renderHome() {
     <div class="stat-tile"><span class="st-ic">${ic('hat_graduation')}</span><div><b>${D.meta.deepTotal}</b><span>บทเชิงลึก (Deep Learning)</span></div></div>
     <div class="stat-tile"><span class="st-ic">${ic('trophy')}</span><div><b>${done.size}</b><span>หน้าที่เรียนแล้ว จาก ${TOTAL}</span></div></div>
   </div>
-  ${lastP && last !== 1 ? `<a class="callout resume" href="${hrefOf(last)}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>${isEx(last) ? 'AI + Excel · ' + esc(lastP.k) : isDeep(last) ? 'Deep Learning บท ' + lastP.k : 'หน้า ' + last} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
+  ${lastP && last !== 1 ? `<a class="callout resume" href="${hrefOf(last)}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>${isEx(last) ? 'AI + Excel · ' + esc(lastP.k) : isDeep(last) ? 'Deep Learning บท ' + lastP.k : 'หน้า ' + pageNo(lastP)} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
   <section class="cgroup"><h2 class="sec">${ic('toolbox')}<span>เครื่องมือ</span></h2><div class="tools">${TOOLS.map(([h, i, t, s]) => `<a class="tool" href="${h}"><span class="ti">${ic(i)}</span><span><b>${esc(t)}</b><small>${esc(s)}</small></span></a>`).join('')}</div></section>
   ${GROUPS3.map(([t, s, keys]) => `<section class="cgroup"><h2 class="sec">${ic('book_open')}<span>${esc(t)}</span></h2><p>${esc(s)}</p><div class="ccards">${keys.map(k => chByKey[k] ? chapterCardHTML(chByKey[k]) : '').join('')}</div></section>`).join('')}
   <section class="cgroup x-home"><h2 class="sec">${ic('table')}<span>AI + Excel Formula Mastery · 3 ระดับ</span></h2><p>เปลี่ยนภาษาคนเป็นสูตร Excel ด้วย AI · Prompt Library, Formula Lab, Interactive Dashboard และไฟล์ Excel ตัวอย่าง · <a href="#/excel">เปิดหน้าหลักสูตร</a></p><div class="ccards">${XCH.map(chapterCardHTML).join('')}</div></section>
@@ -545,7 +553,7 @@ function itemCardHTML(n) {
   const p = PI.get(n); if (!p) return '';
   const deep = isDeep(n), ex = isEx(n);
   const a = p.agent ? AG[p.agent] : null;
-  return `<li><a class="toc-card" href="${hrefOf(n)}" style="${gvar(pageGroup(p))}"><span class="tc-ic">${ic(deep ? 'hat_graduation' : p.icon)}</span><span class="tc-b"><small>${ex ? 'AI + Excel · ' + esc(p.k) + ' · ' + esc(CH.get(p.chapter).title) : deep ? 'บทเชิงลึก ' + p.k + ' · ' + esc(CH.get(p.chapter).title) : 'คอร์สหลัก · หน้า ' + n + ' · ' + esc(p.typeLabel)}</small><b>${esc(p.title)}</b>${ex && p.header.short ? `<span class="tc-s">${esc(p.header.short)}</span>` : deep && p.outcome ? `<span class="tc-s">${esc(p.outcome)}</span>` : a && p.type === 'agent' ? `<span class="tc-s">${esc(a.short)}</span>` : ''}</span><span class="dot ${done.has(n) ? 'd' : visited.has(n) ? 'v' : ''}" title="${done.has(n) ? 'เรียนแล้ว' : visited.has(n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`;
+  return `<li><a class="toc-card" href="${hrefOf(n)}" style="${gvar(pageGroup(p))}"><span class="tc-ic">${ic(deep ? 'hat_graduation' : p.icon)}</span><span class="tc-b"><small>${ex ? 'AI + Excel · ' + esc(p.k) + ' · ' + esc(CH.get(p.chapter).title) : deep ? 'บทเชิงลึก ' + p.k + ' · ' + esc(CH.get(p.chapter).title) : 'คอร์สหลัก · หน้า ' + pageNo(p) + ' · ' + esc(p.typeLabel)}</small><b>${esc(p.title)}</b>${ex && p.header.short ? `<span class="tc-s">${esc(p.header.short)}</span>` : deep && p.outcome ? `<span class="tc-s">${esc(p.outcome)}</span>` : a && p.type === 'agent' ? `<span class="tc-s">${esc(a.short)}</span>` : ''}</span><span class="dot ${done.has(n) ? 'd' : visited.has(n) ? 'v' : ''}" title="${done.has(n) ? 'เรียนแล้ว' : visited.has(n) ? 'เปิดดูแล้ว' : 'ยังไม่เปิด'}"></span></a></li>`;
 }
 function renderTracks() {
   cur = null;
@@ -756,7 +764,7 @@ function buildIndex() {
   SIDX = PAGES.filter(p => p.n !== 1 && (p.html || p.text)).map(p => {
     const a = p.agent ? AG[p.agent] : null;
     const ch = CH.get(p.chapter);
-    return { kind: 'page', n: p.n, title: p.title, t: p.title.toLowerCase(), meta: isEx(p.n) ? `AI + Excel · ${p.k} · ${ch.title}` : isDeep(p.n) ? `Deep Learning บท ${p.k} · ${ch.title}` : `หน้า ${p.n} · บทที่ ${ch.n} ${ch.title}`, icon: p.icon, g: pageGroup(p),
+    return { kind: 'page', n: p.n, title: p.title, t: p.title.toLowerCase(), meta: isEx(p.n) ? `AI + Excel · ${p.k} · ${ch.title}` : isDeep(p.n) ? `Deep Learning บท ${p.k} · ${ch.title}` : `หน้า ${pageNo(p)} · บทที่ ${ch.n} ${ch.title}`, icon: p.icon, g: pageGroup(p),
       a: a && (p.type === 'agent' || p.type === 'agentflow') ? [a.name, a.short, a.builder.name, ...a.inputs, ...a.outputs].join(' ').toLowerCase() : '',
       body: isDeep(p.n) || isEx(p.n) ? p.text : strip(p.html), bl: '' };
   });
@@ -877,7 +885,7 @@ function renderProgress() {
   const last = store.get('cpa26-last', null);
   setMain(`<header class="ph" style="--dc:var(--green)">${art('trophy')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>เครื่องมือ</span></nav><h1>Learning Progress</h1><p class="short">ความคืบหน้าบันทึกในเบราว์เซอร์นี้เท่านั้น (localStorage) ไม่ส่งข้อมูลออกไปที่ใด</p></header>
   <div class="card prog-hero"><svg class="big-ring" viewBox="0 0 150 150" role="img" aria-label="เรียนแล้ว ${pct}%"><defs><linearGradient id="pgrad"><stop offset="0" stop-color="#1F5BE3"/><stop offset=".5" stop-color="#22BE97"/><stop offset="1" stop-color="#8A55EA"/></linearGradient></defs><circle class="bgc" cx="75" cy="75" r="${r}"/><circle class="fgc" cx="75" cy="75" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - done.size / TOTAL)}"/><text x="75" y="80" text-anchor="middle">${pct}%</text><text class="s" x="75" y="100" text-anchor="middle">${done.size}/${TOTAL} หน้า</text></svg>
-  <div><p><b>เรียนแล้ว ${done.size} หน้า</b> · เปิดดูแล้ว ${visited.size} หน้า · จบแล้ว ${D.chapters.filter(ch => chapterDone(ch) === ch.pages.length).length}/${D.chapters.length} บท</p>${last ? `<a class="btn btn-primary" href="#/p/${last}">${ic('history')}<span>ไปหน้าล่าสุด (หน้า ${last})</span></a> ` : ''}<button type="button" class="btn btn-outline" id="progReset">${ic('arrow_clockwise')}<span>ล้างความคืบหน้า</span></button></div></div>
+  <div><p><b>เรียนแล้ว ${done.size} หน้า</b> · เปิดดูแล้ว ${visited.size} หน้า · จบแล้ว ${D.chapters.filter(ch => chapterDone(ch) === ch.pages.length).length}/${D.chapters.length} บท</p>${last ? `<a class="btn btn-primary" href="${PI.has(last) ? hrefOf(last) : '#/'}">${ic('history')}<span>ไปหน้าล่าสุด (หน้า ${PI.has(last) ? esc(pageNo(PI.get(last))) : last})</span></a> ` : ''}<button type="button" class="btn btn-outline" id="progReset">${ic('arrow_clockwise')}<span>ล้างความคืบหน้า</span></button></div></div>
   <h2 class="sec">${ic('book_open')}<span>รายบท</span></h2><div class="pchap">${ALLCH.map(ch => { const d = chapterDone(ch); const nx = ch.pages.find(n => !done.has(n)) || moduleOf(ch); return `<a href="${hrefOf(nx)}" style="${gvar(ch.group)}"><span class="n">${ch.excel ? 'X' + (ch.n - 200) : ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span><b>${esc(ch.title)}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / ch.pages.length * 100)}%"></i></span></span><small>${d}/${ch.pages.length} หน้า</small></a>`; }).join('')}</div>${copyLine()}`, 'Learning Progress');
   $('#progReset').addEventListener('click', () => { if (confirm('ล้างความคืบหน้าทั้งหมดในเบราว์เซอร์นี้?')) { done.clear(); visited.clear(); saveProgress(); store.set('cpa26-last', null); store.set('cpa26-chk', {}); updateProgress(); renderProgress(); toast('ล้างความคืบหน้าแล้ว'); } });
   renderTOC(); updateProgress();
@@ -955,6 +963,7 @@ mq.addEventListener && mq.addEventListener('change', () => { if (!mq.matches) cl
 
 /*__EXCEL_JS__*/
 /*__PROMPTLAB_JS__*/
+/*__SKILLS_JS__*/
 
 // ---------- Email gate (once per device) ----------
 const GATE = (() => { try { return JSON.parse(document.getElementById('gate-cfg').textContent); } catch (e) { return { on: false, h: [] }; } })();

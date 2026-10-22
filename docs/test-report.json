@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-19T05:58:03.622Z",
-  "pass": 372,
+  "generatedAt": "2026-10-22T01:15:45.393Z",
+  "pass": 408,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -73,6 +73,10 @@
     },
     "Prompt Lab อัตโนมัติ (หน้าแรก: ไฟล์/ข้อความ → Prompt)": {
       "pass": 33,
+      "fail": 0
+    },
+    "Skill ของ Agent (หน้าเสริม 21A) + Skill Builder": {
+      "pass": 36,
       "fail": 0
     },
     "Prompt Lab tabs + supplements": {

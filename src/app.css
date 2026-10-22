@@ -1053,3 +1053,48 @@ body.gated{overflow:hidden}
 @media (max-width:900px){.pa-grid{grid-template-columns:minmax(0,1fr)}.pa-prof{min-height:0}}
 @media (max-width:520px){.pa-opts{grid-template-columns:minmax(0,1fr)}.pa-dl>div{grid-template-columns:minmax(0,1fr);gap:2px}.pa-actions .btn{flex:1}}
 @media (prefers-reduced-motion:reduce){.pa-empty .ic.spin{animation:none}}
+
+/* ---------- หน้าเสริม: Skill ของ Agent + Skill Builder ---------- */
+.sk-nav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.sk-nav .pill{text-decoration:none;color:var(--ink);font-weight:500}
+.sk-nav .pill:hover{border-color:var(--accent);color:var(--accent)}
+[id^="sk-"]{scroll-margin-top:72px}
+.sk-types{display:flex;flex-wrap:wrap;gap:4px;margin:0}
+.sk-types code{font-size:12px}
+.sk-tree pre{white-space:pre;overflow-x:auto}
+.sk-steps{display:grid;gap:8px;padding-left:22px;margin:0 0 16px}
+.sk-ex{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px}
+.sk-card{display:flex;flex-direction:column;gap:6px}
+.sk-card p{margin:0}
+.sk-ch{display:flex;gap:10px;align-items:center}
+.sk-ch .ti{display:grid;place-items:center;width:38px;height:38px;border-radius:var(--r8);background:var(--accent-soft);color:var(--accent);flex:none}
+.sk-ch>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.sk-ch code{font-size:12px;align-self:flex-start}
+.sk-act{margin-top:auto;padding-top:6px}
+.sk-md summary{cursor:pointer;display:flex;gap:6px;align-items:center;font-weight:600;font-size:13.5px;color:var(--accent);padding:4px 0}
+.sk-md summary .ic{width:16px;height:16px}
+.sk-md .prompt{margin-top:6px}
+.sk-src{display:grid;gap:4px}
+.sb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start}
+.sb-in,.sb-out{display:grid;gap:12px}
+.sb-in .field,.sb-out .field{margin:0}
+.sb-out textarea{font:400 13px/1.55 var(--mono);min-height:320px}
+.sb-files{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sb-files li{display:flex;gap:8px;align-items:center;padding:6px 6px 6px 10px;border:1px solid var(--line);border-radius:var(--r8);background:var(--surface-2)}
+.sb-files li>.ic{color:var(--accent);flex:none}
+.sb-files li.bad>.ic{color:var(--red)}
+.sb-files li.warn{border-color:color-mix(in srgb,var(--amber,#C98A00) 50%,var(--line))}
+.sb-files li>span{flex:1;min-width:0;display:flex;flex-direction:column}
+.sb-files b{font-size:14px;word-break:break-all}
+.sb-files small{color:var(--ink-2);font-size:12.5px}
+.sb-files .btn{min-height:32px;padding:4px 8px}
+.sb-sum{display:flex;gap:8px;align-items:center;margin:0;font-weight:600;padding:8px 12px;border-radius:var(--r8)}
+.sb-sum.ok{background:color-mix(in srgb,var(--green,#1E8E5A) 12%,var(--surface));color:var(--ink)}
+.sb-sum.bad{background:color-mix(in srgb,var(--red) 12%,var(--surface));color:var(--ink)}
+.sb-sum.ok .ic{color:var(--green,#1E8E5A)}.sb-sum.bad .ic{color:var(--red)}
+.sb-checks{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13.5px}
+.sb-checks li{display:flex;gap:6px;align-items:flex-start}
+.sb-checks .ic{width:16px;height:16px;flex:none;margin-top:3px}
+.sb-checks .ok .ic{color:var(--green,#1E8E5A)}.sb-checks .err .ic{color:var(--red)}.sb-checks .warn .ic{color:var(--amber,#C98A00)}.sb-checks .info .ic{color:var(--accent)}
+.sb-checks .err{font-weight:600}
+@media (max-width:1100px){.sb-grid{grid-template-columns:minmax(0,1fr)}}

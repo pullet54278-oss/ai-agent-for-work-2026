@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { serve, launch, ROOT, seededContext, TEST_EMAIL } from './lib.mjs';
+import { unzip } from '../scripts/lib/zip.mjs';
 
 const results = [];
 let current = '';
@@ -43,7 +44,7 @@ await page.goto(url);
 await page.waitForSelector('.hero');
 const D = await page.evaluate(() => window.__app.D);
 const ORDER = [1, ...D.pages.map(p => p.n)].sort((a, b) => a - b);
-const TOTALP = D.meta.totalPages + D.meta.deepTotal + D.meta.excelTotal;
+const TOTALP = D.meta.totalPages + D.meta.deepTotal + D.meta.excelTotal + (D.meta.extTotal || 0);
 
 await suite('T4 Navigation: every page renders with correct title', async () => {
   let bad = 0;
@@ -244,7 +245,7 @@ await suite('AI + Excel Formula Mastery', async () => {
   eq(await page.$$eval('[data-quiz="xq-b-post"] fieldset', l => l.length), 10, 'post-test 10 questions');
   // progress counts AI + Excel pages
   await page.click('#doneBtn'); await page.waitForTimeout(60);
-  ok((await text('#progTxt')).endsWith('/' + TOTALP), 'progress total includes AI + Excel pages (' + TOTALP + ')');
+  ok((await text('#progTxt')).endsWith('/' + TOTALP), 'progress total includes AI + Excel + extension pages (' + TOTALP + ')');
   await page.click('#doneBtn');
   // workbook download
   await go('#/x/workbook'); await page.waitForSelector('a[download]');
@@ -642,6 +643,95 @@ await suite('Prompt Lab อัตโนมัติ (หน้าแรก: ไ�
   ok(await p.$('.tools a[href="#/plab"]'), 'listed in home tools');
   eq(errs.join(' | '), '', 'no console/page errors under CSP');
   await p.close();
+});
+
+await suite('Skill ของ Agent (หน้าเสริม 21A) + Skill Builder', async () => {
+  const EXD = path.join(ROOT, 'content', 'skills', 'examples');
+  const sctx = await seededContext(browser, { viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block', acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'] });
+  await sctx.route('**/api/copilot-updates', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SNAP) }));
+  const p = await sctx.newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); }); p.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)|net::ERR|ERR_TUNNEL|ERR_PROXY|Failed to load resource/.test(m.text())) errs.push(m.text()); });
+  const reqs = []; p.on('request', r => reqs.push(r.url()));
+  // placement: chapter 4, between page 21 and 22
+  eq(D.chapters.find(c => c.n === 4).pages.join(','), '18,19,20,21,21.5,22,23,24', 'chapter 4 lists the extension page after page 21');
+  await p.goto(url + '#/p/21'); await p.waitForSelector('.pager');
+  eq(await p.$eval('.pager a[rel="next"]', a => a.getAttribute('href')), '#/s/agent-skills', 'page 21 → next is 21A');
+  await p.click('.pager a[rel="next"]'); await p.waitForSelector('[data-skill-builder] .sb-grid');
+  ok((await p.title()).startsWith('Skill ของ Agent'), 'page title');
+  ok((await p.$eval('.crumb', e => e.textContent)).includes('หน้าเสริม 21A'), 'breadcrumb shows หน้าเสริม 21A');
+  eq(await p.$eval('.pager a[rel="next"]', a => a.getAttribute('href')), '#/p/22', '21A → next is page 22');
+  ok(await p.$('#tocList a[aria-current="page"][href="#/s/agent-skills"]'), 'TOC highlights 21A');
+  const txt = await p.$eval('#main', e => e.textContent);
+  ok(['ไฟล์ .zip เท่านั้น', 'ห้ามอัปโหลด SKILL.md เดี่ยว', 'Frontier Program', '50 MB', '25 MB', '350', '20,000', 'ยังไม่รองรับ', 'ตรวจกับบัญชีจริงก่อนสอน'].every(t => txt.includes(t)), 'key facts: zip only, Frontier, limits, known issue, verify label');
+  ok(!/ผู้จัดการ|หัวหน้างาน|\bManager\b|\bSupervisor\b/.test(txt), 'no job titles on the page');
+  // 5 example zips: SKILL.md at the root, valid front matter, files match the source folder
+  const cards = await p.$$eval('[data-skill-ex]', l => l.map(x => ({ slug: x.dataset.skillEx, href: x.querySelector('a[download]').getAttribute('href') })));
+  eq(cards.length, 5, '5 example skills');
+  const bad = [];
+  for (const c of cards) {
+    const b64 = await p.evaluate(async h => { const r = await fetch(h); const u = new Uint8Array(await r.arrayBuffer()); let s = ''; for (const x of u) s += String.fromCharCode(x); return btoa(s); }, c.href);
+    const ents = unzip(Buffer.from(b64, 'base64'));
+    const md = ents.find(e => e.name === 'SKILL.md');
+    const src = fs.readdirSync(path.join(EXD, c.slug)).sort();
+    const fm = md && md.data.toString('utf8').match(/^---\nname: ([a-z0-9-]+)\ndescription: "(.+)"\n---\n/);
+    if (!md || ents[0].name !== 'SKILL.md' || ents.some(e => e.name.includes('/')) || !fm || fm[1] !== c.slug || ents.map(e => e.name).sort().join() !== src.join() || ents.some(e => !e.data.equals(fs.readFileSync(path.join(EXD, c.slug, e.name))))) bad.push(c.slug);
+  }
+  eq(bad.join(','), '', 'every example zip: SKILL.md first at root, name = slug, files byte-identical, CRC ok');
+  // Skill Builder: PDF + Word + Excel → SKILL.md → zip
+  await p.setInputFiles('[data-sb-file]', [path.join(EXD, 'sop-assistant', 'sop-biosecurity.pdf'), path.join(EXD, 'animal-welfare-advisor', 'animal-welfare-guide.docx'), path.join(EXD, 'training-advisor', 'training-catalog.xlsx')]);
+  await p.waitForFunction(() => /เพิ่ม 3 ไฟล์/.test(document.querySelector('[data-sb-msg]').textContent), null, { timeout: 20000 });
+  const md = await p.$eval('[data-sb-md]', e => e.value);
+  ok(md.startsWith('---\nname: sop-biosecurity-assistant\ndescription: "'), 'name suggested from the first file + quoted description');
+  ok(md.includes('5. การบันทึก') && md.includes('6. เมื่อพบความผิดปกติ'), 'PDF headings read in the browser');
+  ok(md.includes('2. การตรวจประจำวัน') && md.includes('(เอกสาร Word)'), 'Word (.docx) headings read in the browser');
+  ok(md.includes('ชีต "หลักสูตร" (10 แถว)') && md.includes('ชั่วโมง (ตัวเลข)'), 'Excel sheets / columns / types in SKILL.md');
+  ok(['# บทบาท', '# ขั้นตอน', '# รูปแบบผลลัพธ์', '# การตรวจสอบ', '# ข้อห้าม', '# เมื่อไม่แน่ใจ'].every(h => md.includes(h)), 'instruction sections present');
+  ok((await p.$eval('[data-sb-sum]', e => e.textContent)).includes('ผ่านการตรวจ'), 'checks pass');
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-sb-dl]')]);
+  eq(dl.suggestedFilename(), 'sop-biosecurity-assistant.zip', 'zip named after the skill');
+  const ents = unzip(fs.readFileSync(await dl.path()));
+  eq(ents.map(e => e.name).join(','), 'SKILL.md,sop-biosecurity.pdf,animal-welfare-guide.docx,training-catalog.xlsx', 'zip: SKILL.md at root + 3 files');
+  ok(ents[0].data.toString('utf8') === md && ents[1].data.equals(fs.readFileSync(path.join(EXD, 'sop-assistant', 'sop-biosecurity.pdf'))), 'zip contents byte-identical (CRC verified)');
+  // rule checks
+  await p.fill('#sbName', 'Farm SOP Assistant'); await p.waitForTimeout(80);
+  ok((await p.$eval('[data-sb-checks]', e => e.textContent)).includes('ต้องเป็นตัวพิมพ์เล็ก'), 'name with spaces/capitals rejected');
+  await p.click('[data-sb-dl]'); await p.waitForTimeout(150);
+  ok((await p.textContent('#toast')).includes('ยังดาวน์โหลดไม่ได้'), 'download blocked while there are errors');
+  await p.fill('#sbName', 'farm-sop-assistant'); await p.waitForTimeout(80);
+  ok((await p.$eval('[data-sb-sum]', e => e.textContent)).includes('ผ่านการตรวจ'), 'fixed name passes');
+  const edited = md.replace('name: sop-biosecurity-assistant', 'name: farm-sop-assistant').replace(/description: ".*"/, 'description: ตอบคำถาม: ขั้นตอนงาน ใช้เมื่อถาม SOP');
+  await p.fill('[data-sb-md]', edited); await p.waitForTimeout(80);
+  ok((await p.$eval('[data-sb-checks]', e => e.textContent)).includes('ใส่เครื่องหมาย " ครอบ'), 'unquoted description with ":" rejected');
+  await p.fill('[data-sb-md]', edited.replace(/description: .*/, 'description: "ok ใช้เมื่อถาม"') + 'x'.repeat(20001)); await p.waitForTimeout(80);
+  ok((await p.$eval('[data-sb-checks]', e => e.textContent)).includes('ต้องน้อยกว่า 20,000') && await p.$('[data-sb-cnt].over'), 'instructions ≥ 20,000 characters rejected');
+  await p.fill('[data-sb-md]', 'no front matter'); await p.waitForTimeout(80);
+  ok((await p.$eval('[data-sb-checks]', e => e.textContent)).includes('YAML front matter'), 'missing front matter rejected');
+  await p.click('[data-sb-gen]'); await p.waitForTimeout(80);
+  ok((await p.$eval('[data-sb-md]', e => e.value)).startsWith('---\nname: farm-sop-assistant'), 'regenerate from form keeps the typed name');
+  const HUGE = path.join(FIX, 'huge.pdf'); if (!fs.existsSync(HUGE) || fs.statSync(HUGE).size !== 26 * 1048576) fs.writeFileSync(HUGE, Buffer.alloc(26 * 1048576));
+  await p.setInputFiles('[data-sb-file]', [path.join(FIX, 'virus.exe'), HUGE]);
+  await p.waitForFunction(() => /เพิ่ม 2 ไฟล์/.test(document.querySelector('[data-sb-msg]').textContent), null, { timeout: 10000 });
+  const ck = await p.$eval('[data-sb-checks]', e => e.textContent);
+  ok(ck.includes('virus.exe: ชนิดไฟล์ไม่รองรับ') && ck.includes('huge.pdf: ไฟล์ใหญ่เกิน 25 MB'), 'unsupported type and > 25 MB file rejected');
+  eq(await p.$$eval('.sb-files li.bad', l => l.length), 2, 'rejected files flagged in the list');
+  await p.click('.sb-files li.bad [data-sb-rm]'); await p.click('.sb-files li.bad [data-sb-rm]');
+  eq(await p.$$eval('.sb-files li', l => l.length), 3, 'remove file button');
+  await p.click('[data-sb-copy]');
+  eq(await p.evaluate(() => navigator.clipboard.readText()), await p.$eval('[data-sb-md]', e => e.value), 'copy SKILL.md');
+  await p.click('[data-sb-clear]'); await p.waitForTimeout(50);
+  ok((await p.$$eval('.sb-files li', l => l.length)) === 0 && (await p.$eval('[data-sb-md]', e => e.value)).includes('name: my-skill'), 'clear resets the builder');
+  const ext = reqs.filter(u => !u.startsWith(url) && !u.startsWith('blob:') && !u.startsWith('data:') && !/fonts\.(googleapis|gstatic)/.test(u));
+  eq(ext.join(' '), '', 'no requests leave the site (files read locally)');
+  // entry points
+  await p.goto(url); await p.waitForSelector('.hero');
+  ok(await p.$('.tools a[href="#/s/agent-skills"]'), 'listed in home tools');
+  await p.goto(url + '#/track/agent'); await p.waitForSelector('.track-steps');
+  ok(await p.$('.track-steps a[href="#/s/agent-skills"]'), 'in the Copilot Agent learning path');
+  await p.keyboard.press('Control+K'); await p.fill('#cmdQ', 'SKILL.md'); await p.waitForTimeout(200);
+  ok((await p.$eval('#cmdList', e => e.textContent)).includes('Skill ของ Agent'), 'Ctrl+K finds the page');
+  await p.keyboard.press('Escape');
+  eq(errs.join(' | '), '', 'no console/page errors under CSP');
+  await sctx.close();
 });
 
 await suite('Prompt Lab tabs + supplements', async () => {

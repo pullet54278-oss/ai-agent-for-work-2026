@@ -9,6 +9,7 @@ import { pageSupplement, renderSupplement } from '../content/supplements.mjs';
 import { buildDeep, DEEP_GROUPS } from './lib/deep.mjs';
 import { renderDeepLesson, quizHTML, checklistHTML } from './lib/deep-render.mjs';
 import { TRACKS } from '../content/tracks.mjs';
+import { readExamples, skillsPageHTML, SKILL_PAGE, SKILL_LIMITS, SKILL_TYPES } from './lib/skills.mjs';
 import { loadAllowed, hashEmail, GATE_SALT } from './lib/gate.mjs';
 import { buildExcel } from './lib/excel.mjs';
 
@@ -132,7 +133,11 @@ const deepShared = {
 };
 // ---- learning paths + cross references (dedupe overlapping topics by linking, not repeating) ----
 const excel = await buildExcel(ROOT);
-const refTitle = r => { const [k, n] = r.split(':'); return k === 'p' ? pageByN.get(+n).title : k === 'x' ? (excel.index.find(i => i.slug === n) || {}).title : deepTitle(+n); };
+// ---- หน้าเสริม: Skill ของ Agent (21A) + ตัวอย่าง zip ----
+const skillExamples = readExamples(ROOT);
+const skillHTML = skillsPageHTML(skillExamples);
+const extPages = [{ ...SKILL_PAGE, header: { short: SKILL_PAGE.short }, html: skillHTML, text: skillHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 6000) }];
+const refTitle = r => { const [k, n] = r.split(':'); return k === 'p' ? pageByN.get(+n).title : k === 'x' ? (excel.index.find(i => i.slug === n) || {}).title : k === 's' ? (extPages.find(e => e.slug === n) || {}).title : deepTitle(+n); };
 const tracks = TRACKS.map(t => ({ ...t, steps: t.steps.map(s => ({ t: s.t, items: s.items.map(r => { if (!refTitle(r)) throw new Error('bad track ref ' + r); return r; }) })) }));
 const related = { p: {}, d: {} };
 for (const t of TRACKS) for (const s of t.steps) {
@@ -160,11 +165,11 @@ const appendix = md => marked.parse(md.replace(/^# .+\n/, '')).replace(/<table>/
 const data = {
   meta: {
     title: 'Copilot AI Agents for Work 2026', subtitle: 'AI Agents for Work 2026', event: 'การใช้งาน AI แบบพาลงมือทำ · 23 ตุลาคม 2569',
-    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, buildId, excelTotal: excel.index.length, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
+    copyright: '© 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret', author: 'Nattapon Yokkret', version: pkg.version, buildId, excelTotal: excel.index.length, extTotal: extPages.length, totalPages: pages.length + 1, deepTotal: deep.lessons.length, built: new Date().toISOString().slice(0, 10)
   },
   groups: Object.fromEntries(Object.entries(groups).map(([k, v]) => [k, { name: v.name, c: GROUP_COLORS[k], icon: GROUP_ICON[k] }])),
   readiness,
-  chapters: src.chapters.map(c => ({ n: c.n, key: c.key, title: c.title, group: c.group, goals: c.goals, pages: c.pages.map(p => p.n), agents: c.pages.filter(p => p.type === 'agent' || (p.type === 'agentflow' && !agents[p.agent].page)).length })),
+  chapters: src.chapters.map(c => ({ n: c.n, key: c.key, title: c.title, group: c.group, goals: c.goals, pages: c.pages.flatMap(p => [p.n, ...extPages.filter(e => e.chapter === c.n && e.after === p.n).map(e => e.n)]), agents: c.pages.filter(p => p.type === 'agent' || (p.type === 'agentflow' && !agents[p.agent].page)).length })),
   pages: rendered,
   agents,
   promptLab: guides.promptLab,
@@ -175,6 +180,7 @@ const data = {
   deepGroups: DEEP_GROUPS,
   deepIndex: deep.lessons.map(l => ({ n: l.n, title: l.title, outcome: l.outcome, group: l.group, icon: l.icon, text: Object.values(deepRendered[l.n]).join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 2500) })),
   tracks, related, updates, updatesTh,
+  ext: extPages, skillCfg: { limits: SKILL_LIMITS, types: SKILL_TYPES },
   excel: { chapters: excel.chapters, index: excel.index }, excelReportDate: excel.sample.reportDate,
   deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
@@ -188,8 +194,9 @@ data.meta.copilotLogo = copilotLogo ? 'brand/' + copilotLogo : null;
 const tpl = fs.readFileSync(path.join(ROOT, 'src', 'template.html'), 'utf8');
 const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8');
 const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'))
-  .replace('/*__PROMPTLAB_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'promptlab.js'), 'utf8'));
-if (js.includes('/*__EXCEL_JS__*/') || js.includes('/*__PROMPTLAB_JS__*/')) throw new Error('excel.js / promptlab.js not injected');
+  .replace('/*__PROMPTLAB_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'promptlab.js'), 'utf8'))
+  .replace('/*__SKILLS_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'skillbuilder.js'), 'utf8'));
+if (/\/\*__(EXCEL|PROMPTLAB|SKILLS)_JS__\*\//.test(js)) throw new Error('excel.js / promptlab.js / skillbuilder.js not injected');
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">${Object.entries(icons).map(([k, v]) => `<symbol id="i-${k}" viewBox="0 0 24 24" fill="currentColor">${v}</symbol>`).join('')}</svg>`;
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 const html = tpl
@@ -207,6 +214,8 @@ fs.writeFileSync(path.join(DIST, 'index.html'), html);
 fs.writeFileSync(path.join(DIST, 'deep-data.js'), 'window.__DEEP=' + JSON.stringify({ lessons: deepRendered, shared: deepShared }).replace(/</g, '\\u003c') + ';');
 // AI + Excel: lesson html + dashboard sample data load on demand; sample workbook is downloadable
 fs.writeFileSync(path.join(DIST, 'excel-data.js'), 'window.__EXCEL=' + JSON.stringify({ html: excel.html, sample: excel.sample }).replace(/</g, '\\u003c') + ';');
+fs.mkdirSync(path.join(DIST, 'skills'), { recursive: true });
+for (const e of skillExamples) fs.writeFileSync(path.join(DIST, 'skills', e.slug + '.zip'), e.zip);
 fs.mkdirSync(path.join(DIST, 'excel'), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'ai-excel-formula-mastery', 'data', 'sample-workbook.xlsx'), path.join(DIST, 'excel', 'sample-workbook.xlsx'));
 fs.copyFileSync(path.join(ROOT, 'assets', 'logo.png'), path.join(DIST, 'logo.png'));
@@ -263,6 +272,10 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
   Cache-Control: public, max-age=0, must-revalidate
 
 /excel/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/skills/*
+  Content-Type: application/zip
   Cache-Control: public, max-age=0, must-revalidate
 
 /sw.js

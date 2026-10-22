@@ -95,11 +95,11 @@ function paKeywords(text) {
   }
   return [...cnt.values()].filter(x => x.c >= 2).sort((a, b) => b.c - a.c || b.w.length - a.w.length).slice(0, 8).map(x => x.w);
 }
-function paHeadings(text) {
+function paHeadings(text, max = 8) {
   const lines = text.split('\n').map(l => l.trim());
   const out = [];
   lines.forEach((l, i) => {
-    if (l.length < 3 || l.length > 90 || out.length >= 8) return;
+    if (l.length < 3 || l.length > 90 || out.length >= max) return;
     const next = lines.slice(i + 1).find(Boolean) || '';
     const words = l.split(/\s+/).length;
     const isH = /^#{1,4}\s/.test(l) || /^(?:บทที่|ส่วนที่|หมวด(?:ที่)?|ข้อ)\s*\d/.test(l) || /^(?:\d{1,2}(?:\.\d{1,2}){0,2}[.)]?|[IVX]{1,4}\.|[ก-ฮ][.)])\s+\S/.test(l) && words <= 12 && !/[.。]$/.test(l) && !/\d/.test(l.replace(/^\S+\s+/, ''))

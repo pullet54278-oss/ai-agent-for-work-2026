@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.4.0 — 22 ต.ค. 2569
+
+- **หน้าเสริม 21A "Skill ของ Agent: SKILL.md และไฟล์ .zip"** ในบทที่ 4 (ต่อจากหน้า 21 · `#/s/agent-skills` · เส้นทาง Copilot Agent · เมนูเครื่องมือ · Ctrl+K) อ้างอิง Microsoft Learn (30 ก.ย. 2569)
+  - Skill คืออะไร เทียบ Instructions / Knowledge / Skill / แนบไฟล์ในแชท
+  - Agent Builder รับเฉพาะ **.zip** ที่มี SKILL.md (ไม่รับ SKILL.md เดี่ยว · Copilot Studio รับได้ทั้งสองแบบ) · PDF/Word/Excel อัปโหลดเป็น Skill ตรง ๆ ไม่ได้ ต้องเป็นไฟล์ประกอบใน zip
+  - โครงสร้าง SKILL.md (name ตัวพิมพ์เล็ก-ขีด ≤ 64 · description ≤ 1,024 · คำสั่ง < 20,000) · โครงสร้าง zip · ข้อจำกัด Preview (8 Skill/Agent, zip 50 MB, ไฟล์ 25 MB, 350 ไฟล์, ลึก 3 ชั้น, ใช้ร่วมกับ Knowledge ที่อัปโหลดยังไม่ได้, sandbox ไม่มีอินเทอร์เน็ต) · ชนิดไฟล์ที่รองรับ · วิธีอัปโหลด 2 แบบ · แปลงงานจาก PDF/Word/Excel · Workshop พร้อมเฉลยและเกณฑ์ตรวจ · ปัญหาที่พบบ่อย
+  - **Skill Builder**: โยนไฟล์ PDF/Word/Excel → อ่านหัวข้อ ชีต คอลัมน์ในเครื่อง → เขียน SKILL.md (แก้ไขได้) → ตรวจกติกาทุกข้อ → ดาวน์โหลด .zip พร้อมอัปโหลด · ไม่ส่งไฟล์ออก
+  - **ตัวอย่าง 5 Skill ดาวน์โหลดได้** (sop-assistant · training-advisor · audit-prep-assistant · animal-welfare-advisor · esg-assistant) พร้อมไฟล์ประกอบข้อมูลสมมติ PDF/Word/Excel
+- ชื่อเมนู Skill ติดป้าย "ตรวจกับบัญชีจริงก่อนสอน" (ยังไม่ได้รับภาพหน้าจอจากบัญชีจริง)
+
 ## 3.3.1 — 19 ต.ค. 2569
 
 - **ยกเลิกการลงชื่อ: ทุกคนเข้าใช้งานได้ทันที** ไม่ต้องกรอก Email (ตามที่เจ้าของงานสั่ง) · build ไม่ฝังรายชื่อหรือ hash ใด ๆ · ไม่มีปุ่มออกจากระบบ · โค้ด gate ยังอยู่ เปิดคืนได้ด้วย env `EMAIL_GATE=on`
