@@ -50,7 +50,7 @@
 
 ## คำถามค้าง (Need Data)
 
-- ไอคอนมุมขวาบนหน้าแรก, รายการตัวเลือกใน Effort dropdown
+- ไอคอนมุมขวาบนหน้าแรก
 - หน้า Codex, Projects (รอภาพ)
 
 ## เพิ่มเติม (ชุดภาพ 6–7)
@@ -66,3 +66,12 @@
 - A5 หน้า Work: "What should we work on?", ข้อความเริ่ม "Create a new site with Sites", ตัวเลือกโมเดล+effort (เช่น "GPT-6 Luna High"), เมนู "+":
   Add photos & files, Add from library, Create image, Add browser tabs, Web search, Work in a project, Sketch ... (set7-49) — เชื่อมบท 8
 - C9 ใช้ Plugin ในแชต (ตัวอย่าง Canva): หน้า plugin เต็มจอ, suggestion chips, Getting started cards, ช่อง "Work with ChatGPT" (set7-50) — เชื่อมบท 14
+
+## เพิ่มเติม (ชุดภาพ 8)
+- C9 Canva (ต่อ): Design by category (Presentation, Education, Document, Social media, Print, Invitation, Image, Sheet, Poster, Website), "Can't find what you need, ask Canva" (set8-51)
+- A6 ตัวเลือกโมเดล + Effort ในช่องพิมพ์ (ไอคอนสมอง): ป็อปอัป "GPT-6 Luna High" + แถบเลื่อน effort 5 ระดับ (set8-52);
+  กดชื่อโมเดล → Select model: Default (Recommended set of models), GPT-6.1 Sol, GPT-6 Astra, GPT-6 Sol, GPT-6 Luna, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna ... (set8-53)
+  → ทำ widget จำลอง: เลื่อน slider แล้วแสดงคำแนะนำจากบท 4 (Luna/Terra/Sol/Astra + effort)
+- A7 เมนู "+" ครบ: Add photos & files, Add from library, Create image, Add browser tabs, Web search, Sketch, แล้วตามด้วย plugin ที่ติดตั้ง (Spotify, Chrome, Netlify, Booking.com ...) (set8-54)
+- A8 หน้า Codex: สลับจากเมนู ChatGPT▾, "What should we build?", แถบ Cloud + Choose environment, ช่อง "Do anything", ปุ่ม "Ask for approval" (โหมดสิทธิ์),
+  โมเดล "GPT-6.1 Sol Light", Recents, Explore → Sites / Canva (set8-55) — เชื่อมบท 9 + Codex Cloud (B18)
