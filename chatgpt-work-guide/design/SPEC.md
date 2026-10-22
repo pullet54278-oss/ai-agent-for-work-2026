@@ -49,6 +49,20 @@
 - C4 Skills: Instructions that extend ChatGPT's capabilities, Installed (เช่น skill-creator), Add (set5-40) — เชื่อมบท 14 + Agent
 
 ## คำถามค้าง (Need Data)
-- Maps, Explore ทำอะไร/ขั้นตอนใช้ (รอภาพ)
-- ไอคอนมุมขวาบนหน้าแรก, ตัวเลือกใน Effort "Medium", เมนู "+"
-- หน้า Work, Codex, Projects, Images, Tasks (รอภาพ)
+
+- ไอคอนมุมขวาบนหน้าแรก, รายการตัวเลือกใน Effort dropdown
+- หน้า Codex, Projects (รอภาพ)
+
+## เพิ่มเติม (ชุดภาพ 6–7)
+- C4 Skills › Add → Create with chat / Create with editor / Upload from your computer (set6-41)
+- C5 Maps: ช่อง "Ask ChatGPT what's nearby" + Effort + mic, แผนที่หมุดคะแนน, การ์ดสถานที่ (รูป, rating, ประเภท, ราคา, เปิด/ปิด) เลื่อนแนวนอน (set6-42) — เกี่ยวกับ Location ใน Data controls
+- C6 Images: แท็บ Trending (Aerial view, Collector's tin, '80s flashback, Caricature, Sketch, Stickers, Photo booth, Y2K, Anime, 70s portrait, Impressionist ...)
+  / Templates (Poster, Interior design, Logo, Illustration, Headshot, Icon, Product photo, Merch, Infographic, Flyer, Book cover, Packaging, Ad, Thumbnail ...)
+  + ช่อง "Describe a new image" + Effort (set6-43, -44) — เชื่อมบท 12
+- C7 Explore (GPTs): แบนเนอร์ "GPTs will be retired on December 11" → Explore plugins, ค้นหา, หมวด Top Picks/Images/Programming/Research & Analysis/
+  Productivity/Writing/Lifestyle/Education, Featured, รายการจัดอันดับ + See more, My GPTs, + Create (set6-45, set7-46) — ติด badge Deprecated
+- C8 Sites: "Turn your ideas into live websites", grid/list, ค้นหา, + Create Site, สถานะ Published/Not published, Shared with (Only you) (set7-47) — เชื่อมบท 9/17
+- A4 Chat | Work toggle (set7-48)
+- A5 หน้า Work: "What should we work on?", ข้อความเริ่ม "Create a new site with Sites", ตัวเลือกโมเดล+effort (เช่น "GPT-6 Luna High"), เมนู "+":
+  Add photos & files, Add from library, Create image, Add browser tabs, Web search, Work in a project, Sketch ... (set7-49) — เชื่อมบท 8
+- C9 ใช้ Plugin ในแชต (ตัวอย่าง Canva): หน้า plugin เต็มจอ, suggestion chips, Getting started cards, ช่อง "Work with ChatGPT" (set7-50) — เชื่อมบท 14
