@@ -42,6 +42,11 @@
 ## หมวด C — เครื่องมือจากแถบซ้าย
 - C1 Scheduled: พิมพ์ "Schedule a task", รายการ Daily/Weekly/Monitoring + Next run, Recommended, ตัวกรอง Active (set4-29) — เชื่อมบท 11.4
 - C2 Library: แท็บ Suggested/Favorites/Folders/Images/All, ค้นหา, New, มุมมอง grid/list, ไฟล์จาก Drive/รูป/วิดีโอ (set4-30)
+  - ปุ่มตั้งค่า: เปิด/ปิด Google Drive, Storage, Trash (set5-36)
+  - ตัวกรอง: File type (Images, Documents, Spreadsheets, Presentations, PDFs), Source (Uploaded, Generated) + มุมมอง list มี Last activity (set5-37)
+  - New: Note, Image, Document, Spreadsheet, Presentation, Folder, Upload files, Connect a plugin (set5-38)
+- C3 Plugins (จากแถบซ้าย): แท็บ Plugins/Skills, ค้นหา, Installed, Public/Personal, Popular + ปุ่ม + ติดตั้ง, ปุ่ม Add, เฟือง=ไป Settings>Plugins (set5-39)
+- C4 Skills: Instructions that extend ChatGPT's capabilities, Installed (เช่น skill-creator), Add (set5-40) — เชื่อมบท 14 + Agent
 
 ## คำถามค้าง (Need Data)
 - Maps, Explore ทำอะไร/ขั้นตอนใช้ (รอภาพ)
