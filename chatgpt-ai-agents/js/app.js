@@ -1,6 +1,9 @@
 /* Chat GPT AI Agents for Work — app shell, router, pages, Prompt Lab */
 (() => {
   'use strict';
+  // Bump on every release; BUILD must match VERSION in sw.js.
+  const APP_VERSION = '1.0.1';
+  const BUILD = '2026.10.22 · gaw-v2';
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -439,6 +442,8 @@
   };
   if ('serviceWorker' in navigator && location.protocol !== 'file:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* ignore */ }));
 
+  $('#app-version').textContent = APP_VERSION;
+  $('#app-build').textContent = BUILD;
   updateProgress();
   route();
 })();

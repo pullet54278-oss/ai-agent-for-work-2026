@@ -305,6 +305,12 @@ code { font-family: var(--mono); font-size: .88em; background: var(--surface-2);
 ::view-transition-new(root) { animation: .35s var(--ease) both pageIn; }
 @keyframes fadeOut { to { opacity: 0; } }
 
+/* footer */
+.site-foot { position: relative; z-index: 1; text-align: center; padding: 26px 20px 30px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.site-foot p { margin: 2px 0; }
+.foot-copy { color: var(--text); font-weight: 600; }
+.foot-meta span { font-family: var(--mono); color: var(--green-2); }
+
 /* responsive */
 @media (max-width: 1000px) {
   .lesson-grid { grid-template-columns: repeat(2, 1fr); }
@@ -338,6 +344,8 @@ code { font-family: var(--mono); font-size: .88em; background: var(--surface-2);
   .tool-hero { gap: 14px; }
   .th-e { width: 64px; height: 64px; font-size: 32px; border-radius: 20px; }
   .toast { bottom: 84px; }
+  .wrap { padding-bottom: 30px; }
+  .site-foot { padding-bottom: calc(96px + env(safe-area-inset-bottom)); font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
