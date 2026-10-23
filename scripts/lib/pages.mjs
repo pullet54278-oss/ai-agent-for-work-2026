@@ -195,6 +195,7 @@ export function renderPBuild(page) {
   must(outs.length === 3, 'prompt builder outputs');
   const f = (id, label, el) => `<div class="field"><label for="${id}">${esc(label)}</label>${el}</div>`;
   return `<p class="lede">${inline(t[0].text)}</p>
+  <a class="callout tip resume pa-link" href="#/forge">${ic('beaker')}<div><b>ใหม่: Prompt Lab เครื่องผลิต</b><p>กรอกเป้าหมาย ข้อมูล สิทธิ์ และผลลัพธ์ แล้วดู Prompt ประกอบตัวเอง พร้อมมาตรวัดความพร้อมและคำเตือนเมื่อให้สิทธิ์สูงเกินงาน</p></div>${ic('chevron_right')}</a>
   <div class="pb" data-pb>
     <form class="pb-form card" autocomplete="off">
       <div class="eyebrow">${ic('edit')} <span>กรอกงานของคุณ</span></div>

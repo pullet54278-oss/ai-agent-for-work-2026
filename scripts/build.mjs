@@ -11,6 +11,7 @@ import { renderDeepLesson, quizHTML, checklistHTML } from './lib/deep-render.mjs
 import { TRACKS } from '../content/tracks.mjs';
 import { readExamples, skillsPageHTML, SKILL_PAGE, SKILL_LIMITS, SKILL_TYPES } from './lib/skills.mjs';
 import { loadSims } from './lib/sims.mjs';
+import { JOURNEY } from '../content/journey.mjs';
 import { loadAllowed, hashEmail, GATE_SALT } from './lib/gate.mjs';
 import { buildExcel } from './lib/excel.mjs';
 
@@ -183,10 +184,18 @@ const data = {
   tracks, related, updates, updatesTh,
   ext: extPages, skillCfg: { limits: SKILL_LIMITS, types: SKILL_TYPES },
   sims: await loadSims(ROOT, n => n === 1 || pageByN.has(n) || extPages.some(e => e.n === n)),
+  journey: JOURNEY,
   excel: { chapters: excel.chapters, index: excel.index }, excelReportDate: excel.sample.reportDate,
   deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
 
+// เส้นทาง 7 สถานี: ทุกสถานีต้องมีฉาก (page: 'journey') หรือจุดขออนุญาต และลิงก์ไปหน้าที่มีอยู่จริง
+if (JOURNEY.stations.length !== 7) throw new Error('journey must have 7 stations');
+for (const s of JOURNEY.stations) {
+  if (s.sim && !data.sims.some(x => x.id === s.sim && x.page === 'journey')) throw new Error('journey: missing sim ' + s.sim);
+  if (!s.sim && !s.consent) throw new Error('journey: station needs a sim or consent ' + s.key);
+  if (s.link && !pageByN.has(s.link)) throw new Error('journey: bad link ' + s.link);
+}
 // ---- brand: optional official Copilot logo (only when the owner supplies an authorised file) ----
 const brandDir = path.join(ROOT, 'assets', 'brand');
 const copilotLogo = ['copilot-logo.svg', 'copilot-logo.png'].find(f => fs.existsSync(path.join(brandDir, f)));
@@ -198,7 +207,7 @@ const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8') + '\n' + 
 const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'))
   .replace('/*__PROMPTLAB_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'promptlab.js'), 'utf8'))
   .replace('/*__SKILLS_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'skillbuilder.js'), 'utf8'))
-  .replace('/*__FX_JS__*/', () => ['core', 'sound', 'feel', 'sim'].map(f => fs.readFileSync(path.join(ROOT, 'src', 'fx', f + '.js'), 'utf8')).join('\n'));
+  .replace('/*__FX_JS__*/', () => ['core', 'sound', 'feel', 'sim', 'journey', 'forge'].map(f => fs.readFileSync(path.join(ROOT, 'src', 'fx', f + '.js'), 'utf8')).join('\n'));
 if (/\/\*__(EXCEL|PROMPTLAB|SKILLS|FX)_JS__\*\//.test(js)) throw new Error('excel.js / promptlab.js / skillbuilder.js not injected');
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">${Object.entries(icons).map(([k, v]) => `<symbol id="i-${k}" viewBox="0 0 24 24" fill="currentColor">${v}</symbol>`).join('')}</svg>`;
 const json = JSON.stringify(data).replace(/</g, '\\u003c');

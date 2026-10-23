@@ -743,7 +743,7 @@ await suite('v4 หน้าจอจำลองที่เล่นเอง�
   const SIM = D.sims.find(s => s.id === 'agent-builder-create');
   const guide = async (pg, steps) => { for (let k = 0; k < steps.length; k++) { await pg.click(`.sim [data-t="${steps[k].t}"]`); await pg.waitForFunction(n => !document.querySelector('.sim [data-t]') || document.querySelector('.sim .sim-count').textContent !== `ขั้นที่ ${n}/${document.querySelectorAll('.sim .sim-tx li').length}`, k + 1, { timeout: 8000 }); } };
   const fast = () => p.evaluate(() => { const s = document.querySelector('.sim [data-act="speed"]'); const o = document.createElement('option'); o.value = '8'; o.textContent = 'test'; s.appendChild(o); s.value = '8'; s.dispatchEvent(new Event('change')); });
-  eq(D.sims.map(s => s.id + '@' + s.page).sort().join(','), 'add-skill@21.5,agent-builder-create@19', '2 scenes: page 19 + 21A');
+  eq(D.sims.filter(s => s.page !== 'journey').map(s => s.id + '@' + s.page).sort().join(','), 'add-skill@21.5,agent-builder-create@19', '2 course-page scenes: page 19 + 21A');
   await p.goto(url + '#/p/19'); await p.waitForSelector('.sim .sm-app');
   ok(await p.isVisible('.sim .sim-big') && (await text('.sim .sim-count').catch(() => p.$eval('.sim .sim-count', e => e.textContent))) !== null, 'big play button before start');
   eq(await p.$eval('.sim .sim-count', e => e.textContent), `ขั้นที่ 1/${SIM.steps.length}`, 'step counter');
@@ -830,6 +830,86 @@ await suite('v4 หน้าจอจำลองที่เล่นเอง�
   fs.writeFileSync(path.join(tmp, 'content', 'sims', 'bad.mjs'), "export default { id: 'bad', page: 19, title: 'x', init: { screen: 'chat' }, steps: [{ t: 'btn:create', act: 'click', tip: 'กด' }] };");
   let threw = ''; try { await loadSims(tmp, () => true); } catch (e) { threw = e.message; }
   ok(threw.includes('not on screen chat'), 'build fails on a target that is not on the screen');
+});
+
+await suite('v4.1 เส้นทาง 7 สถานี + Prompt Lab เครื่องผลิต', async () => {
+  const jctx = await seededContext(browser, { viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block', permissions: ['clipboard-read', 'clipboard-write'] });
+  await jctx.route('**/api/copilot-updates', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SNAP) }));
+  const p = await jctx.newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); }); p.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)|net::ERR|ERR_TUNNEL|ERR_PROXY|Failed to load resource/.test(m.text())) errs.push(m.text()); });
+  const J = D.journey;
+  await p.goto(url + '#/journey'); await p.waitForSelector('.jr-st .sim .sm-app');
+  eq(await p.$$eval('.jr-st h2', l => l.map(x => x.textContent).join('→')), 'เป้าหมาย→สิทธิ์→ข้อมูล→เครื่องมือ→ขออนุญาต→ผลงาน→ส่งมอบ', '7 stations in order');
+  eq(await p.$$eval('.jr-st .sim', l => l.length), 6, 'every station except consent has its own demo');
+  ok(await p.$$eval('.jr-link', l => l.length === 7 && l.every(a => /^#\/p\/\d+$/.test(a.getAttribute('href')))), 'each station links to a course page');
+  ok(await p.$eval('#tocList', e => e.children.length > 0), 'contents sidebar rendered');
+  const h0 = parseFloat(await p.$eval('.jr-fill', e => e.style.height));
+  await p.evaluate(() => scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(250);
+  const h1 = parseFloat(await p.$eval('.jr-fill', e => e.style.height));
+  ok(h0 < 20 && h1 > 90, `green line follows scrolling (${h0}% → ${h1}%)`);
+  ok(await p.$$eval('.jr-st.passed', l => l.length) === 7, 'stations light up as the line passes');
+  ok((await p.$eval('[data-jr-carry]', e => e.textContent)).includes('ยังไม่ได้เลือก'), 'result station waits for the consent choice');
+  const pick = async k => { await p.click(`[data-consent="${k}"]`); await p.waitForTimeout(60); return { ex: await p.$eval('[data-jr-explain]', e => e.className + '|' + e.textContent), carry: await p.$eval('[data-jr-carry]', e => e.textContent), pressed: await p.$eval(`[data-consent="${k}"]`, e => e.getAttribute('aria-pressed')) }; };
+  let c = await pick('once'); ok(c.ex.includes('tone-ok') && c.ex.includes('ครั้งหน้าจะถามใหม่') && c.carry.includes('อนุญาตครั้งนี้') && c.pressed === 'true', 'อนุญาตครั้งนี้ → safe explanation, carried to station 6');
+  c = await pick('always'); ok(c.ex.includes('tone-warn') && c.carry.includes('ทบทวน'), 'อนุญาตเสมอ → orange warning + review reminder');
+  c = await pick('deny'); ok(c.ex.includes('tone-stop') && c.carry.includes('แนบไฟล์ที่ต้องการเองในแชท'), 'ไม่อนุญาต → work stops, station 6 shows the manual-attach path');
+  await p.reload(); await p.waitForSelector('.jr-st .sim .sm-app');
+  ok((await p.$eval('[data-consent="deny"]', e => e.getAttribute('aria-pressed'))) === 'true' && (await p.$eval('#jr-consent', e => e.classList.contains('done'))), 'choice + station progress remembered');
+  const c0 = await p.evaluate(() => window.__fx.confetti);
+  for (const st of J.stations.filter(x => x.sim)) {
+    const sc = D.sims.find(x => x.id === st.sim), box = `#jr-${st.key} .sim`;
+    await p.click(`${box} [data-mode="guided"]`);
+    for (let k = 0; k < sc.steps.length; k++) {
+      await p.click(`${box} [data-t="${sc.steps[k].t}"]`);
+      await p.waitForFunction(([b, n, N]) => document.querySelector(b + ' .sim-count').textContent !== `ขั้นที่ ${n}/${N}`, [box, k + 1, sc.steps.length], { timeout: 8000 });
+    }
+  }
+  await p.waitForSelector('[data-jr-end]:not([hidden])', { timeout: 5000 });
+  ok((await p.$eval('[data-jr-count]', e => e.textContent)).includes('7/7') && await p.$$eval('.jr-st.done', l => l.length) === 7, 'all 7 stations done');
+  eq(await p.evaluate(() => window.__fx.confetti), c0 + 1, 'confetti once when the journey is finished (not per station)');
+  ok((await p.textContent('#toast')).includes('จบเส้นทาง 7 สถานี'), 'toast at the end');
+  ok((await p.$eval('#jr-result .sim-screen', e => e.textContent)).includes('เช็กลิสต์ก่อนเข้าโรงเรือน.docx') && (await p.$eval('#jr-handoff .sim-screen', e => e.textContent)).includes('Shared'), 'station demos end with a file and a shared agent');
+  await p.click('[data-jr-reset]'); await p.waitForSelector('.jr-st .sim .sm-app');
+  ok((await p.$eval('[data-jr-count]', e => e.textContent)).includes('0/7'), 'reset journey');
+  // Forge
+  const cases = await p.evaluate(() => { const S = window.__fx.scorePrompt, base = { goal: 'สรุปยอดผลิตเดือนนี้เทียบเป้าหมาย', data: 'ไฟล์ยอดผลิต.xlsx', level: 'read', approve: 'ask', out: 'chat', detail: 'ตาราง + สรุป', check: true }; const r = o => S({ ...base, ...o });
+    return [r({}), S({ goal: '', data: '', level: 'read', approve: 'ask', out: 'chat', detail: '', check: false }), r({ goal: 'สรุป' }), r({ data: 'ยอดผลิต' }), r({ level: 'send' }), r({ approve: 'always' }), r({ out: 'email' }), r({ out: 'word', level: 'write', approve: 'once' }), r({ check: false }), r({ detail: '' }), r({ out: 'excel', level: 'send' }), r({ goal: 'ช่วยหน่อย อยากได้อะไรสักอย่าง' })].map(x => [x.score, x.tone, x.over, x.under]); });
+  const want = [[100, 'high', false, false], [30, 'low', false, false], [75, 'mid', false, false], [90, 'high', false, false], [85, 'over', true, false], [90, 'over', true, false], [80, 'low', false, true], [100, 'high', false, false], [85, 'high', false, false], [90, 'high', false, false], [85, 'over', true, false], [85, 'high', false, false]];
+  eq(JSON.stringify(cases), JSON.stringify(want), 'scorePrompt: 12 cases (goal/data/output/check/least-privilege/over/under)');
+  await p.goto(url + '#/forge'); await p.waitForSelector('.fg-grid');
+  await p.waitForTimeout(400);
+  ok(await p.$eval('[data-fg-out]', e => e.classList.contains('typing') && e.textContent.length > 0), 'prompt types itself');
+  await p.click('[data-fg-skip]');
+  const exp = await p.evaluate(() => window.__fx.forgePrompt({ goal: 'สรุปยอดผลิตเดือนนี้เทียบเป้าหมายและเดือนก่อน พร้อมจุดที่ต้องติดตาม', data: 'ไฟล์ยอดผลิตรายวัน.xlsx ชีต "ผลผลิต"', level: 'write', approve: 'once', out: 'word', detail: '1 หน้า สำหรับผู้บริหาร', check: true }));
+  eq(await p.$eval('[data-fg-out]', e => e.textContent), exp, 'skip → full prompt matches the form');
+  ok(await p.$$eval('.fg-steps li.in', l => l.length) === 4 && (await p.$eval('.fg-steps', e => e.textContent)).includes('ขออนุญาตก่อนสร้างไฟล์') && (await p.$eval('.fg-steps', e => e.textContent)).includes('ผลลัพธ์.docx') && (await p.$eval('[data-fg-done]', e => e.textContent)).includes('Turn complete'), 'agent timeline: read → analyse → consent → file → เสร็จแล้ว');
+  eq(await p.$eval('.fg-bar', e => e.getAttribute('aria-valuenow')), await p.$eval('[data-fg-score]', e => e.textContent), 'meter value exposed to assistive tech');
+  await p.click('[data-fg-copy]');
+  eq(await p.evaluate(() => navigator.clipboard.readText()), exp, 'copy the prompt');
+  await p.fill('#fgGoal', 'ร่างอีเมลแจ้งทีมเรื่องตารางอบรมเดือนหน้า'); await p.selectOption('#fgOut', 'email'); await p.selectOption('#fgLevel', 'send'); await p.selectOption('#fgApprove', 'always'); await p.waitForTimeout(80);
+  ok(await p.$eval('[data-fg-score]', e => e.classList.contains('tone-over')) && (await p.$eval('[data-fg-warn]', e => e.textContent)).includes('อนุญาตเสมอ'), 'Always allow → meter turns orange + warning');
+  await p.click('[data-fg-skip]'); 
+  ok((await p.$eval('.fg-steps', e => e.textContent)).includes('ทำต่อทันทีโดยไม่ถาม') && (await p.$eval('.fg-steps', e => e.textContent)).includes('ส่งอีเมลออกไปทันที'), 'timeline shows the agent acting without asking');
+  await p.click('[data-fg-fix]'); await p.waitForTimeout(80);
+  ok(await p.$eval('[data-fg-score]', e => e.classList.contains('tone-high')) && !(await p.$('[data-fg-warn]')) && await p.$eval('#fgApprove', e => e.value) === 'once', '"ลดสิทธิ์ให้พอดีงาน" fixes the warning');
+  await p.selectOption('#fgLevel', 'read'); await p.waitForTimeout(80); await p.click('[data-fg-skip]');
+  ok((await p.$eval('[data-fg-warn]', e => e.textContent)).includes('สิทธิ์ไม่พอ') && (await p.$eval('.fg-steps', e => e.textContent)).includes('หยุด: สิทธิ์ไม่พอ') && (await p.$eval('[data-fg-done]', e => e.textContent)).includes('ทำไม่สำเร็จ'), 'too little permission → stop + explain');
+  await p.click('[data-fg-preset="1"]'); await p.waitForTimeout(80);
+  eq(await p.$eval('#fgOut', e => e.value), 'chat', 'presets fill the form');
+  // entry points
+  await p.goto(url); await p.waitForSelector('.hero');
+  ok(await p.$('.hero-new a[href="#/journey"]') && await p.$('.hero-new a[href="#/forge"]') && await p.$('.tools a[href="#/journey"]') && await p.$('.tools a[href="#/forge"]'), 'home hero + tools link to both');
+  await p.goto(url + '#/p/9'); await p.waitForSelector('.pa-link[href="#/forge"]');
+  ok(true, 'page 9 links to the forge');
+  eq(errs.join(' | '), '', 'no console/page errors under CSP');
+  await jctx.close();
+  // phone + reduced motion
+  const mctx = await seededContext(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce', serviceWorkers: 'block' });
+  await mctx.route('**/api/copilot-updates', r => r.fulfill({ status: 404, body: '' }));
+  const m = await mctx.newPage();
+  for (const h of ['#/journey', '#/forge']) { await m.goto(url + h); await m.waitForSelector(h === '#/journey' ? '.jr-st' : '.fg-grid'); eq(await m.evaluate(() => document.documentElement.scrollWidth - innerWidth), 0, `${h}: no horizontal scroll at 390 px`); }
+  ok(await m.$eval('[data-fg-out]', e => !e.classList.contains('typing') && e.textContent.startsWith('งาน:')) && await m.$$eval('.fg-steps li.in', l => l.length) >= 3, 'reduced motion: prompt + timeline shown at once');
+  await mctx.close();
 });
 
 await suite('Prompt Lab tabs + supplements', async () => {

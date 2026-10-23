@@ -10,10 +10,13 @@ function simApply(st, s) {
   st = simClone(st);
   if (s.go) st.screen = s.go;
   if (s.tab) st.tab = s.tab;
-  if (s.act === 'type') { const [k, id] = s.t.split(':'); if (k === 'field') st.f[id] = s.type; else st.draft = s.type; }
+  if (s.act === 'type') { const [k, id] = s.t.split(':'); if (k === 'field') st.f[id] = s.type; else if (k === 'describe') st.ddraft = s.type; else st.draft = s.type; }
   if (s.set) Object.assign(st, s.set);
   if (s.skill) st.skills = [...st.skills, s.skill];
   if (s.msgs) { st.msgs = [...st.msgs, ...s.msgs]; st.draft = ''; st.attach = null; }
+  if (s.dmsgs) { st.dmsgs = [...(st.dmsgs || []), ...s.dmsgs]; st.ddraft = ''; }
+  if (s.sites) st.sites = [...(st.sites || []), ...s.sites];
+  if (s.cap) st.caps = (st.caps || []).includes(s.cap) ? st.caps.filter(c => c !== s.cap) : [...(st.caps || []), s.cap];
   st.toast = s.toast || '';
   return st;
 }
@@ -32,16 +35,19 @@ function simScreenHTML(st) {
     const fld = (id, label, ph, tall) => `<button type="button" class="sm-field ${tall ? 'tall' : ''}" ${T('field:' + id)}><small>${label}</small><span class="v" data-v="${id}">${st.f[id] ? esc(st.f[id]) : `<i>${ph}</i>`}</span></button>`;
     const tabs = [['describe', 'Describe'], ['configure', 'Configure'], ['try', 'Try it']].map(([k, l]) => `<button type="button" class="sm-tab ${st.tab === k ? 'on' : ''}" ${T('tab:' + k)}>${l}</button>`).join('');
     let body;
-    if (st.tab === 'describe') body = `<div class="sm-chat"><div class="sm-msg a">${ic('sparkle')}<span>บอกฉันว่าอยากให้ Agent ช่วยงานอะไร แล้วฉันจะช่วยร่างการตั้งค่าให้</span></div></div><div class="sm-in"><span class="sm-ph">บรรยาย Agent ที่ต้องการ…</span><span class="sm-send">${ic('send')}</span></div>`;
+    const msgHTML = m => `<div class="sm-msg ${m.r}">${m.r === 'a' ? ic(m.ic || 'bot') : ''}<span>${m.file ? `<span class="sm-chip">${ic('document')}${esc(m.file)}</span>` : ''}${m.skill ? `<span class="sm-chip sk">${ic('layer')}ใช้ Skill: ${esc(m.skill)}</span>` : ''}${esc(m.t)}${m.out ? `<span class="sm-chip out">${ic('document_text')}${esc(m.out)}</span>` : ''}</span></div>`;
+    if (st.tab === 'describe') body = `<div class="sm-chat"><div class="sm-msg a">${ic('sparkle')}<span>บอกฉันว่าอยากให้ Agent ช่วยงานอะไร แล้วฉันจะช่วยร่างการตั้งค่าให้</span></div>${(st.dmsgs || []).map(m => msgHTML({ ...m, ic: 'sparkle' })).join('')}</div><div class="sm-in"><button type="button" class="sm-txt" ${T('describe:input')}><span class="v" data-v="ddraft">${st.ddraft ? esc(st.ddraft) : '<i>บรรยาย Agent ที่ต้องการ…</i>'}</span></button><button type="button" class="sm-send on" ${T('describe:send')} aria-label="ส่ง">${ic('send')}</button></div>`;
     else if (st.tab === 'configure') body = `<div class="sm-form">${fld('name', 'Name', 'ตั้งชื่อ Agent')}${fld('desc', 'Description', 'Agent นี้ทำอะไร')}${fld('instr', 'Instructions', 'บอก Agent ว่าต้องทำงานอย่างไร', true)}
-      <div class="sm-sec"><div><b>Knowledge</b><small>เว็บไซต์สาธารณะ ≤ 4 แหล่ง</small></div><span class="sm-btn ghost">${ic('link')}<span>Add</span></span></div>
+      <div class="sm-sec"><div><b>Knowledge</b><small>${(st.sites || []).length ? st.sites.map(u => `<span class="sm-chip">${ic('globe')}${esc(u)}</span>`).join(' ') : 'เว็บไซต์สาธารณะ ≤ 4 แหล่ง'}</small></div><button type="button" class="sm-btn" ${T('knowledge:add')}>${ic('link')}<span>Add</span></button></div>
+      <div class="sm-sec"><div><b>Capabilities</b><small>เปิดเฉพาะที่งานต้องใช้</small></div><div class="sm-caps">${[['web', 'globe', 'Web search'], ['code', 'code', 'Code interpreter'], ['image', 'sparkle', 'Image generator']].map(([k, i, l]) => `<button type="button" class="sm-cap ${(st.caps || []).includes(k) ? 'on' : ''}" ${T('cap:' + k)} aria-pressed="${(st.caps || []).includes(k)}">${ic(i)}<span>${l}</span><i></i></button>`).join('')}</div></div>
       <div class="sm-sec"><div><b>Skills</b><small>${st.skills.length ? st.skills.map(s => `<span class="sm-chip">${ic('layer')}${esc(s)}</span>`).join(' ') : 'ยังไม่มี Skill'}</small></div><button type="button" class="sm-btn" ${T('skills:add')}>${ic('arrow_upload')}<span>Add</span></button></div></div>`;
-    else body = `<div class="sm-chat">${st.msgs.length ? st.msgs.map(m => `<div class="sm-msg ${m.r}">${m.r === 'a' ? ic('bot') : ''}<span>${m.file ? `<span class="sm-chip">${ic('document')}${esc(m.file)}</span>` : ''}${m.skill ? `<span class="sm-chip sk">${ic('layer')}ใช้ Skill: ${esc(m.skill)}</span>` : ''}${esc(m.t)}</span></div>`).join('') : `<p class="sm-hello">${ic('bot')}<span>ทดสอบ ${esc(st.f.name || 'Agent')} ที่นี่ก่อนแชร์</span></p>`}</div>
+    else body = `<div class="sm-chat">${st.msgs.length ? st.msgs.map(msgHTML).join('') : `<p class="sm-hello">${ic('bot')}<span>ทดสอบ ${esc(st.f.name || 'Agent')} ที่นี่ก่อนแชร์</span></p>`}</div>
       <div class="sm-in"><button type="button" class="sm-icb" ${T('try:attach')} aria-label="แนบไฟล์">${ic('attach')}</button>${st.attach ? `<span class="sm-chip">${ic('document')}${esc(st.attach)}</span>` : ''}<button type="button" class="sm-txt" ${T('try:input')}><span class="v" data-v="draft">${st.draft ? esc(st.draft) : '<i>พิมพ์คำถามทดสอบ…</i>'}</span></button><button type="button" class="sm-send on" ${T('try:send')} aria-label="ส่ง">${ic('send')}</button></div>`;
-    main = `<div class="sm-head"><b>${esc(st.created ? st.f.name : 'New agent')}</b><div class="sm-tabs" role="presentation">${tabs}</div><button type="button" class="sm-btn pri" ${T('btn:create')}>${st.created ? 'Update' : 'Create'}</button></div><div class="sm-body">${body}</div>`;
+    main = `<div class="sm-head"><b>${esc(st.created ? st.f.name : 'New agent')}</b><div class="sm-tabs" role="presentation">${tabs}</div>${st.created ? `<button type="button" class="sm-btn" ${T('btn:share')}>${ic('people_team')}<span>${st.shared ? 'Shared' : 'Share'}</span></button>` : ''}<button type="button" class="sm-btn pri" ${T('btn:create')}>${st.created ? 'Update' : 'Create'}</button></div><div class="sm-body">${body}</div>`;
   }
-  const dlg = st.dialog ? `<div class="sm-dlg"><div class="sm-dlg-in"><b>Add skill</b><small>อัปโหลดแพ็กเกจ .zip ที่มี SKILL.md</small>${st.upload ? `<div class="sm-file">${ic('folder')}<div><b>sop-assistant.zip</b><small>name: sop-assistant · description: ตอบคำถามวิธีปฏิบัติงานจาก SOP…</small><small>ไฟล์: SKILL.md · sop-biosecurity.pdf</small></div>${ic('checkmark_circle')}</div>` : `<button type="button" class="sm-drop" ${T('dialog:file')}>${ic('arrow_upload')}<span>เลือกไฟล์ .zip</span></button>`}<div class="sm-dlg-act"><span class="sm-btn ghost">Cancel</span><button type="button" class="sm-btn pri" ${T('dialog:add')}>Add</button></div></div></div>` : '';
-  return `<div class="sm-app">${rail}<div class="sm-main">${main}</div>${dlg}${st.toast ? `<div class="sm-toast">${ic('checkmark_circle')}<span>${esc(st.toast)}</span></div>` : ''}</div>`;
+  const share = st.dialog === 'share' ? `<div class="sm-dlg"><div class="sm-dlg-in"><b>Share ${esc(st.f.name)}</b><small>เลือกคนที่ใช้ Agent นี้ได้</small>${[['me', 'person', 'เฉพาะฉัน', 'ใช้ทดสอบก่อนแชร์'], ['people', 'people_team', 'บางคนในองค์กร', 'ทีมที่ทำงานนี้จริง (แนะนำ)'], ['org', 'organization', 'ทุกคนในองค์กร', 'ต้องผ่านผู้มีอำนาจอนุมัติ']].map(([k, i, l, d]) => `<button type="button" class="sm-opt" ${T('share:' + k)}>${ic(i)}<span><b>${l}</b><small>${d}</small></span></button>`).join('')}</div></div>` : '';
+  const dlg = st.dialog === 'skill' ? `<div class="sm-dlg"><div class="sm-dlg-in"><b>Add skill</b><small>อัปโหลดแพ็กเกจ .zip ที่มี SKILL.md</small>${st.upload ? `<div class="sm-file">${ic('folder')}<div><b>sop-assistant.zip</b><small>name: sop-assistant · description: ตอบคำถามวิธีปฏิบัติงานจาก SOP…</small><small>ไฟล์: SKILL.md · sop-biosecurity.pdf</small></div>${ic('checkmark_circle')}</div>` : `<button type="button" class="sm-drop" ${T('dialog:file')}>${ic('arrow_upload')}<span>เลือกไฟล์ .zip</span></button>`}<div class="sm-dlg-act"><span class="sm-btn ghost">Cancel</span><button type="button" class="sm-btn pri" ${T('dialog:add')}>Add</button></div></div></div>` : '';
+  return `<div class="sm-app">${rail}<div class="sm-main">${main}</div>${dlg}${share}${st.toast ? `<div class="sm-toast">${ic('checkmark_circle')}<span>${esc(st.toast)}</span></div>` : ''}</div>`;
 }
 
 const SIM_CURSOR = '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M5 2.5l14.5 9.2-6.3 1.4 3.6 6.6-2.7 1.5-3.6-6.6L6 19.2z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>';
@@ -133,7 +139,8 @@ function mountSim(el) {
   }
   function finish() {
     const st = store.get('cpa26-sim', {})[sc.id] || {}, dn = { ...(st.done || {}), [P.mode]: true };
-    save({ done: dn }); fxSound('done'); fxConfetti(); fxAnnounce(`ทำครบ ${N} ขั้นแล้ว: ${sc.title}`);
+    save({ done: dn }); fxSound('done'); if (!el.closest('.jr')) fxConfetti(); fxAnnounce(`ทำครบ ${N} ขั้นแล้ว: ${sc.title}`);
+    el.dispatchEvent(new CustomEvent('sim:done', { bubbles: true, detail: { id: sc.id, mode: P.mode } }));
     if (dn.auto && dn.guided) toast('ฝึกครบทั้ง 2 โหมดแล้ว');
   }
   async function play() {

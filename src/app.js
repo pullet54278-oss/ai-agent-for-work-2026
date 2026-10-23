@@ -213,6 +213,8 @@ function route() {
   if (h === 'deep') return renderDeepHome();
   const tm = h.match(/^track\/([a-z]+)$/); if (tm && D.tracks.some(t => t.key === tm[1])) return renderTrack(tm[1]);
   if (h === 'tracks') return renderTracks();
+  if (h === 'journey') return renderJourney();
+  if (h === 'forge') return renderForge();
   if (h === 'updates') return renderUpdatesPage();
   if (h === 'agents') return renderDirectoryPage();
   const b = h.match(/^builder(?:\/(\d+))?$/); if (b) return renderStudio(b[1] ? +b[1] : null);
@@ -484,6 +486,8 @@ const TOOLS = [
   ['#/agents', 'people_team', 'Agent Directory', 'ค้นหาและกรอง Agent ทั้ง 67 ตัวตามกลุ่มงานและระดับความพร้อม'],
   ['#/builder', 'toolbox', 'Agent Builder Studio', 'เขียนการตั้งค่า Agent เอง พร้อมตัวนับและตรวจกติกา URL'],
   ['#/p/9', 'edit', 'Prompt Builder', 'กรอกงานของคุณ ได้ Prompt 3 แบบทันที'],
+  ['#/journey', 'compass_northwest', 'เส้นทาง 7 สถานี', 'บทเรียนแรกแบบเส้นทางเดียว: เป้าหมาย → สิทธิ์ → ข้อมูล → เครื่องมือ → ขออนุญาต → ผลงาน → ส่งมอบ'],
+  ['#/forge', 'beaker', 'Prompt Lab เครื่องผลิต', 'กรอก 4 เรื่อง → Prompt พิมพ์ตัวเอง → ดู Agent ทำงาน + มาตรวัดความพร้อม'],
   ['#/plab', 'sparkle', 'Prompt Lab อัตโนมัติ', 'โยนไฟล์ PDF/Excel หรือวางข้อความ ได้ Prompt 7 แบบทันที'],
   ['#/s/agent-skills', 'layer', 'Skill ของ Agent (SKILL.md / .zip)', 'Skill Builder: โยนไฟล์ PDF/Word/Excel → ได้ .zip พร้อมอัปโหลด · ตัวอย่าง 5 แบบ'],
   ['#/p/23', 'beaker', 'Prompt Lab', 'Prompt ตัวอย่าง 12 หมวด พร้อมคัดลอก'],
@@ -522,6 +526,7 @@ function renderHome() {
     <p class="hero-ev"><span class="pill">${ic('hat_graduation')}<span>${esc(D.meta.event)}</span></span><span class="pill pill-ver">${ic('tag')}<span>v${esc(D.meta.version)}</span></span></p>
     <p class="hero-desc">คู่มือเรียนรู้ Microsoft Copilot เชิงลึก <b>เริ่มที่ Copilot Agent</b> ตั้งแต่แนวคิด สร้าง ทดสอบ จนนำไปใช้กับงานจริง ต่อด้วย Copilot ใน Excel, Word, PowerPoint การใช้งานบนเบราว์เซอร์ และเทคนิคขั้นสูง</p>
     <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#/track/agent">${ic('bot')}<span>เริ่มเรียน Copilot Agent →</span></a><a class="btn btn-outline btn-lg" href="#/p/${moduleOf(chByKey.pmode)}">เริ่มที่ Prompt Mode →</a><button type="button" class="btn btn-subtle btn-lg" data-open-finder>${ic('people_team')}<span>ค้นหา Agent ตามกลุ่มงาน</span></button></div>
+    <p class="hero-new"><span class="pill pa-new">${ic('flash')}<span>ใหม่</span></span><a href="#/journey">${ic('compass_northwest')}<span>เส้นทาง 7 สถานี</span></a><a href="#/forge">${ic('beaker')}<span>Prompt Lab เครื่องผลิต</span></a></p>
   </div><div class="hero-art">${heroScene()}</div></div></section>
   ${paSectionHTML()}
   ${updatesPanelHTML(true)}

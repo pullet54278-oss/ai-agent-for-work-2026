@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-23T13:42:30.177Z",
-  "pass": 442,
+  "generatedAt": "2026-10-23T14:07:38.990Z",
+  "pass": 475,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -81,6 +81,10 @@
     },
     "v4 หน้าจอจำลองที่เล่นเองได้ + ลูกเล่น": {
       "pass": 34,
+      "fail": 0
+    },
+    "v4.1 เส้นทาง 7 สถานี + Prompt Lab เครื่องผลิต": {
+      "pass": 33,
       "fail": 0
     },
     "Prompt Lab tabs + supplements": {
