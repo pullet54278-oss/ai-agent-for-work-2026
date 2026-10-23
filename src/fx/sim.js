@@ -140,6 +140,7 @@ function mountSim(el) {
   function finish() {
     const st = store.get('cpa26-sim', {})[sc.id] || {}, dn = { ...(st.done || {}), [P.mode]: true };
     save({ done: dn }); fxSound('done'); if (!el.closest('.jr')) fxConfetti(); fxAnnounce(`ทำครบ ${N} ขั้นแล้ว: ${sc.title}`);
+    fxBadgeCheck();
     el.dispatchEvent(new CustomEvent('sim:done', { bubbles: true, detail: { id: sc.id, mode: P.mode } }));
     if (dn.auto && dn.guided) toast('ฝึกครบทั้ง 2 โหมดแล้ว');
   }

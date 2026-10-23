@@ -12,6 +12,9 @@ import { TRACKS } from '../content/tracks.mjs';
 import { readExamples, skillsPageHTML, SKILL_PAGE, SKILL_LIMITS, SKILL_TYPES } from './lib/skills.mjs';
 import { loadSims } from './lib/sims.mjs';
 import { JOURNEY } from '../content/journey.mjs';
+import { LIBRARY, LIB_CATS } from '../content/library.mjs';
+import { CHAPTER_CHECKS } from '../content/chapter-checks.mjs';
+import { BADGES } from '../content/badges.mjs';
 import { loadAllowed, hashEmail, GATE_SALT } from './lib/gate.mjs';
 import { buildExcel } from './lib/excel.mjs';
 
@@ -185,6 +188,9 @@ const data = {
   ext: extPages, skillCfg: { limits: SKILL_LIMITS, types: SKILL_TYPES },
   sims: await loadSims(ROOT, n => n === 1 || pageByN.has(n) || extPages.some(e => e.n === n)),
   journey: JOURNEY,
+  library: LIBRARY, libCats: LIB_CATS, badges: BADGES,
+  // ตัวเลือกแบบทดสอบท้ายบทสลับลำดับแบบคงที่ (ต้นฉบับเขียนคำตอบถูกไว้ข้อแรก)
+  checks: Object.fromEntries(Object.entries(CHAPTER_CHECKS).map(([n, c]) => [n, { safety: c.safety, quiz: c.quiz.map((q, i) => { let x = (+n * 31 + i * 7) % 233280; const idx = q.opts.map((_, k) => k); for (let k = idx.length - 1; k > 0; k--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (k + 1)); [idx[k], idx[j]] = [idx[j], idx[k]]; } return { q: q.q, why: q.why, opts: idx.map(k => q.opts[k]), a: idx.indexOf(q.a) }; }) }])),
   excel: { chapters: excel.chapters, index: excel.index }, excelReportDate: excel.sample.reportDate,
   deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
@@ -196,6 +202,14 @@ for (const s of JOURNEY.stations) {
   if (!s.sim && !s.consent) throw new Error('journey: station needs a sim or consent ' + s.key);
   if (s.link && !pageByN.has(s.link)) throw new Error('journey: bad link ' + s.link);
 }
+// คลังเครื่องมือ: 40 หัวข้อ slug ไม่ซ้ำ หมวดถูก ลิงก์ชี้ไปที่มีอยู่จริง · แบบทดสอบท้ายบทครบ 27 บท
+const ROUTES_OK = new Set(['#/forge', '#/journey', '#/plab', '#/builder', '#/agents', '#/excel', '#/deep', '#/tracks', '#/updates']);
+if (LIBRARY.length !== 40 || new Set(LIBRARY.map(t => t.slug)).size !== 40) throw new Error('library must have 40 unique topics');
+for (const t of LIBRARY) {
+  if (!LIB_CATS.some(c => c.k === t.cat) || !t.points || t.points.length < 3 || !t.prompt) throw new Error('library: bad topic ' + t.slug);
+  for (const r of t.links) if (r.startsWith('r:') ? !ROUTES_OK.has(r.slice(2)) : !refTitle(r)) throw new Error(`library ${t.slug}: bad link ${r}`);
+}
+for (const c of src.chapters) { const k = CHAPTER_CHECKS[c.n]; if (!k || k.quiz.length !== 3 || k.safety.length !== 5 || k.quiz.some(q => q.opts.length < 3 || q.a < 0 || q.a >= q.opts.length || !q.why)) throw new Error('chapter check missing/invalid: ' + c.n); }
 // ---- brand: optional official Copilot logo (only when the owner supplies an authorised file) ----
 const brandDir = path.join(ROOT, 'assets', 'brand');
 const copilotLogo = ['copilot-logo.svg', 'copilot-logo.png'].find(f => fs.existsSync(path.join(brandDir, f)));
@@ -207,7 +221,7 @@ const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8') + '\n' + 
 const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'))
   .replace('/*__PROMPTLAB_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'promptlab.js'), 'utf8'))
   .replace('/*__SKILLS_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'skillbuilder.js'), 'utf8'))
-  .replace('/*__FX_JS__*/', () => ['core', 'sound', 'feel', 'sim', 'journey', 'forge'].map(f => fs.readFileSync(path.join(ROOT, 'src', 'fx', f + '.js'), 'utf8')).join('\n'));
+  .replace('/*__FX_JS__*/', () => ['core', 'sound', 'feel', 'sim', 'journey', 'forge', 'library', 'progress'].map(f => fs.readFileSync(path.join(ROOT, 'src', 'fx', f + '.js'), 'utf8')).join('\n'));
 if (/\/\*__(EXCEL|PROMPTLAB|SKILLS|FX)_JS__\*\//.test(js)) throw new Error('excel.js / promptlab.js / skillbuilder.js not injected');
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">${Object.entries(icons).map(([k, v]) => `<symbol id="i-${k}" viewBox="0 0 24 24" fill="currentColor">${v}</symbol>`).join('')}</svg>`;
 const json = JSON.stringify(data).replace(/</g, '\\u003c');

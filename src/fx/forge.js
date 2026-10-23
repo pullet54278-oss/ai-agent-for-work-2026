@@ -52,9 +52,9 @@ function fgSteps(f, r) {
   else S.push([O[3], 'สร้างไฟล์ผลงาน', '', O[4]]);
   return S;
 }
-let fgForm = { ...FG_PRESETS[0].f }, fgShown = '', fgTimer = 0, fgRun = 0;
+let fgForm = { ...FG_PRESETS[0].f }, fgShown = '', fgTimer = 0, fgRun = 0, fgTouched = false;
 function renderForge() {
-  cur = null;
+  cur = null; fgTouched = false;
   const sel = (id, k, opts) => `<select id="${id}" data-fg="${k}">${opts.map(o => `<option value="${o[0]}" ${fgForm[k] === o[0] ? 'selected' : ''}>${esc(o[1])}${o[2] && k === 'level' ? ' · ' + esc(o[2]) : ''}</option>`).join('')}</select>`;
   setMain(`<header class="ph" style="--dc:var(--accent)">${art('beaker')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>Prompt Lab เครื่องผลิต</span></nav><h1>Prompt Lab เครื่องผลิต</h1><p class="short">กรอก 4 เรื่อง แล้วดู Prompt ประกอบตัวเอง พร้อมภาพจำลองว่า Agent จะทำอะไร · มาตรวัดเตือนเมื่อให้สิทธิ์สูงเกินงาน</p>
   <div class="ph-meta">${FG_PRESETS.map((p, i) => `<button type="button" class="btn btn-subtle" data-fg-preset="${i}">${ic('sparkle')}<span>${esc(p.t)}</span></button>`).join('')}</div></header>
@@ -75,7 +75,9 @@ function renderForge() {
   const out = $('[data-fg-out]', root);
   fgShown = ''; out.textContent = '';
   const meter = () => {
-    const r = scorePrompt(fgForm), lbl = { over: 'สิทธิ์สูงเกินงาน', low: 'ยังไม่พร้อม', mid: 'พอใช้', high: 'พร้อมใช้' }[r.tone];
+    const r = scorePrompt(fgForm);
+    if (fgTouched && !r.over && !r.under && r.score > store.get('cpa26-forge-best', 0)) { store.set('cpa26-forge-best', r.score); fxBadgeCheck(); }
+    const lbl = { over: 'สิทธิ์สูงเกินงาน', low: 'ยังไม่พร้อม', mid: 'พอใช้', high: 'พร้อมใช้' }[r.tone];
     $('[data-fg-meter]', root).innerHTML = `<div class="fg-mh"><b>ความพร้อมของคำสั่ง</b><span class="fg-score tone-${r.tone}" data-fg-score>${r.score}</span></div>
       <div class="fg-bar tone-${r.tone}" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${r.score}" aria-label="ความพร้อมของคำสั่ง ${r.score} คะแนน · ${lbl}"><i style="width:${r.score}%"></i></div><p class="fg-lbl tone-${r.tone}">${esc(lbl)}</p>
       <ul class="fg-items">${r.items.map(([t, g, m]) => `<li class="${g === m ? 'ok' : g ? 'part' : 'no'}">${ic(g === m ? 'checkmark_circle' : g ? 'warning' : 'dismiss_circle')}<span>${esc(t)}</span><b>${g}/${m}</b></li>`).join('')}</ul>
@@ -109,7 +111,7 @@ function renderForge() {
     };
     tick();
   };
-  const changed = () => { meter(); clearTimeout(fgTimer); fgTimer = setTimeout(typeTo, 250); };
+  const changed = () => { fgTouched = true; meter(); clearTimeout(fgTimer); fgTimer = setTimeout(typeTo, 250); };
   root.addEventListener('input', e => { const el = e.target.closest('[data-fg]'); if (!el) return; fgForm[el.dataset.fg] = el.type === 'checkbox' ? el.checked : el.value; changed(); });
   root.addEventListener('change', e => { const el = e.target.closest('select[data-fg]'); if (!el) return; fgForm[el.dataset.fg] = el.value; changed(); });
   root.addEventListener('click', e => {

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-23T14:07:38.990Z",
-  "pass": 475,
+  "generatedAt": "2026-10-23T14:43:51.043Z",
+  "pass": 506,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -85,6 +85,10 @@
     },
     "v4.1 เส้นทาง 7 สถานี + Prompt Lab เครื่องผลิต": {
       "pass": 33,
+      "fail": 0
+    },
+    "v4.2 คลังเครื่องมือ + เหรียญ + ทบทวนท้ายบท": {
+      "pass": 31,
       "fail": 0
     },
     "Prompt Lab tabs + supplements": {

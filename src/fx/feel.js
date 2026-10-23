@@ -43,7 +43,7 @@ function fxCount(root) {
 // พลุ: canvas 1.6 วินาที สีจาก token ของธีม
 function fxConfetti() {
   if (reduceMotion()) return;
-  window.__fx.confetti++;
+  window.__fx.confetti++; window.__fx.lastConfetti = Date.now();
   const c = document.createElement('canvas'); c.className = 'fx-confetti'; c.setAttribute('aria-hidden', 'true');
   const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
   c.width = W * dpr; c.height = H * dpr; document.body.appendChild(c);

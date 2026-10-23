@@ -839,6 +839,7 @@ await suite('v4.1 เส้นทาง 7 สถานี + Prompt Lab เคร
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); }); p.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)|net::ERR|ERR_TUNNEL|ERR_PROXY|Failed to load resource/.test(m.text())) errs.push(m.text()); });
   const J = D.journey;
   await p.goto(url + '#/journey'); await p.waitForSelector('.jr-st .sim .sm-app');
+  await p.evaluate(() => localStorage.setItem('cpa26-badges', JSON.stringify(['journey', 'sims', 'forge', 'quiz5', 'quiz27']))); // badge confetti is tested in v4.2
   eq(await p.$$eval('.jr-st h2', l => l.map(x => x.textContent).join('→')), 'เป้าหมาย→สิทธิ์→ข้อมูล→เครื่องมือ→ขออนุญาต→ผลงาน→ส่งมอบ', '7 stations in order');
   eq(await p.$$eval('.jr-st .sim', l => l.length), 6, 'every station except consent has its own demo');
   ok(await p.$$eval('.jr-link', l => l.length === 7 && l.every(a => /^#\/p\/\d+$/.test(a.getAttribute('href')))), 'each station links to a course page');
@@ -910,6 +911,102 @@ await suite('v4.1 เส้นทาง 7 สถานี + Prompt Lab เคร
   for (const h of ['#/journey', '#/forge']) { await m.goto(url + h); await m.waitForSelector(h === '#/journey' ? '.jr-st' : '.fg-grid'); eq(await m.evaluate(() => document.documentElement.scrollWidth - innerWidth), 0, `${h}: no horizontal scroll at 390 px`); }
   ok(await m.$eval('[data-fg-out]', e => !e.classList.contains('typing') && e.textContent.startsWith('งาน:')) && await m.$$eval('.fg-steps li.in', l => l.length) >= 3, 'reduced motion: prompt + timeline shown at once');
   await mctx.close();
+});
+
+await suite('v4.2 คลังเครื่องมือ + เหรียญ + ทบทวนท้ายบท', async () => {
+  const lctx = await seededContext(browser, { viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block', permissions: ['clipboard-read', 'clipboard-write'] });
+  await lctx.route('**/api/copilot-updates', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SNAP) }));
+  const p = await lctx.newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); }); p.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)|net::ERR|ERR_TUNNEL|ERR_PROXY|Failed to load resource/.test(m.text())) errs.push(m.text()); });
+  // library list
+  await p.goto(url + '#/lib'); await p.waitForSelector('.lib-card:not([hidden])');
+  eq(await p.$$eval('.lib-card', l => l.length), 40, '40 topics');
+  eq(await p.$$eval('[data-libcat]', l => l.length), 9, '8 category chips + all');
+  ok(await p.$$eval('.lib-card', l => new Set(l.map(a => getComputedStyle(a).getPropertyValue('--dc'))).size >= 6), 'cards coloured by category');
+  await p.click('[data-libcat="excel"]');
+  eq(await p.$$eval('.lib-card:not([hidden])', l => l.length), 5, 'filter by category');
+  await p.reload(); await p.waitForSelector('.lib-card:not([hidden])');
+  eq(await p.$eval('[data-libcat="excel"]', b => b.getAttribute('aria-pressed')), 'true', 'category filter remembered');
+  await p.click('[data-libcat=""]'); await p.fill('#libQ', 'อีเมล');
+  const vis = await p.$$eval('.lib-card:not([hidden])', l => l.map(a => a.textContent));
+  ok(vis.length >= 2 && vis.length < 40, `search filters cards (${vis.length})`);
+  await p.fill('#libQ', 'zzzz-ไม่มี'); ok(await p.isVisible('[data-lib-empty]'), 'empty state'); await p.fill('#libQ', '');
+  // card → detail with a view transition, back the same way
+  const vt0 = await p.evaluate(() => window.__fx.vt);
+  await p.click('[data-lib="excel-formulas"]'); await p.waitForSelector('.lib-body');
+  eq(await p.evaluate(() => location.hash), '#/lib/excel-formulas', 'card opens its page');
+  eq(await p.evaluate(() => window.__fx.vt), vt0 + 1, 'opened with a View Transition');
+  ok(await p.$eval('.lib-hero', e => e.style.viewTransitionName === 'lib-hero'), 'shared element name on the page header');
+  await p.click('.lib-body [data-copy]');
+  ok((await p.evaluate(() => navigator.clipboard.readText())).startsWith('เขียนสูตร Excel'), 'copy example prompt');
+  await p.click('[data-lib-back]'); await p.waitForFunction(() => !document.querySelector('.lib-body') && document.querySelector('#libQ'), null, { timeout: 5000 });
+  eq(await p.evaluate(() => location.hash + ' ' + window.__fx.vt), '#/lib ' + (vt0 + 2), 'back to the list with a transition');
+  // fallback without View Transitions API
+  await p.evaluate(() => { document.startViewTransition = undefined; });
+  await p.click('[data-lib="consent"]'); await p.waitForSelector('.lib-body');
+  ok(await p.evaluate(() => location.hash) === '#/lib/consent' && await p.evaluate(() => window.__fx.vt) === vt0 + 2, 'works without View Transitions (instant)');
+  // every topic page renders, every link resolves
+  const bad = [];
+  for (const t of D.library) {
+    await p.evaluate(h => { location.hash = h; }, '#/lib/' + t.slug); await p.waitForFunction(x => document.querySelector('h1') && document.querySelector('h1').textContent === x, t.title, { timeout: 4000 }).catch(() => bad.push(t.slug + ':render'));
+    const hrefs = await p.$$eval('.toc-cards a', l => l.map(a => a.getAttribute('href')));
+    if (hrefs.length !== t.links.length) bad.push(t.slug + ':links');
+  }
+  eq(bad.join(','), '', 'all 40 topic pages render with all their course links');
+  ok((await p.evaluate(() => window.__app.cmdSearch('notebooks'))).includes('#/lib/pages-notebooks'), 'Ctrl+K search finds library topics');
+  // end-of-chapter checks
+  const lastPages = D.chapters.map(c => c.pages[c.pages.length - 1]);
+  const miss = [];
+  for (const n of lastPages) { await p.evaluate(h => { location.hash = h; }, Number.isInteger(n) ? '#/p/' + n : '#/s/agent-skills'); await p.waitForSelector('#doneBtn'); const q = await p.$$eval('.chk-end fieldset', l => l.length), s2 = await p.$$eval('.chk-end .vlist li', l => l.length); if (q !== 3 || s2 !== 5) miss.push(n); }
+  eq(miss.join(','), '', 'every chapter ends with 3 questions + 5 safety items');
+  await p.goto(url + '#/p/8'); await p.waitForSelector('#doneBtn');
+  ok(!(await p.$('.chk-end')), 'not shown on pages that are not the last of a chapter');
+  const pos = Object.values(D.checks).flatMap(c => c.quiz.map(q => q.a));
+  ok(new Set(pos).size >= 3, 'correct answers are not always in the same position');
+  await p.goto(url + '#/p/10'); await p.waitForSelector('.chk-end');
+  const A = D.checks[2].quiz.map(q => q.a);
+  await p.check(`.chk-end input[name="ch-2-q0"][value="${(A[0] + 1) % 3}"]`); await p.click('.chk-end [data-quiz-check]');
+  ok(await p.$eval('.chk-end fieldset .qwhy', e => e.classList.contains('no') && e.textContent.includes('คำตอบที่ถูก')), 'wrong answer → correct answer + explanation');
+  // badges
+  await p.goto(url + '#/progress'); await p.waitForSelector('.badges');
+  const total = await p.$$eval('.bd', l => l.length);
+  ok(total === D.badges.length + D.chapters.length + D.deepGroups.length + D.excel.chapters.length && await p.$$eval('.bd.got', l => l.length) === 0, `badge cabinet: ${total} badges, none yet`);
+  const ch6 = D.chapters.find(c => c.n === 6);
+  for (const n of ch6.pages) { await p.goto(url + '#/p/' + n); await p.waitForSelector('#doneBtn'); await p.click('#doneBtn'); }
+  await p.waitForFunction(() => /ได้เหรียญใหม่: บทที่ 6/.test(document.querySelector('#toast').textContent), null, { timeout: 4000 });
+  ok(true, 'finishing chapter 6 unlocks its badge');
+  for (const c of D.chapters.slice(0, 5)) {
+    const last = c.pages[c.pages.length - 1]; await p.goto(url + (Number.isInteger(last) ? '#/p/' + last : '#/s/agent-skills')); await p.waitForSelector('.chk-end');
+    for (let i = 0; i < 3; i++) await p.check(`.chk-end input[name="ch-${c.n}-q${i}"][value="${D.checks[c.n].quiz[i].a}"]`);
+    await p.click('.chk-end [data-quiz-check]');
+  }
+  await p.waitForFunction(() => /ทบทวนสม่ำเสมอ/.test(document.querySelector('#toast').textContent), null, { timeout: 4000 });
+  ok(await p.evaluate(() => Object.entries(JSON.parse(localStorage.getItem('cpa26-quiz'))).filter(([k, v]) => /^ch-/.test(k) && v === 3).length === 5), 'full marks on 5 chapter quizzes → "ทบทวนสม่ำเสมอ" badge');
+  await p.goto(url + '#/forge'); await p.waitForSelector('.fg-grid'); await p.waitForTimeout(300);
+  ok(!(await p.evaluate(() => localStorage.getItem('cpa26-forge-best'))), 'opening the forge alone does not award the badge');
+  await p.fill('#fgDetail', '1 หน้า สำหรับผู้บริหาร พร้อมตาราง');
+  await p.waitForFunction(() => /นักสร้าง Prompt/.test(document.querySelector('#toast').textContent), null, { timeout: 4000 });
+  ok(true, 'forge score ≥ 80 without over-permission → "นักสร้าง Prompt"');
+  await p.evaluate(() => localStorage.setItem('cpa26-journey', JSON.stringify({ done: ['goal'], consent: null, finished: true })));
+  await p.goto(url + '#/progress'); await p.waitForSelector('.badges');
+  const got = await p.$$eval('.bd.got b', l => l.map(x => x.textContent));
+  ok(['นักเดินทาง Agent', 'นักสร้าง Prompt', 'ทบทวนสม่ำเสมอ', 'บทที่ 6'].every(x => got.includes(x)), 'cabinet shows earned badges: ' + got.join(', '));
+  eq(errs.join(' | '), '', 'no console/page errors under CSP');
+  await lctx.close();
+  // existing progress: badges recorded silently on first load (no toast flood)
+  const sctx = await seededContext(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
+  await sctx.addInitScript(pages => { if (!localStorage.getItem('cpa26-done')) localStorage.setItem('cpa26-done', JSON.stringify(pages)); }, D.chapters.find(c => c.n === 6).pages);
+  await sctx.route('**/api/copilot-updates', r => r.fulfill({ status: 404, body: '' }));
+  const m = await sctx.newPage(); await m.goto(url + '#/progress'); await m.waitForSelector('.badges'); await m.waitForTimeout(1200);
+  ok(!(await m.$eval('#toast', e => !e.hidden && e.textContent.includes('ได้เหรียญ'))) && await m.$$eval('.bd.got', l => l.length) === 1, 'earlier progress → badge shown, no retroactive toast');
+  for (const h of ['#/lib', '#/lib/governance', '#/progress']) { await m.goto(url + h); await m.waitForTimeout(150); eq(await m.evaluate(() => document.documentElement.scrollWidth - innerWidth), 0, `${h}: no horizontal scroll at 390 px`); }
+  await sctx.close();
+  // reduced motion: no view transition
+  const rctx = await seededContext(browser, { viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
+  await rctx.route('**/api/copilot-updates', r => r.fulfill({ status: 404, body: '' }));
+  const r = await rctx.newPage(); await r.goto(url + '#/lib'); await r.waitForSelector('.lib-card:not([hidden])'); await r.click('[data-lib="work-web"]'); await r.waitForSelector('.lib-body');
+  eq(await r.evaluate(() => window.__fx.vt), 0, 'reduced motion: navigates without View Transitions');
+  await rctx.close();
 });
 
 await suite('Prompt Lab tabs + supplements', async () => {

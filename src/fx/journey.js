@@ -40,7 +40,7 @@ function renderJourney() {
   const mark = k => {
     const s = jrState(); if (s.done.includes(k)) return;
     s.done.push(k); const fin = s.done.length === N && !s.finished; if (fin) s.finished = true;
-    store.set(JR_KEY, s); sync(); fxSound('ok');
+    store.set(JR_KEY, s); sync(); fxSound('ok'); if (fin) setTimeout(fxBadgeCheck, 400);
     if (fin) { fxConfetti(); fxSound('done'); toast('จบเส้นทาง 7 สถานีแล้ว'); fxAnnounce('จบเส้นทาง 7 สถานีแล้ว'); }
   };
   root.addEventListener('sim:done', e => { const li = e.target.closest('.jr-st'); if (li) mark(li.dataset.k); });

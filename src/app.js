@@ -89,6 +89,7 @@ function toggleDone(n) {
   const b = $('#doneBtn'); if (b) setDoneBtn(b, done.has(n));
   if (!before && chapterDone(ch) === ch.pages.length) { toast(ch.deep ? `จบกลุ่ม ${ch.title} แล้ว` : `จบบทที่ ${ch.n} แล้ว`); fxConfetti(); fxSound('done'); }
   else if (done.has(n)) { toast('บันทึกว่าเรียนหน้านี้แล้ว'); fxSound('ok'); }
+  fxBadgeCheck();
 }
 function setDoneBtn(b, is) {
   b.setAttribute('aria-pressed', is);
@@ -214,6 +215,8 @@ function route() {
   const tm = h.match(/^track\/([a-z]+)$/); if (tm && D.tracks.some(t => t.key === tm[1])) return renderTrack(tm[1]);
   if (h === 'tracks') return renderTracks();
   if (h === 'journey') return renderJourney();
+  if (h === 'lib') return renderLib();
+  const lm = h.match(/^lib\/([a-z0-9-]+)$/); if (lm && (D.library || []).some(t => t.slug === lm[1])) return renderLibItem(lm[1]);
   if (h === 'forge') return renderForge();
   if (h === 'updates') return renderUpdatesPage();
   if (h === 'agents') return renderDirectoryPage();
@@ -245,7 +248,7 @@ function renderPage(n) {
   }
   cur = p;
   visited.add(n); saveProgress(); store.set('cpa26-last', n);
-  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}${simSlotHTML(n)}<div class="content${isDeep(n) ? ' deep-body' : isEx(n) ? ' x-body' : ''}">${p.html}</div>${isDeep(n) || isEx(n) ? '' : relatedHTML(n)}${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
+  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}${simSlotHTML(n)}<div class="content${isDeep(n) ? ' deep-body' : isEx(n) ? ' x-body' : ''}">${p.html}</div>${isDeep(n) || isEx(n) ? '' : relatedHTML(n)}${p.supp || ''}${chapterCheckHTML(n)}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
   setDoneBtn($('#doneBtn'), done.has(n));
   mount($('#main'), p);
   renderTOC(); scrollTocToCurrent(); updateProgress();
@@ -486,6 +489,7 @@ const TOOLS = [
   ['#/agents', 'people_team', 'Agent Directory', 'ค้นหาและกรอง Agent ทั้ง 67 ตัวตามกลุ่มงานและระดับความพร้อม'],
   ['#/builder', 'toolbox', 'Agent Builder Studio', 'เขียนการตั้งค่า Agent เอง พร้อมตัวนับและตรวจกติกา URL'],
   ['#/p/9', 'edit', 'Prompt Builder', 'กรอกงานของคุณ ได้ Prompt 3 แบบทันที'],
+  ['#/lib', 'apps', 'คลังเครื่องมือ 40 หัวข้อ', 'Copilot Chat · Agent · Excel · Word/PowerPoint · Outlook/Teams · เว็บ · ความปลอดภัย · Prompt'],
   ['#/journey', 'compass_northwest', 'เส้นทาง 7 สถานี', 'บทเรียนแรกแบบเส้นทางเดียว: เป้าหมาย → สิทธิ์ → ข้อมูล → เครื่องมือ → ขออนุญาต → ผลงาน → ส่งมอบ'],
   ['#/forge', 'beaker', 'Prompt Lab เครื่องผลิต', 'กรอก 4 เรื่อง → Prompt พิมพ์ตัวเอง → ดู Agent ทำงาน + มาตรวัดความพร้อม'],
   ['#/plab', 'sparkle', 'Prompt Lab อัตโนมัติ', 'โยนไฟล์ PDF/Excel หรือวางข้อความ ได้ Prompt 7 แบบทันที'],
@@ -619,6 +623,7 @@ function initQuiz(box) {
     res.textContent = `คะแนน ${score}/${fs.length}${miss ? ` · ยังไม่ได้ตอบ ${miss} ข้อ` : score === fs.length ? ' · ยอดเยี่ยม!' : ''}`;
     const b = store.get('cpa26-quiz', {}); b[box.dataset.quiz] = Math.max(score, b[box.dataset.quiz] || 0); store.set('cpa26-quiz', b);
     if (score === fs.length) toast('ทำแบบทดสอบได้คะแนนเต็ม');
+    fxBadgeCheck();
   });
   $('[data-quiz-reset]', box).addEventListener('click', () => { $$('input', box).forEach(i => { i.checked = false; }); $$('.qopt', box).forEach(o => o.classList.remove('right', 'wrong')); $$('.qwhy', box).forEach(w => { w.hidden = true; }); res.textContent = ''; });
 }
@@ -776,6 +781,7 @@ function buildIndex() {
   });
   SIDX.forEach(x => { x.bl = x.body.toLowerCase(); });
   TOOLS.forEach(([h, i, t, s]) => SIDX.push({ kind: 'tool', href: h, title: t, t: t.toLowerCase(), meta: 'เครื่องมือ · ' + s, icon: i, g: 'gen', a: s.toLowerCase(), body: '', bl: '' }));
+  (D.library || []).forEach(x => SIDX.push({ kind: 'tool', href: '#/lib/' + x.slug, title: x.title, t: x.title.toLowerCase(), meta: 'คลังเครื่องมือ · ' + x.short, icon: x.icon, g: 'gen', a: (x.short + ' ' + x.points.join(' ')).toLowerCase(), body: '', bl: '' }));
 }
 function cmdSearch(q) {
   if (!SIDX) buildIndex();
@@ -892,6 +898,7 @@ function renderProgress() {
   setMain(`<header class="ph" style="--dc:var(--green)">${art('trophy')}<nav class="crumb"><a href="#/">${ic('home')} หน้าแรก</a><span>›</span><span>เครื่องมือ</span></nav><h1>Learning Progress</h1><p class="short">ความคืบหน้าบันทึกในเบราว์เซอร์นี้เท่านั้น (localStorage) ไม่ส่งข้อมูลออกไปที่ใด</p></header>
   <div class="card prog-hero"><svg class="big-ring" viewBox="0 0 150 150" role="img" aria-label="เรียนแล้ว ${pct}%"><defs><linearGradient id="pgrad"><stop offset="0" stop-color="#1F5BE3"/><stop offset=".5" stop-color="#22BE97"/><stop offset="1" stop-color="#8A55EA"/></linearGradient></defs><circle class="bgc" cx="75" cy="75" r="${r}"/><circle class="fgc" cx="75" cy="75" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - done.size / TOTAL)}"/><text x="75" y="80" text-anchor="middle">${pct}%</text><text class="s" x="75" y="100" text-anchor="middle">${done.size}/${TOTAL} หน้า</text></svg>
   <div><p><b>เรียนแล้ว ${done.size} หน้า</b> · เปิดดูแล้ว ${visited.size} หน้า · จบแล้ว ${D.chapters.filter(ch => chapterDone(ch) === ch.pages.length).length}/${D.chapters.length} บท</p>${last ? `<a class="btn btn-primary" href="${PI.has(last) ? hrefOf(last) : '#/'}">${ic('history')}<span>ไปหน้าล่าสุด (หน้า ${PI.has(last) ? esc(pageNo(PI.get(last))) : last})</span></a> ` : ''}<button type="button" class="btn btn-outline" id="progReset">${ic('arrow_clockwise')}<span>ล้างความคืบหน้า</span></button></div></div>
+  ${badgeCabinetHTML()}
   <h2 class="sec">${ic('book_open')}<span>รายบท</span></h2><div class="pchap">${ALLCH.map(ch => { const d = chapterDone(ch); const nx = ch.pages.find(n => !done.has(n)) || moduleOf(ch); return `<a href="${hrefOf(nx)}" style="${gvar(ch.group)}"><span class="n">${ch.excel ? 'X' + (ch.n - 200) : ch.deep ? 'D' + (ch.n - 100) : String(ch.n).padStart(2, '0')}</span><span><b>${esc(ch.title)}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(d / ch.pages.length * 100)}%"></i></span></span><small>${d}/${ch.pages.length} หน้า</small></a>`; }).join('')}</div>${copyLine()}`, 'Learning Progress');
   $('#progReset').addEventListener('click', () => { if (confirm('ล้างความคืบหน้าทั้งหมดในเบราว์เซอร์นี้?')) { done.clear(); visited.clear(); saveProgress(); store.set('cpa26-last', null); store.set('cpa26-chk', {}); updateProgress(); renderProgress(); toast('ล้างความคืบหน้าแล้ว'); } });
   renderTOC(); updateProgress();
