@@ -1,0 +1,12 @@
+source-docs/*
+!source-docs/README.md
+.DS_Store
+node_modules/
+dist/
+test-results/
+playwright-report/
+*-dist.zip
+private/*
+!private/README.md
+scripts/excel/.workbook-expected.json
+/ai-excel-formula-mastery.zip

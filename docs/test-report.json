@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-10-23T14:43:51.043Z",
+  "pass": 506,
+  "fail": 0,
+  "bySuite": {
+    "T4 Navigation: every page renders with correct title": {
+      "pass": 22,
+      "fail": 0
+    },
+    "Brand + illustrations": {
+      "pass": 8,
+      "fail": 0
+    },
+    "Copilot Agent first + learning paths": {
+      "pass": 9,
+      "fail": 0
+    },
+    "Deep Learning 36 lessons": {
+      "pass": 28,
+      "fail": 0
+    },
+    "Auto-updates (Microsoft 365 Roadmap) · Thai summaries · 3 featured": {
+      "pass": 23,
+      "fail": 0
+    },
+    "AI + Excel Formula Mastery": {
+      "pass": 51,
+      "fail": 0
+    },
+    "Open access (no sign-in in the production build)": {
+      "pass": 5,
+      "fail": 0
+    },
+    "Email gate code (kept for EMAIL_GATE=on · test list injected)": {
+      "pass": 17,
+      "fail": 0
+    },
+    "PWA + refresh / update app": {
+      "pass": 16,
+      "fail": 0
+    },
+    "Version + credit": {
+      "pass": 3,
+      "fail": 0
+    },
+    "T5 Search (Ctrl+K)": {
+      "pass": 10,
+      "fail": 0
+    },
+    "T6 Agent Directory + finder": {
+      "pass": 11,
+      "fail": 0
+    },
+    "T7 Agent Builder panel: copy, counters, attachments": {
+      "pass": 21,
+      "fail": 0
+    },
+    "T7b Agent Builder Studio": {
+      "pass": 12,
+      "fail": 0
+    },
+    "T8 Prompt Builder": {
+      "pass": 8,
+      "fail": 0
+    },
+    "T9 Calculators": {
+      "pass": 16,
+      "fail": 0
+    },
+    "Agent Flow player": {
+      "pass": 5,
+      "fail": 0
+    },
+    "Prompt Lab อัตโนมัติ (หน้าแรก: ไฟล์/ข้อความ → Prompt)": {
+      "pass": 33,
+      "fail": 0
+    },
+    "Skill ของ Agent (หน้าเสริม 21A) + Skill Builder": {
+      "pass": 36,
+      "fail": 0
+    },
+    "v4 หน้าจอจำลองที่เล่นเองได้ + ลูกเล่น": {
+      "pass": 34,
+      "fail": 0
+    },
+    "v4.1 เส้นทาง 7 สถานี + Prompt Lab เครื่องผลิต": {
+      "pass": 33,
+      "fail": 0
+    },
+    "v4.2 คลังเครื่องมือ + เหรียญ + ทบทวนท้ายบท": {
+      "pass": 31,
+      "fail": 0
+    },
+    "Prompt Lab tabs + supplements": {
+      "pass": 8,
+      "fail": 0
+    },
+    "T10 Learning progress": {
+      "pass": 9,
+      "fail": 0
+    },
+    "TOC filter + theme": {
+      "pass": 7,
+      "fail": 0
+    },
+    "Storage unavailable": {
+      "pass": 2,
+      "fail": 0
+    },
+    "T11 Responsive (no horizontal scroll, drawer, bottom bar)": {
+      "pass": 38,
+      "fail": 0
+    },
+    "T12 Accessibility": {
+      "pass": 8,
+      "fail": 0
+    },
+    "Offline file:// mode": {
+      "pass": 2,
+      "fail": 0
+    }
+  },
+  "failures": []
+}

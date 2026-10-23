@@ -1,0 +1,14 @@
+{
+  "concept": {
+    "n": "Concept Design",
+    "th": "ออกแบบเชิงแนวคิด ต้องมีระบบข้อมูลต้นทางเพิ่มก่อนใช้งานจริง"
+  },
+  "assist": {
+    "n": "Copilot-assisted",
+    "th": "ทำได้ทันทีด้วย Copilot Chat + ไฟล์ + Master Instructions"
+  },
+  "connected": {
+    "n": "Connected Automation",
+    "th": "ต้องเชื่อม Power Automate / Lists / Power BI เพื่อทำงานต่อเนื่อง"
+  }
+}

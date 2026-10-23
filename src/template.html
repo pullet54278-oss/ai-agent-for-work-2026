@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Copilot AI Agents for Work 2026</title>
+<meta name="description" content="คู่มือเรียนรู้แบบโต้ตอบ: การใช้งาน AI แบบพาลงมือทำ — Prompt Mode, Copilot Agent 67 ตัว พร้อมการตั้งค่า Agent Builder ที่คัดลอกได้">
+<meta name="theme-color" content="#2557E0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0F1E" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Copilot AI Agents for Work 2026">
+<meta property="og:description" content="คู่มือเรียนรู้แบบโต้ตอบ · การใช้งาน AI แบบพาลงมือทำ">
+<meta property="og:image" content="logo.png">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Copilot Agents">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<script>try{var t=localStorage.getItem('cpa26-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<div id="fxGlow" aria-hidden="true"><i></i><i></i><i></i></div>
+<!--__SPRITE__-->
+<a class="skip" href="#main">ข้ามไปเนื้อหา</a>
+<header class="topbar" id="topbar">
+  <button type="button" class="btn btn-icon tb-menu" id="tocToggle" aria-label="เปิดสารบัญ" aria-controls="sidebar" aria-expanded="false"><svg class="ic"><use href="#i-navigation"/></svg></button>
+  <a class="brand" href="#/" aria-label="หน้าแรก Copilot AI Agents for Work">
+    <span class="logo-chip"><img src="logo.png" alt="AI Agent for Work" width="116" height="32"></span>
+    <span class="brand-t"><b>Copilot</b><small>AI Agents for Work</small></span>
+  </a>
+  <div class="tb-actions">
+    <button type="button" class="btn btn-search" id="searchBtn" aria-keyshortcuts="Control+K"><svg class="ic"><use href="#i-search"/></svg><span>ค้นหา</span><kbd>Ctrl K</kbd></button>
+    <button type="button" class="btn btn-outline tb-finder" id="finderBtn"><svg class="ic"><use href="#i-people_team"/></svg><span>Agent ตามกลุ่มงาน</span></button>
+    <div class="menu-wrap">
+      <button type="button" class="btn btn-subtle" id="toolsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="toolsMenu"><svg class="ic"><use href="#i-toolbox"/></svg><span class="tb-lbl">เครื่องมือ</span></button>
+      <div class="menu" id="toolsMenu" role="menu" hidden></div>
+    </div>
+    <button type="button" class="btn btn-icon" id="updateBtn" aria-label="รีเฟรช อัปเดตแอปเป็นเวอร์ชันล่าสุด" title="รีเฟรช · อัปเดตแอป"><svg class="ic"><use href="#i-arrow_sync"/></svg><i class="upd-dot" hidden></i></button>
+    <button type="button" class="btn btn-icon" id="soundBtn" aria-pressed="false" aria-label="เปิดเสียงเอฟเฟกต์" title="เปิดเสียงเอฟเฟกต์"></button>
+    <button type="button" class="btn btn-icon" id="themeBtn" aria-label="สลับโหมดสว่าง/มืด"><svg class="ic ic-sun"><use href="#i-weather_sunny"/></svg><svg class="ic ic-moon"><use href="#i-weather_moon"/></svg></button>
+    <a class="tb-prog" href="#/progress" id="progLink" aria-label="ความคืบหน้า"><span id="progTxt">เรียนแล้ว 0/155</span></a>
+  </div>
+  <div class="tb-line" aria-hidden="true"><i id="progBar"></i></div>
+</header>
+<div class="shell">
+  <nav class="sidebar" id="sidebar" aria-label="สารบัญ">
+    <div class="sb-top">
+      <label class="sr-only" for="tocQ">กรองสารบัญ</label>
+      <div class="input-ic"><svg class="ic"><use href="#i-filter"/></svg><input id="tocQ" type="search" placeholder="กรองชื่อหน้า…" autocomplete="off"></div>
+      <label class="sr-only" for="tocGroup">กรองกลุ่มงาน</label>
+      <select id="tocGroup"><option value="">ทุกกลุ่มงาน</option></select>
+    </div>
+    <div class="sb-list" id="tocList"></div>
+    <div class="sb-app" id="sbApp" aria-label="แอป"></div>
+    <p class="sb-foot">© 2026 Copilot AI Agents for Work</p>
+  </nav>
+  <div class="scrim" id="scrim" hidden></div>
+  <main id="main" class="main" tabindex="-1"></main>
+</div>
+<nav class="bottombar" aria-label="เมนูมือถือ">
+  <button type="button" id="bbToc"><svg class="ic"><use href="#i-text_bullet_list_square"/></svg><span>สารบัญ</span></button>
+  <button type="button" id="bbFinder"><svg class="ic"><use href="#i-bot"/></svg><span>ค้นหา Agent</span></button>
+  <button type="button" id="bbNext"><svg class="ic"><use href="#i-arrow_right"/></svg><span>ถัดไป →</span></button>
+</nav>
+<div class="modal" id="cmd" hidden role="dialog" aria-modal="true" aria-labelledby="cmdTitle">
+  <div class="modal-box cmd-box">
+    <h2 id="cmdTitle" class="sr-only">ค้นหา</h2>
+    <div class="cmd-in"><svg class="ic"><use href="#i-search"/></svg><input id="cmdQ" type="search" placeholder="ค้นหาหน้า Agent Prompt ข้อมูลที่ใช้…" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdList" aria-autocomplete="list"><kbd>Esc</kbd></div>
+    <ul id="cmdList" role="listbox" aria-label="ผลการค้นหา"></ul>
+    <div class="cmd-foot"><span><kbd>↑</kbd><kbd>↓</kbd> เลือก</span><span><kbd>Enter</kbd> เปิด</span><span><kbd>Esc</kbd> ปิด</span><span id="cmdCount"></span></div>
+  </div>
+</div>
+<div class="modal" id="finder" hidden role="dialog" aria-modal="true" aria-labelledby="finderTitle">
+  <div class="modal-box finder-box">
+    <div class="finder-head"><h2 id="finderTitle">ค้นหา Agent ตามกลุ่มงาน</h2><button type="button" class="btn btn-icon" id="finderClose" aria-label="ปิด"><svg class="ic"><use href="#i-dismiss"/></svg></button></div>
+    <div id="finderBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script type="application/json" id="gate-cfg">/*__GATE__*/</script>
+<script type="application/json" id="app-data">/*__DATA__*/</script>
+<script>/*__JS__*/</script>
+</body>
+</html>
