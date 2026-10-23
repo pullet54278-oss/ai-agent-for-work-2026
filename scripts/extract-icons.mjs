@@ -11,7 +11,8 @@ chat building_factory money megaphone wrench arrow_trending_lines vehicle_truck 
 table arrow_download edit question_circle trophy ribbon star history lock_closed person mail window code rocket toolbox flash timer
 layer organization plug_connected cloud branch arrow_sync key tag data_trending chart_multiple document_search folder eye alert keyboard
 food_grains cart receipt scales tasks_app arrow_clockwise people_community leaf_two dismiss_circle hat_graduation compass_northwest
-text_bullet_list_square shield_task book_question_mark arrow_up chat_multiple settings arrow_upload`.split(/\s+/).filter(Boolean);
+text_bullet_list_square shield_task book_question_mark arrow_up chat_multiple settings arrow_upload
+speaker_2 speaker_mute pause previous next cursor_click play_circle ribbon_star send arrow_reset`.split(/\s+/).filter(Boolean);
 const out = {}; const missing = [];
 for (const n of names) {
   for (const v of ['24_regular', '24_filled']) {

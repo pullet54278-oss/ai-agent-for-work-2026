@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-22T01:15:45.393Z",
-  "pass": 408,
+  "generatedAt": "2026-10-23T13:42:30.177Z",
+  "pass": 442,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -77,6 +77,10 @@
     },
     "Skill ของ Agent (หน้าเสริม 21A) + Skill Builder": {
       "pass": 36,
+      "fail": 0
+    },
+    "v4 หน้าจอจำลองที่เล่นเองได้ + ลูกเล่น": {
+      "pass": 34,
       "fail": 0
     },
     "Prompt Lab tabs + supplements": {

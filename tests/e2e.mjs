@@ -734,6 +734,104 @@ await suite('Skill ของ Agent (หน้าเสริม 21A) + Skill Bui
   await sctx.close();
 });
 
+await suite('v4 หน้าจอจำลองที่เล่นเองได้ + ลูกเล่น', async () => {
+  const { loadSims } = await import('../scripts/lib/sims.mjs');
+  const vctx = await seededContext(browser, { viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block' });
+  await vctx.route('**/api/copilot-updates', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SNAP) }));
+  const p = await vctx.newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); }); p.on('console', m => { if (m.type() === 'error' && !/fonts\.(googleapis|gstatic)|net::ERR|ERR_TUNNEL|ERR_PROXY|Failed to load resource/.test(m.text())) errs.push(m.text()); });
+  const SIM = D.sims.find(s => s.id === 'agent-builder-create');
+  const guide = async (pg, steps) => { for (let k = 0; k < steps.length; k++) { await pg.click(`.sim [data-t="${steps[k].t}"]`); await pg.waitForFunction(n => !document.querySelector('.sim [data-t]') || document.querySelector('.sim .sim-count').textContent !== `ขั้นที่ ${n}/${document.querySelectorAll('.sim .sim-tx li').length}`, k + 1, { timeout: 8000 }); } };
+  const fast = () => p.evaluate(() => { const s = document.querySelector('.sim [data-act="speed"]'); const o = document.createElement('option'); o.value = '8'; o.textContent = 'test'; s.appendChild(o); s.value = '8'; s.dispatchEvent(new Event('change')); });
+  eq(D.sims.map(s => s.id + '@' + s.page).sort().join(','), 'add-skill@21.5,agent-builder-create@19', '2 scenes: page 19 + 21A');
+  await p.goto(url + '#/p/19'); await p.waitForSelector('.sim .sm-app');
+  ok(await p.isVisible('.sim .sim-big') && (await text('.sim .sim-count').catch(() => p.$eval('.sim .sim-count', e => e.textContent))) !== null, 'big play button before start');
+  eq(await p.$eval('.sim .sim-count', e => e.textContent), `ขั้นที่ 1/${SIM.steps.length}`, 'step counter');
+  eq(await p.$$eval('.sim .sim-tx li', l => l.length), SIM.steps.length, 'text transcript lists every step');
+  ok((await p.$eval('.sim .sim-note', e => e.textContent)).includes('ตรวจกับบัญชีจริงก่อนสอน'), 'simulated-screen + verify label');
+  ok(await p.$eval('.sim .sim-ring', e => !e.hidden) && await p.$('.sim .sim-tip:not([hidden])'), 'ring + tip on the first target');
+  // keyboard: arrows change steps (not pages)
+  await p.focus('.sim .sim-vp'); await p.keyboard.press('ArrowRight');
+  eq(await p.$eval('.sim .sim-count', e => e.textContent), `ขั้นที่ 2/${SIM.steps.length}`, 'ArrowRight → next step');
+  eq(await p.evaluate(() => location.hash), '#/p/19', 'arrow keys inside the sim do not change page');
+  await p.keyboard.press('ArrowLeft');
+  await p.click('.sim .sim-dots button:nth-child(5)');
+  ok((await p.$eval('.sim .sim-screen', e => e.textContent)).includes('ผู้ช่วยขั้นตอนงาน'), 'jump to step 5 replays earlier steps (name filled)');
+  // auto play to the end
+  await p.click('.sim [data-act="reset"]'); await fast();
+  const c0 = await p.evaluate(() => window.__fx.confetti);
+  await p.click('.sim .sim-big');
+  await p.waitForSelector('.sim .sim-end:not([hidden])', { timeout: 60000 });
+  eq(await p.$eval('.sim .sim-count', e => e.textContent), `ครบ ${SIM.steps.length}/${SIM.steps.length} ขั้น`, 'auto mode plays every step');
+  ok((await p.$eval('.sim .sim-screen', e => e.textContent)).includes('อ้างอิง: sop-biosecurity.pdf'), 'final screen shows the test answer');
+  eq(await p.evaluate(() => window.__fx.confetti), c0 + 1, 'confetti when the scene ends');
+  ok(await p.evaluate(() => JSON.parse(localStorage.getItem('cpa26-sim'))['agent-builder-create'].done.auto), 'completion saved');
+  // guided mode
+  await p.click('.sim .sim-end [data-act="try"]');
+  ok(await p.$eval('.sim', e => e.classList.contains('guided')), 'switch to ลองกดเอง');
+  await p.click('.sim [data-t="rail:chat"]'); await p.click('.sim [data-t="rail:chat"]');
+  ok(await p.$eval('.sim .sim-ring', e => e.classList.contains('strong')) && (await p.$eval('.sim .sim-tip', e => e.textContent)).includes('กดที่จุดที่มีวงแสง'), 'wrong clicks → stronger hint');
+  eq(await p.$eval('.sim .sim-count', e => e.textContent), `ขั้นที่ 1/${SIM.steps.length}`, 'wrong click does not advance');
+  await guide(p, SIM.steps);
+  await p.waitForSelector('.sim .sim-end:not([hidden])', { timeout: 20000 });
+  ok(await p.evaluate(() => { const d = JSON.parse(localStorage.getItem('cpa26-sim'))['agent-builder-create'].done; return d.auto && d.guided; }), 'guided completion saved (both modes)');
+  ok((await p.textContent('#toast')).includes('ฝึกครบทั้ง 2 โหมด'), 'toast when both modes done');
+  // 21A scene
+  await p.goto(url + '#/s/agent-skills'); await p.waitForSelector('.sim[data-sim="add-skill"] .sm-app');
+  await p.click('.sim [data-mode="guided"]');
+  await guide(p, D.sims.find(x => x.id === 'add-skill').steps);
+  await p.waitForSelector('.sim .sim-end:not([hidden])', { timeout: 20000 });
+  ok((await p.$eval('.sim .sim-screen', e => e.textContent)).includes('ใช้ Skill: sop-assistant'), 'add-skill scene: answer uses the Skill');
+  // sound: off by default, no AudioContext until enabled
+  eq(await p.$eval('#soundBtn', b => b.getAttribute('aria-pressed')), 'false', 'sound off by default');
+  eq(await p.evaluate(() => window.__fx.audio), false, 'no AudioContext before the learner enables sound');
+  await p.click('#soundBtn');
+  ok(await p.$eval('#soundBtn', b => b.getAttribute('aria-pressed')) === 'true' && await p.evaluate(() => JSON.parse(localStorage.getItem('cpa26-sound'))), 'sound toggle on + remembered');
+  await p.click('#soundBtn');
+  // ripple
+  await p.dispatchEvent('#themeBtn', 'pointerdown', { clientX: 10, clientY: 10, bubbles: true });
+  ok(await p.$('#themeBtn .fx-ripw'), 'ripple on button press');
+  // home: resume card + count-up + glow
+  await p.goto(url + '#/p/19'); await p.waitForSelector('.sim .sm-app'); await p.click('.sim [data-go="3"]');
+  await p.goto(url); await p.waitForSelector('.hero'); await p.waitForTimeout(1300);
+  const rc = await p.$eval('.resume-card', e => e.textContent).catch(() => '');
+  ok(rc.includes('เรียนต่อจากเดิม') && rc.includes('หน้า 19') && rc.includes('หน้าจอจำลอง: ถึงขั้นที่ 4/'), 'resume card: page, chapter progress, sim step');
+  ok(await p.$$eval('.stat-tile b[data-count]', l => l.length >= 4 && l.every(b => b.textContent === (+b.dataset.count).toLocaleString('th-TH'))), 'stat numbers count up to their real values');
+  ok(await p.$eval('#fxGlow', e => getComputedStyle(e.firstElementChild).animationName !== 'none'), 'animated glow background');
+  // confetti on finishing a chapter
+  const small = D.chapters.filter(c => !c.pages.includes(1)).sort((a, b) => a.pages.length - b.pages.length)[0];
+  const c1 = await p.evaluate(() => window.__fx.confetti);
+  for (const n of small.pages) { await p.goto(url + (Number.isInteger(n) ? '#/p/' + n : '#/s/agent-skills')); await p.waitForSelector('#doneBtn'); await p.click('#doneBtn'); }
+  eq(await p.evaluate(() => window.__fx.confetti), c1 + 1, `confetti when chapter ${small.n} is finished`);
+  eq(errs.join(' | '), '', 'no console/page errors under CSP');
+  await vctx.close();
+  // mobile: fits, docked tip, swipe changes step
+  const mctx = await seededContext(browser, { viewport: { width: 360, height: 780 }, hasTouch: true, isMobile: true, serviceWorkers: 'block' });
+  await mctx.route('**/api/copilot-updates', r => r.fulfill({ status: 404, body: '' }));
+  const m = await mctx.newPage(); await m.goto(url + '#/p/19'); await m.waitForSelector('.sim .sm-app');
+  const fit = await m.evaluate(() => { const vp = document.querySelector('.sim-vp'), st = document.querySelector('.sim-stage'); const sc = +st.style.transform.match(/scale\(([\d.]+)\)/)[1]; return { sc, h: Math.round(st.getBoundingClientRect().height), want: Math.round(720 * sc), over: document.documentElement.scrollWidth - innerWidth, tipVisible: (() => { const t = document.querySelector('.sim-tip.dock').getBoundingClientRect(), g = st.getBoundingClientRect(); return t.height > 20 && t.top >= g.bottom - 1; })() }; });
+  ok(fit.sc < 0.35 && Math.abs(fit.h - fit.want) <= 2 && fit.over <= 0, `scales to fit 360 px (scale ${fit.sc.toFixed(3)}, no horizontal scroll)`);
+  ok(fit.tipVisible, 'tip docks visibly below the screen on phones');
+  await m.evaluate(() => { const vp = document.querySelector('.sim-vp'), r = vp.getBoundingClientRect(), y = r.top + 40; const ev = (t, x) => vp.dispatchEvent(new PointerEvent(t, { pointerType: 'touch', clientX: x, clientY: y, bubbles: true })); ev('pointerdown', r.right - 20); ev('pointerup', r.left + 20); });
+  eq(await m.$eval('.sim .sim-count', e => e.textContent), `ขั้นที่ 2/${SIM.steps.length}`, 'swipe left → next step');
+  await mctx.close();
+  // reduced motion: no cursor animation, no confetti, still completes
+  const rctx = await seededContext(browser, { viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
+  await rctx.route('**/api/copilot-updates', r => r.fulfill({ status: 404, body: '' }));
+  const r = await rctx.newPage(); await r.goto(url + '#/p/19'); await r.waitForSelector('.sim .sm-app');
+  ok(await r.$eval('#fxGlow i', e => getComputedStyle(e).animationName === 'none') && await r.$eval('.sim-ring', e => getComputedStyle(e).animationName === 'none'), 'reduced motion: glow + pulse off');
+  await r.click('.sim [data-mode="guided"]');
+  await guide(r, SIM.steps);
+  await r.waitForSelector('.sim .sim-end:not([hidden])', { timeout: 10000 });
+  ok(await r.evaluate(() => window.__fx.confetti === 0 && document.getAnimations().filter(a => a.playState === 'running' && a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.sim')).length === 0), 'reduced motion: no confetti / running sim animations');
+  await rctx.close();
+  // build validation rejects a scene whose target is not on screen
+  const tmp = fs.mkdtempSync(path.join(ROOT, 'test-results', 'sims-')); fs.mkdirSync(path.join(tmp, 'content', 'sims'), { recursive: true });
+  fs.writeFileSync(path.join(tmp, 'content', 'sims', 'bad.mjs'), "export default { id: 'bad', page: 19, title: 'x', init: { screen: 'chat' }, steps: [{ t: 'btn:create', act: 'click', tip: 'กด' }] };");
+  let threw = ''; try { await loadSims(tmp, () => true); } catch (e) { threw = e.message; }
+  ok(threw.includes('not on screen chat'), 'build fails on a target that is not on the screen');
+});
+
 await suite('Prompt Lab tabs + supplements', async () => {
   await go('#/p/23');
   eq(await page.$$eval('.plab [role="tab"]', l => l.length), 12, '12 categories');

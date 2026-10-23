@@ -87,8 +87,8 @@ function toggleDone(n) {
   if (done.has(n)) done.delete(n); else { done.add(n); visited.add(n); }
   saveProgress(); updateProgress(); renderTOC();
   const b = $('#doneBtn'); if (b) setDoneBtn(b, done.has(n));
-  if (!before && chapterDone(ch) === ch.pages.length) toast(ch.deep ? `จบกลุ่ม ${ch.title} แล้ว` : `จบบทที่ ${ch.n} แล้ว`);
-  else if (done.has(n)) toast('บันทึกว่าเรียนหน้านี้แล้ว');
+  if (!before && chapterDone(ch) === ch.pages.length) { toast(ch.deep ? `จบกลุ่ม ${ch.title} แล้ว` : `จบบทที่ ${ch.n} แล้ว`); fxConfetti(); fxSound('done'); }
+  else if (done.has(n)) { toast('บันทึกว่าเรียนหน้านี้แล้ว'); fxSound('ok'); }
 }
 function setDoneBtn(b, is) {
   b.setAttribute('aria-pressed', is);
@@ -243,7 +243,7 @@ function renderPage(n) {
   }
   cur = p;
   visited.add(n); saveProgress(); store.set('cpa26-last', n);
-  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}<div class="content${isDeep(n) ? ' deep-body' : isEx(n) ? ' x-body' : ''}">${p.html}</div>${isDeep(n) || isEx(n) ? '' : relatedHTML(n)}${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
+  setMain(`<div style="${gvar(pageGroup(p))}">${headerHTML(p)}${isDeep(n) ? relatedHTML(n) : ''}${simSlotHTML(n)}<div class="content${isDeep(n) ? ' deep-body' : isEx(n) ? ' x-body' : ''}">${p.html}</div>${isDeep(n) || isEx(n) ? '' : relatedHTML(n)}${p.supp || ''}<div class="done-bar"><button type="button" class="btn btn-done" id="doneBtn"></button></div>${pagerHTML(n)}${copyLine()}</div>`, p.title, n);
   setDoneBtn($('#doneBtn'), done.has(n));
   mount($('#main'), p);
   renderTOC(); scrollTocToCurrent(); updateProgress();
@@ -262,6 +262,7 @@ function mount(root, p) {
   $$('[data-decision]', root).forEach(initDecision);
   mountExcel(root);
   $$('[data-skill-builder]', root).forEach(mountSkillBuilder);
+  $$('[data-sim]', root).forEach(mountSim);
 }
 
 // ---------- tabs ----------
@@ -526,19 +527,19 @@ function renderHome() {
   ${updatesPanelHTML(true)}
   <section class="cgroup tracks-sec"><h2 class="sec">${ic('compass_northwest')}<span>เส้นทางการเรียน</span></h2><p>เรียงตามความสำคัญ เริ่มจาก Copilot Agent · แต่ละเส้นทางรวมหน้าในคอร์สหลักและบทเรียนเชิงลึกที่พูดเรื่องเดียวกันไว้ด้วยกัน</p>${tracksGridHTML()}</section>
   <div class="stats">
-    <div class="stat-tile"><span class="st-ic">${ic('bot')}</span><div><b>${AGL.length}</b><span>Agent พร้อมการตั้งค่าคัดลอกได้</span></div></div>
-    <div class="stat-tile"><span class="st-ic">${ic('people_team')}</span><div><b>${groupsN}</b><span>กลุ่มงาน</span></div></div>
-    <div class="stat-tile"><span class="st-ic">${ic('book_open')}</span><div><b>${D.chapters.length}</b><span>บทเรียน</span></div></div>
-    <div class="stat-tile"><span class="st-ic">${ic('hat_graduation')}</span><div><b>${D.meta.deepTotal}</b><span>บทเชิงลึก (Deep Learning)</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('bot')}</span><div><b data-count="${AGL.length}">${AGL.length}</b><span>Agent พร้อมการตั้งค่าคัดลอกได้</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('people_team')}</span><div><b data-count="${groupsN}">${groupsN}</b><span>กลุ่มงาน</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('book_open')}</span><div><b data-count="${D.chapters.length}">${D.chapters.length}</b><span>บทเรียน</span></div></div>
+    <div class="stat-tile"><span class="st-ic">${ic('hat_graduation')}</span><div><b data-count="${D.meta.deepTotal}">${D.meta.deepTotal}</b><span>บทเชิงลึก (Deep Learning)</span></div></div>
     <div class="stat-tile"><span class="st-ic">${ic('trophy')}</span><div><b>${done.size}</b><span>หน้าที่เรียนแล้ว จาก ${TOTAL}</span></div></div>
   </div>
-  ${lastP && last !== 1 ? `<a class="callout resume" href="${hrefOf(last)}">${ic('history')}<div><b>เรียนต่อจากหน้าล่าสุด</b><p>${isEx(last) ? 'AI + Excel · ' + esc(lastP.k) : isDeep(last) ? 'Deep Learning บท ' + lastP.k : 'หน้า ' + pageNo(lastP)} · ${esc(lastP.title)}</p></div>${ic('chevron_right')}</a>` : ''}
+  ${resumeCardHTML(last)}
   <section class="cgroup"><h2 class="sec">${ic('toolbox')}<span>เครื่องมือ</span></h2><div class="tools">${TOOLS.map(([h, i, t, s]) => `<a class="tool" href="${h}"><span class="ti">${ic(i)}</span><span><b>${esc(t)}</b><small>${esc(s)}</small></span></a>`).join('')}</div></section>
   ${GROUPS3.map(([t, s, keys]) => `<section class="cgroup"><h2 class="sec">${ic('book_open')}<span>${esc(t)}</span></h2><p>${esc(s)}</p><div class="ccards">${keys.map(k => chByKey[k] ? chapterCardHTML(chByKey[k]) : '').join('')}</div></section>`).join('')}
   <section class="cgroup x-home"><h2 class="sec">${ic('table')}<span>AI + Excel Formula Mastery · 3 ระดับ</span></h2><p>เปลี่ยนภาษาคนเป็นสูตร Excel ด้วย AI · Prompt Library, Formula Lab, Interactive Dashboard และไฟล์ Excel ตัวอย่าง · <a href="#/excel">เปิดหน้าหลักสูตร</a></p><div class="ccards">${XCH.map(chapterCardHTML).join('')}</div></section>
   <section class="cgroup"><h2 class="sec">${ic('hat_graduation')}<span>Deep Learning · 36 บทเชิงลึก</span></h2><p>บทเรียนเชิงลึกพร้อม Workshop, Prompt Builder และแบบทดสอบประจำบท · <a href="#/deep">ดูภาพรวมและหลักคิดร่วม</a></p><div class="ccards">${DEEPCH.map(chapterCardHTML).join('')}</div></section>
   ${copyLine()}`, '', 1);
-  wireUpdates($('#main')); wirePromptLab($('#main')); refreshUpdates();
+  wireUpdates($('#main')); wirePromptLab($('#main')); fxCount($('#main')); refreshUpdates();
   renderTOC(); updateProgress();
 }
 
@@ -964,6 +965,8 @@ mq.addEventListener && mq.addEventListener('change', () => { if (!mq.matches) cl
 /*__EXCEL_JS__*/
 /*__PROMPTLAB_JS__*/
 /*__SKILLS_JS__*/
+/*__FX_JS__*/
+fxSoundBtn();
 
 // ---------- Email gate (once per device) ----------
 const GATE = (() => { try { return JSON.parse(document.getElementById('gate-cfg').textContent); } catch (e) { return { on: false, h: [] }; } })();
@@ -1109,7 +1112,7 @@ function renderAppMenu() {
   if (GATE.on && g && g.m) items.push(['signout', 'person', 'ออกจากระบบ (เปลี่ยน Email)', 'เข้าใช้งานด้วย ' + g.m]);
   m.insertAdjacentHTML('beforeend', '<hr class="menu-sep">' + items.map(([k, i, t, sub]) => `<a role="menuitem" href="#" data-app-act="${k}">${ic(i)}<span>${esc(t)}<small>${esc(sub)}</small></span></a>`).join(''));
   // same actions in the contents drawer (phones hide the tools menu)
-  $('#sbApp').innerHTML = `${g && g.m && GATE.on ? `<p class="sb-user">${ic('person')}<span>${esc(g.m)}</span></p>` : ''}<div class="sb-app-btns">${items.map(([k, i, t]) => `<button type="button" class="btn btn-subtle" data-app-act="${k}">${ic(i)}<span>${esc({ update: 'อัปเดตแอป', install: 'ติดตั้งแอป', signout: 'ออกจากระบบ' }[k] || t)}</span></button>`).join('')}</div><p class="sb-ver">เวอร์ชัน ${esc(D.meta.version)}</p>`;
+  $('#sbApp').innerHTML = `${g && g.m && GATE.on ? `<p class="sb-user">${ic('person')}<span>${esc(g.m)}</span></p>` : ''}<div class="sb-app-btns">${items.map(([k, i, t]) => `<button type="button" class="btn btn-subtle" data-app-act="${k}">${ic(i)}<span>${esc({ update: 'อัปเดตแอป', install: 'ติดตั้งแอป', signout: 'ออกจากระบบ' }[k] || t)}</span></button>`).join('')}<button type="button" class="btn btn-subtle sb-sound" data-sound-toggle aria-pressed="${fxSoundOn}">${ic(fxSoundOn ? 'speaker_2' : 'speaker_mute')}<span>${fxSoundOn ? 'ปิดเสียง' : 'เปิดเสียง'}</span></button></div><p class="sb-ver">เวอร์ชัน ${esc(D.meta.version)}</p>`;
   $$('[data-app-act]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); closeMenus(); const k = a.dataset.appAct; if (k === 'update') updateApp(); else if (k === 'install') installApp(); else if (k === 'signout') gateSignOut(); }));
 }
 

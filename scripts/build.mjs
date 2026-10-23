@@ -10,6 +10,7 @@ import { buildDeep, DEEP_GROUPS } from './lib/deep.mjs';
 import { renderDeepLesson, quizHTML, checklistHTML } from './lib/deep-render.mjs';
 import { TRACKS } from '../content/tracks.mjs';
 import { readExamples, skillsPageHTML, SKILL_PAGE, SKILL_LIMITS, SKILL_TYPES } from './lib/skills.mjs';
+import { loadSims } from './lib/sims.mjs';
 import { loadAllowed, hashEmail, GATE_SALT } from './lib/gate.mjs';
 import { buildExcel } from './lib/excel.mjs';
 
@@ -181,6 +182,7 @@ const data = {
   deepIndex: deep.lessons.map(l => ({ n: l.n, title: l.title, outcome: l.outcome, group: l.group, icon: l.icon, text: Object.values(deepRendered[l.n]).join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 2500) })),
   tracks, related, updates, updatesTh,
   ext: extPages, skillCfg: { limits: SKILL_LIMITS, types: SKILL_TYPES },
+  sims: await loadSims(ROOT, n => n === 1 || pageByN.has(n) || extPages.some(e => e.n === n)),
   excel: { chapters: excel.chapters, index: excel.index }, excelReportDate: excel.sample.reportDate,
   deepStats: { deduped: deep.report.dedupedBlocks.length, shared: deep.report.removedAsShared }
 };
@@ -192,11 +194,12 @@ data.meta.copilotLogo = copilotLogo ? 'brand/' + copilotLogo : null;
 
 // ---- assemble ----
 const tpl = fs.readFileSync(path.join(ROOT, 'src', 'template.html'), 'utf8');
-const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8');
+const css = fs.readFileSync(path.join(ROOT, 'src', 'app.css'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'src', 'fx.css'), 'utf8');
 const js = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').replace('/*__EXCEL_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'excel.js'), 'utf8'))
   .replace('/*__PROMPTLAB_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'promptlab.js'), 'utf8'))
-  .replace('/*__SKILLS_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'skillbuilder.js'), 'utf8'));
-if (/\/\*__(EXCEL|PROMPTLAB|SKILLS)_JS__\*\//.test(js)) throw new Error('excel.js / promptlab.js / skillbuilder.js not injected');
+  .replace('/*__SKILLS_JS__*/', () => fs.readFileSync(path.join(ROOT, 'src', 'skillbuilder.js'), 'utf8'))
+  .replace('/*__FX_JS__*/', () => ['core', 'sound', 'feel', 'sim'].map(f => fs.readFileSync(path.join(ROOT, 'src', 'fx', f + '.js'), 'utf8')).join('\n'));
+if (/\/\*__(EXCEL|PROMPTLAB|SKILLS|FX)_JS__\*\//.test(js)) throw new Error('excel.js / promptlab.js / skillbuilder.js not injected');
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">${Object.entries(icons).map(([k, v]) => `<symbol id="i-${k}" viewBox="0 0 24 24" fill="currentColor">${v}</symbol>`).join('')}</svg>`;
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 const html = tpl

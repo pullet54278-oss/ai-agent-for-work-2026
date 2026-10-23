@@ -18,6 +18,7 @@ Web app คู่มือเรียนรู้ภาษาไทย สำ�
 - `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)
 - Prompt Lab อัตโนมัติ (หน้าแรก `#/plab`): `src/promptlab.js` ฉีดเข้า app.js ตอน build · วิเคราะห์ไฟล์/ข้อความในเครื่องเท่านั้น (ห้ามส่งข้อมูลออก) · PDF ใช้ `assets/vendor/pdfjs/` (pdfjs-dist 4.10.38, Apache-2.0) โหลดเมื่อใช้ · fixtures ทดสอบที่ `tests/fixtures/`
 - หน้าเสริม 21A Skill ของ Agent (`#/s/agent-skills`): เนื้อหา `scripts/lib/skills.mjs` · Skill Builder `src/skillbuilder.js` · ตัวอย่าง `content/skills/examples/<slug>/` (SKILL.md + ข้อมูลสมมติ, build แพ็กเป็น `dist/skills/<slug>.zip`) · หน้าเสริมใช้ n ทศนิยม (21.5 = 21A) ผ่าน `D.ext` ไม่แตะ MD · ข้อจำกัด Skill อ้างอิง Microsoft Learn (Preview, Frontier) — อัปเดตเมื่อ Microsoft เปลี่ยน
+- v4 ลูกเล่น/หน้าจอจำลอง (ออกแบบใน `docs/INTERACTIVE-DESIGN.md`): `src/fx/{core,sound,feel,sim}.js` ฉีดที่ `/*__FX_JS__*/` · `src/fx.css` ต่อท้าย app.css · ฉาก `content/sims/<id>.mjs` ตรวจโดย `scripts/lib/sims.mjs` (target ต้องอยู่ใน `SIM_TARGETS`) → `D.sims` · หน้าจอจำลองวาดด้วย HTML ติดป้ายตรวจกับบัญชีจริง · ทุกลูกเล่นต้องปิดเองเมื่อ reduced motion · เสียงปิดเป็นค่าเริ่มต้น
 - `scripts/build.mjs` สร้าง `dist/` (index.html ไฟล์เดียว + logo.png + vendor/ + _headers) · `scripts/inventory.mjs` · `scripts/audit.mjs`
 - `tests/e2e.mjs` ทดสอบทุกฟังก์ชันด้วย Playwright · `docs/` แผน รายงาน
 - `assets/logo.png` โลโก้ AI Agent for Work · `assets/brand/copilot-logo.svg` โลโก้ Copilot ทางการ (แสดงที่แถบบนและหน้าแรก)
