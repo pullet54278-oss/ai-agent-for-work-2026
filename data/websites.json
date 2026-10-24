@@ -1,0 +1,212 @@
+{
+  "msexcel": {
+    "name": "Microsoft Support: Excel",
+    "url": "https://support.microsoft.com/en-us/excel",
+    "use": "วิธีใช้สูตร PivotTable และการวิเคราะห์ข้อมูลใน Excel"
+  },
+  "msword": {
+    "name": "Microsoft Support: Word",
+    "url": "https://support.microsoft.com/en-us/word",
+    "use": "วิธีใช้ Word และการจัดรูปแบบเอกสาร"
+  },
+  "msppt": {
+    "name": "Microsoft Support: PowerPoint",
+    "url": "https://support.microsoft.com/en-us/powerpoint",
+    "use": "วิธีใช้ PowerPoint และการนำเสนอ"
+  },
+  "mscopilot": {
+    "name": "Microsoft Support: Copilot",
+    "url": "https://support.microsoft.com/en-us/copilot",
+    "use": "วิธีใช้ Microsoft 365 Copilot"
+  },
+  "pbi": {
+    "name": "Microsoft Learn: Power BI",
+    "url": "https://learn.microsoft.com/en-us/power-bi",
+    "use": "การสร้าง Dashboard และแบบจำลองข้อมูล"
+  },
+  "exceljet": {
+    "name": "Exceljet: Excel Functions",
+    "url": "https://exceljet.net/functions",
+    "use": "อ้างอิงฟังก์ชัน Excel พร้อมตัวอย่าง"
+  },
+  "aviagen": {
+    "name": "Aviagen",
+    "url": "https://aviagen.com",
+    "use": "คู่มือการจัดการไก่พ่อแม่พันธุ์ ไก่เนื้อ และโรงฟัก"
+  },
+  "cobb": {
+    "name": "Cobb",
+    "url": "https://www.cobbgenetics.com",
+    "use": "คู่มือการจัดการและมาตรฐานผลผลิตของสายพันธุ์"
+  },
+  "faopoultry": {
+    "name": "FAO: Poultry Production",
+    "url": "https://www.fao.org/poultry-production-products",
+    "use": "ความรู้การผลิตสัตว์ปีกและห่วงโซ่อุปทาน"
+  },
+  "faoah": {
+    "name": "FAO: Animal Health",
+    "url": "https://www.fao.org/animal-health",
+    "use": "สุขภาพสัตว์และการควบคุมโรค"
+  },
+  "faoamr": {
+    "name": "FAO: Antimicrobial Resistance",
+    "url": "https://www.fao.org/antimicrobial-resistance",
+    "use": "การใช้ยาต้านจุลชีพในภาคเกษตร"
+  },
+  "faofeed": {
+    "name": "FAO: Feed Safety",
+    "url": "https://www.fao.org/feed-safety",
+    "use": "ความปลอดภัยของอาหารสัตว์"
+  },
+  "woah": {
+    "name": "WOAH",
+    "url": "https://www.woah.org/en/home/",
+    "use": "มาตรฐานสุขภาพและสวัสดิภาพสัตว์ระหว่างประเทศ"
+  },
+  "whoamr": {
+    "name": "WHO: Antimicrobial Resistance",
+    "url": "https://www.who.int/health-topics/antimicrobial-resistance",
+    "use": "ข้อมูลเชื้อดื้อยาและการใช้ยาอย่างเหมาะสม"
+  },
+  "cdcsal": {
+    "name": "CDC: Salmonella",
+    "url": "https://www.cdc.gov/salmonella",
+    "use": "ความรู้เรื่องเชื้อ Salmonella และการป้องกัน"
+  },
+  "efsa": {
+    "name": "EFSA",
+    "url": "https://www.efsa.europa.eu/en",
+    "use": "ความปลอดภัยอาหาร สวัสดิภาพสัตว์ และ Salmonella"
+  },
+  "dld": {
+    "name": "กรมปศุสัตว์",
+    "url": "https://dld.go.th",
+    "use": "กฎระเบียบ มาตรฐานฟาร์ม และการควบคุมโรคสัตว์ของไทย"
+  },
+  "acfs": {
+    "name": "มกอช.",
+    "url": "https://www.acfs.go.th",
+    "use": "มาตรฐานสินค้าเกษตรของไทย เช่น GAP ฟาร์มสัตว์ปีก"
+  },
+  "fdath": {
+    "name": "สำนักงานคณะกรรมการอาหารและยา",
+    "url": "https://www.fda.moph.go.th",
+    "use": "ข้อกำหนดยาและผลิตภัณฑ์ที่เกี่ยวข้อง"
+  },
+  "oae": {
+    "name": "สำนักงานเศรษฐกิจการเกษตร",
+    "url": "https://www.oae.go.th",
+    "use": "ข้อมูลเศรษฐกิจ ราคา และสถิติสินค้าเกษตร"
+  },
+  "ditp": {
+    "name": "กรมส่งเสริมการค้าระหว่างประเทศ",
+    "url": "https://www.ditp.go.th",
+    "use": "ข้อมูลตลาดส่งออกและการค้าระหว่างประเทศ"
+  },
+  "thaipoultry": {
+    "name": "สมาคมผู้ผลิตไก่เพื่อส่งออกไทย",
+    "url": "https://www.thaipoultry.org",
+    "use": "ข่าวสารและข้อมูลอุตสาหกรรมไก่ส่งออก"
+  },
+  "tfac": {
+    "name": "สภาวิชาชีพบัญชี",
+    "url": "https://www.tfac.or.th",
+    "use": "มาตรฐานการบัญชีและการรายงานทางการเงินของไทย"
+  },
+  "ifrs": {
+    "name": "IFRS Foundation",
+    "url": "https://www.ifrs.org",
+    "use": "มาตรฐานการรายงานทางการเงินระหว่างประเทศ"
+  },
+  "rd": {
+    "name": "กรมสรรพากร",
+    "url": "https://www.rd.go.th",
+    "use": "ภาษีมูลค่าเพิ่ม ใบกำกับภาษี และภาษีอื่น"
+  },
+  "sap": {
+    "name": "SAP Help Portal",
+    "url": "https://help.sap.com",
+    "use": "คู่มือการใช้งานระบบ ERP"
+  },
+  "asq": {
+    "name": "ASQ: Quality Resources",
+    "url": "https://asq.org/quality-resources",
+    "use": "เครื่องมือคุณภาพ RCA CAPA และการปรับปรุง"
+  },
+  "iso9001": {
+    "name": "ISO 9001",
+    "url": "https://www.iso.org/iso-9001-quality-management.html",
+    "use": "ระบบบริหารงานคุณภาพและการควบคุมเอกสาร"
+  },
+  "iso22000": {
+    "name": "ISO 22000",
+    "url": "https://www.iso.org/iso-22000-food-safety-management.html",
+    "use": "ระบบบริหารความปลอดภัยอาหารและการตามสอบ"
+  },
+  "iso17025": {
+    "name": "ISO/IEC 17025",
+    "url": "https://www.iso.org/standard/66912.html",
+    "use": "ข้อกำหนดความสามารถห้องปฏิบัติการทดสอบ"
+  },
+  "tisi": {
+    "name": "สำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม",
+    "url": "https://www.tisi.go.th",
+    "use": "มาตรฐานและการรับรองห้องปฏิบัติการในไทย"
+  },
+  "fdarecall": {
+    "name": "US FDA: Recalls",
+    "url": "https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts",
+    "use": "ตัวอย่างการเรียกคืนสินค้าและการแจ้งเตือน"
+  },
+  "lean": {
+    "name": "Lean Enterprise Institute",
+    "url": "https://www.lean.org/explore-lean",
+    "use": "แนวคิด Lean Kaizen และการลดความสูญเปล่า"
+  },
+  "pmi": {
+    "name": "PMI",
+    "url": "https://www.pmi.org",
+    "use": "หลักการบริหารโครงการ"
+  },
+  "prosci": {
+    "name": "Prosci",
+    "url": "https://www.prosci.com",
+    "use": "หลักการบริหารการเปลี่ยนแปลง"
+  },
+  "smrp": {
+    "name": "SMRP",
+    "url": "https://www.smrp.org",
+    "use": "การบำรุงรักษาและความน่าเชื่อถือของเครื่องจักร"
+  },
+  "dede": {
+    "name": "กรมพัฒนาพลังงานทดแทนและอนุรักษ์พลังงาน",
+    "url": "https://www.dede.go.th",
+    "use": "การอนุรักษ์และประสิทธิภาพพลังงานในไทย"
+  },
+  "eppo": {
+    "name": "สำนักงานนโยบายและแผนพลังงาน",
+    "url": "https://www.eppo.go.th",
+    "use": "สถิติและนโยบายพลังงานของไทย"
+  },
+  "iea": {
+    "name": "IEA: Energy Efficiency",
+    "url": "https://www.iea.org/topics/energy-efficiency",
+    "use": "แนวทางเพิ่มประสิทธิภาพพลังงาน"
+  },
+  "ghg": {
+    "name": "GHG Protocol",
+    "url": "https://ghgprotocol.org/standards",
+    "use": "มาตรฐานการคำนวณก๊าซเรือนกระจก"
+  },
+  "tgo": {
+    "name": "องค์การบริหารจัดการก๊าซเรือนกระจก",
+    "url": "https://www.tgo.or.th/2023/",
+    "use": "ค่าการปล่อยและคาร์บอนฟุตพริ้นท์ของไทย"
+  },
+  "aafco": {
+    "name": "AAFCO",
+    "url": "https://www.aafco.org",
+    "use": "ข้อกำหนดและนิยามวัตถุดิบอาหารสัตว์"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "gen": {
+    "name": "ภาพรวม"
+  },
+  "data": {
+    "name": "Data Analytics"
+  },
+  "farm": {
+    "name": "Farm Operations"
+  },
+  "inv": {
+    "name": "Inventory & Cost"
+  },
+  "fin": {
+    "name": "Finance & Accounting"
+  },
+  "pb": {
+    "name": "Pullet & Breeder"
+  },
+  "hat": {
+    "name": "Hatchery"
+  },
+  "brl": {
+    "name": "Broiler & Animal Health"
+  },
+  "lp": {
+    "name": "Logistics & Planning"
+  },
+  "erp": {
+    "name": "ERP & Sales Admin"
+  },
+  "feed": {
+    "name": "Feed Mill"
+  },
+  "lab": {
+    "name": "Laboratory"
+  },
+  "qms": {
+    "name": "Quality System & Document"
+  },
+  "cis": {
+    "name": "CI & Sustainability"
+  },
+  "sales": {
+    "name": "Sales & Marketing"
+  },
+  "eng": {
+    "name": "Engineering"
+  },
+  "ci": {
+    "name": "Continuous Improvement"
+  },
+  "rep": {
+    "name": "Reporting & Knowledge"
+  }
+}

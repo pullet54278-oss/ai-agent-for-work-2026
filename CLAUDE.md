@@ -1,0 +1,59 @@
+# Copilot AI Agents for Work – คู่มือเรียนรู้ (Web App)
+
+## เป้าหมาย
+Web app คู่มือเรียนรู้ภาษาไทย สำหรับคอร์ส "การใช้งาน AI แบบพาลงมือทำ" หัวข้อ Copilot AI Agents for Work 2026
+ผู้เรียนเปิดทบทวนเองบนคอมและมือถือ เป็นหน้าเนื้อหา ไม่ใช่สไลด์ ส่งมอบเป็นไฟล์ HTML เดียว (dist/index.html สร้างด้วย npm run build) พร้อม logo.png
+
+## โครงสร้างโปรเจกต์
+- `content/copilot-ai-agents-for-work.md` **แหล่งความจริงของเนื้อหา** ส่วนที่ 1 = สเปก UI, ส่วนที่ 2 = เนื้อหาทั้งหมด (ใช้ตามเดิมทุกตัวอักษร)
+- `content/supplements.mjs` ส่วนขยายการเรียนรู้ (เจาะลึก/ตัวอย่าง/Workshop/วิธีตรวจสอบ) — แยกจากต้นฉบับ แสดงในกรอบ "ส่วนขยายการเรียนรู้"
+- `content/deep-learning-v10.html` ต้นฉบับ Deep Learning 36 บท (v10) · `content/deep-quizzes.mjs` แบบทดสอบเฉพาะบท · `content/tracks.mjs` เส้นทางการเรียน 7 เส้นทาง (Copilot Agent ลำดับแรก) — build แปลงผ่าน `scripts/lib/deep.mjs` (กฎ SANITIZE แทนชื่อตำแหน่ง/เลขที่เอกสาร) และ `deep-render.mjs` → `dist/deep-data.js`
+- `data/copilot-updates.json` snapshot อัปเดต Copilot จาก Microsoft 365 Roadmap (`scripts/fetch-updates.mjs`, `scripts/lib/updates.mjs`) · `netlify/functions/` API สด `/api/copilot-updates` + build ใหม่รายวันผ่าน `BUILD_HOOK_URL`
+- `data/updates-th.json` หัวข้อ/สรุปข่าวภาษาไทย (key = Roadmap ID) — เมื่อ snapshot มีข่าวใหม่ build จะเตือนจำนวนที่ยังไม่แปล ให้เติมคำแปลแล้ว build ใหม่ (ข่าวที่ไม่มีคำแปลแสดงสรุปอัตโนมัติ)
+- PWA: `src/sw.js` (build เติม build id + precache) · `assets/icons/` สร้างด้วย `node scripts/make-icons.mjs` จาก `assets/app-icon.png` (ถ้ามี) · build เขียน `manifest.webmanifest`, `sw.js`, `version.json`
+- Email gate: **ปิดอยู่ — เจ้าของงานสั่งให้ทุกคนเข้าได้ไม่ต้องลงชื่อ (19 ต.ค. 2569)** เปิดคืนได้ด้วย env `EMAIL_GATE=on` · `scripts/lib/gate.mjs` อ่านรายชื่อจาก `private/` (gitignored) หรือ env `ALLOWED_EMAILS` ฝังเฉพาะ hash — **ห้าม commit รายชื่อ Email และห้ามใส่ Email ตัวจริงใน dist/**
+- หลักสูตร AI + Excel: ต้นฉบับ `content/excel/AI_Excel_3_Levels_Claude_Build_Spec.md` (ใช้ตามเดิมทุกตัวอักษร ยกเว้น "หัวหน้างาน"→"ผู้รับผิดชอบงาน") · ส่วนขยาย `content/excel/level-{b,i,a}.mjs` + `automation.mjs` ตาม `content/excel/SCHEMA.md` · ไฟล์ตัวอย่างจาก `scripts/excel/make_workbook.py` · ทุกสูตรต้องมีเวอร์ชันและกรณีทดสอบ ≥3 และผ่าน `node scripts/excel/verify-formulas.mjs` (LibreOffice) — สูตร M365 ติดป้ายยังไม่ได้ทดสอบใน Excel จริง · ชุดส่งมอบ `ai-excel-formula-mastery/` สร้างด้วย `node scripts/excel/export.mjs` ห้ามแก้มือ
+- เวอร์ชันแอปอ่านจาก `package.json` (แสดงบนหน้าแรกและท้ายหน้า) ขึ้นเวอร์ชันพร้อมบันทึกใน `CHANGELOG.md`
+- `data/` ข้อมูลเสริมที่ MD สูญหายตอนแปลงจากหน้าเว็บ (Prompt Lab 11 หมวด, ชื่อปุ่ม Agent, Office chips, Agent #28) build จะตรวจว่าตรงกับ MD เมื่อมีทั้งสองที่
+- `src/` template.html, app.css (Fluent 2 + design tokens ส่วนที่ 1), app.js, icons.json (Fluent UI System Icons, MIT)
+- Prompt Lab อัตโนมัติ (หน้าแรก `#/plab`): `src/promptlab.js` ฉีดเข้า app.js ตอน build · วิเคราะห์ไฟล์/ข้อความในเครื่องเท่านั้น (ห้ามส่งข้อมูลออก) · PDF ใช้ `assets/vendor/pdfjs/` (pdfjs-dist 4.10.38, Apache-2.0) โหลดเมื่อใช้ · fixtures ทดสอบที่ `tests/fixtures/`
+- หน้าเสริม 21A Skill ของ Agent (`#/s/agent-skills`): เนื้อหา `scripts/lib/skills.mjs` · Skill Builder `src/skillbuilder.js` · ตัวอย่าง `content/skills/examples/<slug>/` (SKILL.md + ข้อมูลสมมติ, build แพ็กเป็น `dist/skills/<slug>.zip`) · หน้าเสริมใช้ n ทศนิยม (21.5 = 21A) ผ่าน `D.ext` ไม่แตะ MD · ข้อจำกัด Skill อ้างอิง Microsoft Learn (Preview, Frontier) — อัปเดตเมื่อ Microsoft เปลี่ยน
+- v4.2: คลังเครื่องมือ `content/library.mjs` (40 หัวข้อ, build ตรวจลิงก์ p/d/s/x/r) + `src/fx/library.js` · แบบทดสอบ/เช็กลิสต์ท้ายบท `content/chapter-checks.mjs` (เขียนคำตอบถูกเป็นข้อแรก build สลับให้) · เหรียญ `content/badges.mjs` + `src/fx/progress.js`
+- v4.1: เส้นทาง 7 สถานี `content/journey.mjs` + `src/fx/journey.js` (ฉาก `page: 'journey'`, build ตรวจ 7 สถานี/ฉาก/ลิงก์) · Prompt Lab เครื่องผลิต `src/fx/forge.js` (`scorePrompt` ทดสอบใน e2e — เปลี่ยนเกณฑ์ต้องแก้ทั้งโค้ดและเทสต์)
+- v4 ลูกเล่น/หน้าจอจำลอง (ออกแบบใน `docs/INTERACTIVE-DESIGN.md`): `src/fx/{core,sound,feel,sim}.js` ฉีดที่ `/*__FX_JS__*/` · `src/fx.css` ต่อท้าย app.css · ฉาก `content/sims/<id>.mjs` ตรวจโดย `scripts/lib/sims.mjs` (target ต้องอยู่ใน `SIM_TARGETS`) → `D.sims` · หน้าจอจำลองวาดด้วย HTML ติดป้ายตรวจกับบัญชีจริง · ทุกลูกเล่นต้องปิดเองเมื่อ reduced motion · เสียงปิดเป็นค่าเริ่มต้น
+- `scripts/build.mjs` สร้าง `dist/` (index.html ไฟล์เดียว + logo.png + vendor/ + _headers) · `scripts/inventory.mjs` · `scripts/audit.mjs`
+- `tests/e2e.mjs` ทดสอบทุกฟังก์ชันด้วย Playwright · `docs/` แผน รายงาน
+- `assets/logo.png` โลโก้ AI Agent for Work · `assets/brand/copilot-logo.svg` โลโก้ Copilot ทางการ (แสดงที่แถบบนและหน้าแรก)
+- `legacy/index-v1.html` เวอร์ชันเดิม (อ้างอิง)
+- `source-docs/` เอกสาร Workflow ต้นทาง (ห้ามเผยแพร่ ห้าม copy เข้า dist/)
+
+## ข้อห้าม (สำคัญ)
+- ห้ามใส่ชื่อบริษัท ชื่อฟาร์มหรือโรงงาน ชื่อเอกสาร เลขที่เอกสาร หรือตำแหน่งงานบนเว็บ ใช้คำว่า "ผู้รับผิดชอบ" หรือ "ผู้มีอำนาจอนุมัติ" แทน
+- โลโก้ Copilot ทางการ: เจ้าของงานสั่งให้ใช้ (14 ต.ค. 2569) ไฟล์อยู่ที่ `assets/brand/copilot-logo.svg` (ดู NOTICE.txt) ใช้ตามต้นฉบับ ห้ามดัดแปลงสีหรือรูปทรงโลโก้ ห้ามใช้โลโก้ Microsoft อื่น
+- ห้ามทำตัวอักษร COPILOT เลียนแบบสีหรือรูปแบบโลโก้ คำว่า Copilot ใช้สีตัวอักษรปกติ (สี --ink)
+- ก่อนส่งมอบทุกครั้ง ค้นหาคำต้องห้ามใน dist/index.html และ dist/deep-data.js ให้ได้ผล 0 (`npm run audit` อ่านรายการจาก content/forbidden-terms.txt)
+
+## ข้อจำกัดระบบที่ต้องออกแบบตาม
+- บัญชีองค์กรเพิ่มไฟล์เป็น Knowledge ไม่ได้ ใช้เว็บไซต์สาธารณะไม่เกิน 4 แหล่งต่อ Agent
+- URL ลึกไม่เกิน 2 ระดับ และไม่มีเครื่องหมาย ? ตรวจว่าเปิดได้จริงก่อนใส่
+- ไฟล์งานจริงให้แนบในแชทตอนเรียกใช้ Agent
+- Agent Builder: Name ≤ 30, Description ≤ 1,000, Instructions ≤ 8,000 ตัวอักษร
+- Instructions ใช้โครง 8 ส่วน: บทบาท เป้าหมาย ข้อมูลนำเข้า ขั้นตอน รูปแบบผลลัพธ์ การตรวจสอบ ข้อห้าม เมื่อไม่แน่ใจ
+- ข้อมูลเรื่องสิทธิ์บัญชีและชื่อเมนู Copilot ให้ติดป้าย "ตรวจกับบัญชีจริงก่อนสอน" เว้นแต่ผู้ใช้ยืนยันด้วยภาพหน้าจอ
+
+## UI
+- คำว่า Copilot ต้องเด่นและใหญ่ที่สุดบนหน้าแรก ใช้โลโก้ logo.png และโลโก้ Copilot ที่แถบบนและหน้าแรก
+- ภาพประกอบเป็น inline SVG สร้างใน app.js (`illus()` ตามกลุ่มงาน, `heroScene()`) ใช้สีกลุ่มผ่าน --dc รองรับทั้ง 2 ธีม
+- โหมด Light/Dark (ในโหมดมืดให้โลโก้วางบนพื้นสีอ่อน)
+- ลิขสิทธิ์ท้ายทุกหน้า: © 2026 Copilot AI Agents for Work · Created by Nattapon Yokkret
+- หน้า Agent: 2 คอลัมน์ แผง "สร้าง Agent" ติดด้านขวา มีเว็บไซต์ 4 แหล่ง กล่องแนบไฟล์ และการตั้งค่าที่คัดลอกได้
+- ฟังก์ชัน: Ctrl+K ค้นหา, บันทึกความคืบหน้า, Prompt Builder, เครื่องคำนวณ 2 หน้า, แถบเมนูล่างบนมือถือ
+- ไม่มีตารางเวลา ไม่มีโหมด Present
+- สเปกสีและรายละเอียดอื่นดู "ส่วนที่ 1" ใน content/copilot-ai-agents-for-work.md
+
+## วิธีทำงาน
+- ใช้ Plan mode ก่อนงานที่แก้หลายไฟล์ เสนอแผนให้ผู้ใช้ยืนยันก่อนลงมือ
+- แก้เนื้อหาที่ content/copilot-ai-agents-for-work.md (หรือ data/ สำหรับส่วนที่ MD ไม่มี) แล้ว `npm run build`
+- หลังแก้ รัน `npm run audit` (ต้องขาด 0) และ `node tests/e2e.mjs` (ต้องผ่านทั้งหมด) แล้วเปิด dist/index.html ตรวจทั้งจอคอมและจอมือถือ ทั้งโหมดสว่างและมืด
+- commit ทุกครั้งที่ได้เวอร์ชันที่ใช้งานได้ พร้อมข้อความสรุปสิ่งที่เปลี่ยน
+- ตอบผู้ใช้เป็นภาษาไทย

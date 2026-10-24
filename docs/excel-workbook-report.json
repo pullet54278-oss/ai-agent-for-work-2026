@@ -1,0 +1,36 @@
+{
+ "generatedAt": "2026-10-14T13:56:22",
+ "engine": "LibreOffice headless recalculation",
+ "file": "ai-excel-formula-mastery/data/sample-workbook.xlsx",
+ "sheets": [
+  "Instructions",
+  "Raw_Data",
+  "Master_Data",
+  "Calculations",
+  "Weight_Samples",
+  "Validation",
+  "Dashboard",
+  "Sales_Data",
+  "Product_Master",
+  "Farm_Performance",
+  "M365_Formulas"
+ ],
+ "requiredSheetsMissing": [],
+ "formulaCells": 354,
+ "passed": 354,
+ "failed": 0,
+ "fails": [],
+ "rows": {
+  "Instructions": 28,
+  "Raw_Data": 25,
+  "Master_Data": 11,
+  "Calculations": 43,
+  "Weight_Samples": 101,
+  "Validation": 15,
+  "Dashboard": 14,
+  "Sales_Data": 13,
+  "Product_Master": 6,
+  "Farm_Performance": 9,
+  "M365_Formulas": 12
+ }
+}
