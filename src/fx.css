@@ -302,3 +302,24 @@
 .chk-ic{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--dc,var(--accent));color:#fff;flex:none}
 .chk-end .deep-w{margin:0}
 .chk-end .sub{display:flex;gap:6px;align-items:center}
+
+/* หน้าแรก: ส่วน Skill + ข่าวแบบย่อ */
+.sk-facts{list-style:none;margin:6px 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.sk-facts li{display:inline-flex;gap:6px;align-items:center;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13.5px;font-weight:600}
+.sk-facts .ic{width:16px;height:16px;color:var(--accent)}
+.sk-home .badge-verify{margin:0 0 12px}
+.sk-dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.sk-dl-i{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none}
+.sk-dl-i:hover{border-color:var(--accent)}
+.sk-dl-i .ti{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--accent-soft);color:var(--accent);flex:none}
+.sk-dl-i>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column}
+.sk-dl-i small{color:var(--ink-2);font-size:12.5px}
+.sk-dl-i>.ic:last-child{color:var(--accent);flex:none}
+.updates.compact{padding:14px 18px}
+.updates.compact .upd-head h2{font-size:17px}
+.updates.compact .upd-head .badge-verify{font-size:12px}
+.upd-mini-list{list-style:none;margin:8px 0 6px;padding:0;display:grid;gap:6px}
+.upd-mini{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+.upd-mini .upd-t{font-weight:600;font-size:14.5px;flex:1 1 240px;min-width:0}
+.upd-mini .upd-t .ic{width:14px;height:14px}
+.updates.compact .upd-more{min-height:32px;padding:4px 10px;font-size:13.5px}

@@ -186,6 +186,7 @@ const data = {
   deepIndex: deep.lessons.map(l => ({ n: l.n, title: l.title, outcome: l.outcome, group: l.group, icon: l.icon, text: Object.values(deepRendered[l.n]).join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 2500) })),
   tracks, related, updates, updatesTh,
   ext: extPages, skillCfg: { limits: SKILL_LIMITS, types: SKILL_TYPES },
+  skillExamples: skillExamples.map(e => ({ slug: e.slug, title: e.title, icon: e.icon, from: e.from })),
   sims: await loadSims(ROOT, n => n === 1 || pageByN.has(n) || extPages.some(e => e.n === n)),
   journey: JOURNEY,
   library: LIBRARY, libCats: LIB_CATS, badges: BADGES,

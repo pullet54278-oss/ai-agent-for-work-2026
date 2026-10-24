@@ -273,3 +273,17 @@ function mountSkillBuilder(el) {
     const cp = e.target.closest('[data-sb-copy]'); if (cp) copyText(sbState.md, cp, el.querySelector('[data-sb-md]'));
   });
 }
+
+// หน้าแรก: ส่วน Skill (ต่อจาก Prompt Lab อัตโนมัติ) · คู่มือเต็มอยู่ที่หน้าเสริม 21A
+function skillHomeHTML() {
+  const L = SK.limits;
+  return `<section class="cgroup pa sk-home" id="skills-home" aria-labelledby="skH">
+  <div class="pa-head"><h2 class="sec" id="skH">${ic('layer')}<span>Skill ของ Agent: SKILL.md และไฟล์ .zip</span></h2><span class="pill pa-new">${ic('flash')}<span>ใหม่</span></span></div>
+  <p>โยนไฟล์ <b>PDF, Word, Excel</b> แล้วได้ไฟล์ <b>.zip</b> พร้อมอัปโหลดเป็น Skill ใน Agent Builder · อ่านไฟล์ในเครื่องนี้ ไม่ส่งไฟล์ออก · <a href="#/s/agent-skills">อ่านคู่มือเต็ม (หน้า 21A)</a></p>
+  <ul class="sk-facts">${[['folder', 'Agent Builder รับเฉพาะ .zip ที่มี SKILL.md'], ['layer', `ไม่เกิน ${L.skills} Skill ต่อ Agent`], ['box', `zip ≤ ${L.zipMB} MB · ไฟล์ละ ≤ ${L.fileMB} MB`], ['shield_checkmark', 'Preview · องค์กรใน Frontier Program']].map(([i, t]) => `<li>${ic(i)}<span>${t}</span></li>`).join('')}</ul>
+  <p class="badge-verify" role="note">${ic('warning')}<span>ชื่อเมนูและสิทธิ์ใช้งาน Skill อ้างอิงเอกสาร Microsoft · ตรวจกับบัญชีจริงก่อนสอน</span></p>
+  <div data-skill-builder></div>
+  <h3 class="sub">${ic('arrow_download')}<span>ตัวอย่าง Skill พร้อมอัปโหลด (ข้อมูลสมมติ)</span></h3>
+  <div class="sk-dl">${(D.skillExamples || []).map(e => `<a class="sk-dl-i" href="skills/${esc(e.slug)}.zip" download="${esc(e.slug)}.zip"><span class="ti">${ic(e.icon)}</span><span><b>${esc(e.title)}</b><small>${esc(e.slug)}.zip · ${esc(e.from)}</small></span>${ic('arrow_download')}</a>`).join('')}</div>
+</section>`;
+}

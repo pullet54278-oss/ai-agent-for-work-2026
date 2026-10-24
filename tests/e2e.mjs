@@ -93,7 +93,7 @@ await suite('Copilot Agent first + learning paths', async () => {
   ok(cta[0].includes('เริ่มเรียน Copilot Agent') && cta[1] === '#/track/agent', 'primary CTA = Copilot Agent');
   ok((await text('.hero-cta')).includes('เริ่มที่ Prompt Mode →'), 'Prompt Mode CTA kept');
   const order = await page.$$eval('#main > .wrap > section, #main > .wrap > div.stats', l => l.map(e => e.className));
-  ok(order[0].includes('hero') && order[1].includes('pa') && order[2].includes('updates') && order[3].includes('tracks-sec'), 'home order: hero → Prompt Lab อัตโนมัติ → live updates → learning paths (' + order.slice(0, 4).join(' | ') + ')');
+  ok(order[0].includes('hero') && order[1].includes('pa') && order[2].includes('sk-home') && order[3].includes('updates') && order[4].includes('tracks-sec'), 'home order: hero → Prompt Lab อัตโนมัติ → Skill → updates (compact) → learning paths (' + order.slice(0, 5).join(' | ') + ')');
   const tracks = await page.$$eval('.tracks .track b', l => l.map(e => e.textContent));
   eq(tracks[0], 'Copilot Agent', 'first learning path is Copilot Agent');
   ok(tracks.length === 8 && tracks.some(t => /AI \+ Excel/.test(t)) && tracks.some(t => /Excel, Word และ PowerPoint/.test(t)) && tracks.some(t => /เบราว์เซอร์/.test(t)) && tracks.some(t => /Tips & Tricks/.test(t)) && tracks.some(t => /งานจริง/.test(t)), '8 paths: Agent, AI + Excel, Office, browser, tips, real work, …');
@@ -156,16 +156,17 @@ await suite('Auto-updates (Microsoft 365 Roadmap) · Thai summaries · 3 feature
   await page.waitForFunction(() => document.querySelector('.updates .live-dot.live'), null, { timeout: 8000 });
   ok((await text('.updates [data-upd-meta]')).includes('ข้อมูลสด'), 'live indicator (data from /api/copilot-updates)');
   eq(await page.$$eval('.updates.home .upd', l => l.length), 3, 'home shows only 3 featured stories');
-  eq(await page.$$eval('.updates.home .upd.feat', l => l.length), 3, 'featured cards styled');
+  eq(await page.$$eval('.updates.home .upd-mini', l => l.length), 3, 'home news is compact (one line per story)');
+  ok(!(await page.$('.updates.home .upd-s')) && !(await page.$('.updates.home .upd-en')), 'no summaries on home (they live on #/updates)');
   eq(await page.$eval('.updates.home .upd', e => e.dataset.topic), 'agent', 'first featured story is Copilot Agent');
   ok(await page.$$eval('.updates.home .upd-t', l => l.every(a => /[฀-๿]/.test(a.textContent))), 'featured headlines are Thai');
-  ok(await page.$$eval('.updates.home .upd-s', l => l.every(p => /[฀-๿]/.test(p.textContent) && p.textContent.length > 40)), 'featured cards have a Thai plain-language summary');
-  ok(await page.$$eval('.updates.home .upd', l => l.every(e => e.querySelector('.upd-en') && e.querySelector('details.upd-orig'))), 'English original title + collapsible original summary kept');
   eq(await page.$$eval('.updates.home [data-ut]', l => l.length), 0, 'full list / filters hidden from home');
   ok((await text('.updates.home .upd-more')).includes(String(LIVE.items.length)), 'button shows total count');
   await page.click('.updates.home .upd-more'); await page.waitForSelector('.upd-all');
   eq(await page.evaluate(() => location.hash), '#/updates', '"ดูข่าวทั้งหมด" opens updates page');
   eq(await page.$$eval('.updates .feat-list .upd', l => l.length), 3, 'updates page: 3 featured on top');
+  ok(await page.$$eval('.updates .feat-list .upd-s', l => l.length === 3 && l.every(p => /[฀-๿]/.test(p.textContent) && p.textContent.length > 40)), 'updates page: featured cards have a Thai plain-language summary');
+  ok(await page.$$eval('.updates .feat-list .upd', l => l.every(e => e.querySelector('.upd-en') && e.querySelector('details.upd-orig'))), 'English original title + collapsible original summary kept');
   ok(!(await page.$eval('.upd-all', d => d.open)) && !(await page.isVisible('.upd-all [data-upd-list]')), 'all news hidden until clicked');
   await page.click('.upd-all > summary');
   eq(await page.$$eval('.upd-all .upd', l => l.length), LIVE.items.length, 'click → all items listed');
@@ -725,6 +726,11 @@ await suite('Skill ของ Agent (หน้าเสริม 21A) + Skill Bui
   // entry points
   await p.goto(url); await p.waitForSelector('.hero');
   ok(await p.$('.tools a[href="#/s/agent-skills"]'), 'listed in home tools');
+  ok(await p.$('#skills-home [data-skill-builder] .sb-grid') && await p.$$eval('#skills-home .sk-dl-i', l => l.length === 5 && l.every(a => /^skills\/[a-z-]+\.zip$/.test(a.getAttribute('href')))) && await p.$('#skills-home a[href="#/s/agent-skills"]'), 'home: Skill section with Skill Builder, 5 example zips and link to page 21A');
+  ok(await p.evaluate(() => { const a = document.querySelector('#plab'), b = document.querySelector('#skills-home'); return a.nextElementSibling === b; }), 'home: Skill section right after Prompt Lab อัตโนมัติ');
+  await p.setInputFiles('#skills-home [data-sb-file]', path.join(EXD, 'training-advisor', 'training-catalog.xlsx'));
+  await p.waitForFunction(() => /เพิ่ม 1 ไฟล์/.test(document.querySelector('#skills-home [data-sb-msg]').textContent), null, { timeout: 10000 });
+  ok((await p.$eval('#skills-home [data-sb-md]', e => e.value)).includes('ชีต "หลักสูตร"'), 'home Skill Builder reads Excel');
   await p.goto(url + '#/track/agent'); await p.waitForSelector('.track-steps');
   ok(await p.$('.track-steps a[href="#/s/agent-skills"]'), 'in the Copilot Agent learning path');
   await p.keyboard.press('Control+K'); await p.fill('#cmdQ', 'SKILL.md'); await p.waitForTimeout(200);

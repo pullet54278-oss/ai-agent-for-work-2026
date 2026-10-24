@@ -1,4 +1,4 @@
-# Test Report — Copilot AI Agents for Work 2026 · v4.2.0 (23 ต.ค. 2569)
+# Test Report — Copilot AI Agents for Work 2026 · v4.2.1 (24 ต.ค. 2569)
 
 ทดสอบจริงใน Chromium (Playwright 1.56) กับไฟล์ที่ build แล้ว (`dist/`) โดยเปิดผ่านเซิร์ฟเวอร์ที่ใส่ header จาก `dist/_headers` (CSP แบบเดียวกับ Netlify)
 ผลดิบ: `docs/audit-report.json`, `docs/test-report.json`
@@ -33,7 +33,7 @@
 
 **Mutation test:** แก้ค่าที่คาดหวัง 2 เซลล์ (FCR และ Data Quality Status) → verify_workbook รายงานครบทั้ง 2 จุด แล้วคืนค่า
 
-## 2. ฟังก์ชัน (`node tests/e2e.mjs`) — **506/506 ผ่าน**
+## 2. ฟังก์ชัน (`node tests/e2e.mjs`) — **510/510 ผ่าน**
 
 | ชุด | ผ่าน | ทดสอบอะไร |
 |---|---|---|

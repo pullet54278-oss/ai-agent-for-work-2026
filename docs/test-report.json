@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-23T14:43:51.043Z",
-  "pass": 506,
+  "generatedAt": "2026-10-24T23:41:49.988Z",
+  "pass": 510,
   "fail": 0,
   "bySuite": {
     "T4 Navigation: every page renders with correct title": {
@@ -20,7 +20,7 @@
       "fail": 0
     },
     "Auto-updates (Microsoft 365 Roadmap) · Thai summaries · 3 featured": {
-      "pass": 23,
+      "pass": 24,
       "fail": 0
     },
     "AI + Excel Formula Mastery": {
@@ -76,7 +76,7 @@
       "fail": 0
     },
     "Skill ของ Agent (หน้าเสริม 21A) + Skill Builder": {
-      "pass": 36,
+      "pass": 39,
       "fail": 0
     },
     "v4 หน้าจอจำลองที่เล่นเองได้ + ลูกเล่น": {

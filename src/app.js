@@ -533,6 +533,7 @@ function renderHome() {
     <p class="hero-new"><span class="pill pa-new">${ic('flash')}<span>ใหม่</span></span><a href="#/journey">${ic('compass_northwest')}<span>เส้นทาง 7 สถานี</span></a><a href="#/forge">${ic('beaker')}<span>Prompt Lab เครื่องผลิต</span></a></p>
   </div><div class="hero-art">${heroScene()}</div></div></section>
   ${paSectionHTML()}
+  ${skillHomeHTML()}
   ${updatesPanelHTML(true)}
   <section class="cgroup tracks-sec"><h2 class="sec">${ic('compass_northwest')}<span>เส้นทางการเรียน</span></h2><p>เรียงตามความสำคัญ เริ่มจาก Copilot Agent · แต่ละเส้นทางรวมหน้าในคอร์สหลักและบทเรียนเชิงลึกที่พูดเรื่องเดียวกันไว้ด้วยกัน</p>${tracksGridHTML()}</section>
   <div class="stats">
@@ -548,7 +549,7 @@ function renderHome() {
   <section class="cgroup x-home"><h2 class="sec">${ic('table')}<span>AI + Excel Formula Mastery · 3 ระดับ</span></h2><p>เปลี่ยนภาษาคนเป็นสูตร Excel ด้วย AI · Prompt Library, Formula Lab, Interactive Dashboard และไฟล์ Excel ตัวอย่าง · <a href="#/excel">เปิดหน้าหลักสูตร</a></p><div class="ccards">${XCH.map(chapterCardHTML).join('')}</div></section>
   <section class="cgroup"><h2 class="sec">${ic('hat_graduation')}<span>Deep Learning · 36 บทเชิงลึก</span></h2><p>บทเรียนเชิงลึกพร้อม Workshop, Prompt Builder และแบบทดสอบประจำบท · <a href="#/deep">ดูภาพรวมและหลักคิดร่วม</a></p><div class="ccards">${DEEPCH.map(chapterCardHTML).join('')}</div></section>
   ${copyLine()}`, '', 1);
-  wireUpdates($('#main')); wirePromptLab($('#main')); fxCount($('#main')); refreshUpdates();
+  wireUpdates($('#main')); wirePromptLab($('#main')); $$('#main [data-skill-builder]').forEach(mountSkillBuilder); fxCount($('#main')); refreshUpdates();
   renderTOC(); updateProgress();
 }
 
@@ -678,6 +679,11 @@ function featuredUpd(items) {
   for (const i of ranked) { if (out.length === 3) break; if (!out.includes(i)) out.push(i); }
   return out.sort((a, b) => (b.topic === 'agent') - (a.topic === 'agent'));
 }
+// หน้าแรก: ข่าวเด่น 3 ข่าวแบบย่อ (บรรทัดเดียว) · สรุปเต็มอยู่ที่ #/updates
+function updMini(i) {
+  const th = thOf(i);
+  return `<li class="upd upd-mini" data-topic="${esc(i.topic)}">${i.statusTh ? `<span class="upd-st st-${esc(i.status.replace(/\s/g, '').toLowerCase())}" title="${esc(ST_EXPL[i.status] || '')}">${esc(i.statusTh)}</span>` : ''}${i.agent ? `<span class="upd-ag">${ic('bot')}Agent</span>` : ''}<a class="upd-t" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer"${th.auto ? ' lang="en"' : ''}>${esc(th.t)} ${ic('open')}</a></li>`;
+}
 function updCard(i, feat) {
   const th = thOf(i); const when = timelineTh(i);
   return `<li class="upd${feat ? ' feat' : ''}" data-topic="${esc(i.topic)}"><div class="upd-top">${i.statusTh ? `<span class="upd-st st-${esc(i.status.replace(/\s/g, '').toLowerCase())}" title="${esc(ST_EXPL[i.status] || '')}">${esc(i.statusTh)}</span>` : ''}${i.agent ? `<span class="upd-ag">${ic('bot')}Agent</span>` : ''}${th.w ? `<span class="upd-who">${ic('person')}เหมาะกับ${esc(th.w)}</span>` : ''}</div>
@@ -695,10 +701,9 @@ let updAllOpen = false;
 function updatesPanelHTML(home) {
   const u = UPD || { items: [] };
   const feat = featuredUpd(u.items);
-  return `<section class="updates${home ? ' home' : ''}" aria-labelledby="updH${home ? 'h' : 'p'}"><div class="upd-head"><div><h2 id="updH${home ? 'h' : 'p'}">${ic('arrow_sync')}<span>${home ? 'อัปเดตล่าสุดเกี่ยวกับ Microsoft Copilot' : '3 ข่าวเด่นตอนนี้'}</span></h2><p class="upd-meta"><span class="live-dot ${liveState}" aria-hidden="true"></span><span data-upd-meta>${updMetaText()}</span></p></div><span class="badge-verify">${ic('warning')}<span>ข้อมูลจาก Microsoft · ตรวจกับบัญชีจริงก่อนสอน</span></span></div>
-  ${home ? '<p class="upd-lead">3 ข่าวเด่นที่คัดมาให้ (Copilot Agent ก่อน) · สรุปเป็นภาษาไทยให้อ่านเข้าใจง่าย</p>' : ''}
-  <ul class="upd-list feat-list">${feat.map(i => updCard(i, true)).join('')}</ul>
-  ${home ? `<a class="btn btn-primary upd-more" href="#/updates">${ic('arrow_right')}<span>ดูข่าวทั้งหมด ${u.items.length} รายการ</span></a>` : `<details class="upd-all" data-upd-all${updAllOpen ? ' open' : ''}><summary>${ic('text_bullet_list_square')}<span>ดูข่าวทั้งหมด ${u.items.length} รายการ · กรองตามหมวด</span>${ic('chevron_right', 'chev')}</summary>
+  return `<section class="updates${home ? ' home compact' : ''}" aria-labelledby="updH${home ? 'h' : 'p'}"><div class="upd-head"><div><h2 id="updH${home ? 'h' : 'p'}">${ic('arrow_sync')}<span>${home ? 'อัปเดตล่าสุด Copilot' : '3 ข่าวเด่นตอนนี้'}</span></h2><p class="upd-meta"><span class="live-dot ${liveState}" aria-hidden="true"></span><span data-upd-meta>${updMetaText()}</span></p></div><span class="badge-verify">${ic('warning')}<span>ข้อมูลจาก Microsoft · ตรวจกับบัญชีจริงก่อนสอน</span></span></div>
+  ${home ? `<ul class="upd-mini-list">${feat.map(updMini).join('')}</ul>` : `<ul class="upd-list feat-list">${feat.map(i => updCard(i, true)).join('')}</ul>`}
+  ${home ? `<a class="btn btn-subtle upd-more" href="#/updates">${ic('arrow_right')}<span>ดูข่าวทั้งหมด ${u.items.length} รายการ พร้อมสรุปภาษาไทย</span></a>` : `<details class="upd-all" data-upd-all${updAllOpen ? ' open' : ''}><summary>${ic('text_bullet_list_square')}<span>ดูข่าวทั้งหมด ${u.items.length} รายการ · กรองตามหมวด</span>${ic('chevron_right', 'chev')}</summary>
   <div class="fchips upd-chips" role="group" aria-label="กรองหมวดอัปเดต">${UPD_TOPICS.map(([k, t]) => `<button type="button" class="fchip" data-ut="${k}" aria-pressed="${updTopic === k}">${esc(t)} (${k === 'all' ? u.items.length : u.items.filter(i => i.topic === k).length})</button>`).join('')}</div>
   <div data-upd-list>${updItemsHTML()}</div></details>`}</section>`;
 }
